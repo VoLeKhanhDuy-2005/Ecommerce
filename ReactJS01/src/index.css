@@ -1,0 +1,184 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================
+   CSS Variables — Bảng màu chủ đạo
+============================ */
+:root {
+  --color-brand: #f97316; /* Cam chủ đạo (orange-500) */
+  --color-brand-dark: #ea580c; /* Cam đậm khi hover */
+  --color-bg: #fff7ed; /* Nền tổng thể: cam nhạt ấm áp */
+  --color-card-bg: #ffffff;
+  --color-text: #1c1917;
+  --color-text-muted: #78716c;
+  --color-border: #e7e5e4;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.07), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover:
+    0 4px 8px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.1);
+  --radius-card: 16px;
+}
+
+/* ============================
+   Reset & Base styles
+============================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Áp dụng font và màu nền cho toàn trang */
+html {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--color-text);
+
+  /* Nền màu cam nhạt ấm áp */
+  background-color: #fff7ed;
+
+  /* Pattern chấm bi tinh tế tạo chiều sâu */
+  background-image: radial-gradient(
+    circle,
+    rgba(253, 186, 116, 0.35) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* Xóa giới hạn width cứng và text-align center của root cũ */
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  text-align: left; /* Quan trọng: bỏ center cũ */
+  border: none;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================
+   Navbar (Header) — Glassmorphism
+============================ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(234, 88, 12, 0.12);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(249, 115, 22, 0.05);
+}
+
+/* ============================
+   Food Card — dùng chung cho sản phẩm
+============================ */
+.food-card {
+  background: var(--color-card-bg);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.food-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-4px);
+}
+
+/* ============================
+   Badge — nhãn trạng thái sản phẩm
+============================ */
+.badge-hot {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 0 12px 0 12px;
+  letter-spacing: 0.5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.badge-new {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 0 12px 0 12px;
+  letter-spacing: 0.5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* ============================
+   Section label — nhãn tiêu đề nhỏ
+============================ */
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* ============================
+   Ant Design overrides
+============================ */
+/* Nút tìm kiếm màu cam */
+.ant-input-search .ant-btn-primary {
+  background-color: var(--color-brand) !important;
+  border-color: var(--color-brand) !important;
+}
+.ant-input-search .ant-btn-primary:hover {
+  background-color: var(--color-brand-dark) !important;
+}
+
+/* Radio button màu cam */
+.ant-radio-wrapper:hover .ant-radio-inner {
+  border-color: var(--color-brand) !important;
+}
+.ant-radio-checked .ant-radio-inner {
+  border-color: var(--color-brand) !important;
+  background-color: var(--color-brand) !important;
+}
+
+/* ============================
+   Custom Scrollbar (thẩm mĩ)
+============================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fafafa;
+}
+::-webkit-scrollbar-thumb {
+  background: #fdba74;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand);
+}
