@@ -5,6 +5,7 @@ const apiRoutes = require("./routes/api");
 const connection = require("./config/database");
 const { getHomepage } = require("./controllers/homeController");
 const cors = require("cors");
+const Order = require("./models/order");
 const app = express(); //cấu hình app là express
 const port = process.env.PORT || 8888;
 app.use(cors()); //config cors
@@ -21,6 +22,23 @@ app.use("/v1/api/", apiRoutes);
   try {
     //kết nối database using mongoose
     await connection();
+
+    // Khởi tạo tiến trình chạy ngầm quét tự động xác nhận đơn hàng sau 30 phút
+    setInterval(async () => {
+      try {
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const result = await Order.updateMany(
+          { status: "New", createdAt: { $lte: thirtyMinutesAgo } },
+          { $set: { status: "Confirmed" } }
+        );
+        if (result.modifiedCount > 0) {
+          console.log(`[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`);
+        }
+      } catch (err) {
+        console.error("Lỗi trong tiến trình quét tự động xác nhận đơn hàng:", err);
+      }
+    }, 60000); // Quét mỗi 60 giây
+
     //lắng nghe port trong env
     app.listen(port, () => {
       console.log(`Backend Nodejs App listening on port ${port}`);
@@ -29,3 +47,4 @@ app.use("/v1/api/", apiRoutes);
     console.log(">>> Error connect to DB: ", error);
   }
 })();
+

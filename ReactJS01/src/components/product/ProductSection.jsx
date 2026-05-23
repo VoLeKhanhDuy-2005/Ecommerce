@@ -109,7 +109,7 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
               <ProductCard
                 id={item._id}
                 name={item.name}
-                price={formatPrice(item.price)}
+                price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
                 image={item.images[0]}
                 categoryName={item.categoryName}
                 badge={badge}

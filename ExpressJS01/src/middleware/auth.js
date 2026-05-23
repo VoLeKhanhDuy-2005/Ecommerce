@@ -15,6 +15,7 @@ const auth = (req, res, next) => {
         req.user = {
           email: decoded.email,
           name: decoded.name,
+          role: decoded.role,
           createdBy: "hoidanit",
         };
         //console.log(">>> check token: ", decoded)

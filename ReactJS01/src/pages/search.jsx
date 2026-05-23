@@ -24,7 +24,7 @@ export default function SearchFilterPage() {
     parseInt(searchParams.get("page")) || 1,
   );
   const [totalItems, setTotalItems] = useState(0);
-  const pageSize = 12;
+  const pageSize = 8;
 
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Bắt đầu là true để load ngay khi vào trang
@@ -132,9 +132,6 @@ export default function SearchFilterPage() {
       <div className="bg-gradient-to-r from-orange-500 to-red-500 py-10 px-4">
         <div className="max-w-2xl mx-auto text-center text-white mb-6">
           <h2 className="text-3xl font-black mb-2">Tìm Món Ngon 🍽️</h2>
-          <p className="text-orange-100 text-sm">
-            Tìm kiếm theo tên, lọc theo danh mục và mức giá
-          </p>
         </div>
         <div className="max-w-xl mx-auto">
           <Input
@@ -206,7 +203,7 @@ export default function SearchFilterPage() {
                     value="under50"
                     className="py-2 px-3 hover:bg-orange-50 rounded-xl transition-colors"
                   >
-                    Dưới 50.000đ
+                    Từ 50.000đ trở xuống
                   </Radio>
                   <Radio
                     value="50to100"
@@ -218,7 +215,7 @@ export default function SearchFilterPage() {
                     value="over100"
                     className="py-2 px-3 hover:bg-orange-50 rounded-xl transition-colors"
                   >
-                    Trên 100.000đ
+                    Từ 100.000đ trở lên
                   </Radio>
                 </Radio.Group>
               </div>
@@ -273,7 +270,7 @@ export default function SearchFilterPage() {
                     key={item._id}
                     id={item._id}
                     name={item.name}
-                    price={formatPrice(item.price)}
+                    price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
                     image={item.images[0]}
                     categoryName={item.categoryName}
                     badge={item.isHot ? "Hot 🔥" : item.isNew ? "New" : null}

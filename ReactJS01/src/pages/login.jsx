@@ -40,9 +40,16 @@ const LoginPage = () => {
         user: {
           email: res?.user?.email ?? "",
           name: res?.user?.name ?? "",
+          role: res.user.role
         },
       });
-      navigate("/");
+      if (res.user.role === "admin") {
+          console.log(res.user.role)
+          navigate("/admin/orders");
+        } else {
+          console.log("USER")
+          navigate("/");
+        }
     } else {
       notification.error({
         message: "LOGIN USER",

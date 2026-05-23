@@ -8,6 +8,8 @@ import {
   UsergroupAddOutlined,
   MenuOutlined,
   CloseOutlined,
+  ShoppingCartOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -16,7 +18,7 @@ import { Avatar, Dropdown } from "antd";
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, setAuth } = useContext(AuthContext);
+  const { auth, setAuth, cartCount } = useContext(AuthContext);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -25,10 +27,45 @@ const Header = () => {
     navigate("/");
   };
 
+  const isAdmin = auth.isAuthenticated && auth.user.role === "admin";
+
   const navLinks = [
     { to: "/", label: "Trang chủ", icon: <HomeOutlined /> },
     { to: "/search", label: "Tìm kiếm", icon: <SearchOutlined /> },
+    ...(auth.isAuthenticated
+      ? isAdmin
+        ? [
+            {
+              to: "/admin/orders",
+              label: "Quản lý đơn hàng",
+              icon: <HistoryOutlined />,
+            },
+            {
+              to: "/user",
+              label: "Quản lý User",
+              icon: <UsergroupAddOutlined />,
+            },
+          ]
+        : [
+            {
+              to: "/cart",
+              label: (
+                <span className="flex items-center gap-1">
+                  Giỏ hàng
+                  {cartCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-2xs bg-red-500 text-white rounded-full font-bold leading-none min-w-4 text-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </span>
+              ),
+              icon: <ShoppingCartOutlined />,
+            },
+            { to: "/orders", label: "Đơn hàng", icon: <HistoryOutlined /> },
+          ]
+      : []),
   ];
+
 
   const userMenuItems = {
     items: [

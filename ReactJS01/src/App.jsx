@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
 import Header from "./components/layout/header";
-import { getCurrentUserApi } from "./util/api";
+import { getCurrentUserApi, getCartApi } from "./util/api";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import { Spin } from "antd";
 
 function App() {
-  const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
+  const { setAuth, appLoading, setAppLoading, setCartCount } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -18,13 +18,26 @@ function App() {
           user: {
             email: res.user.email,
             name: res.user.name,
+            role: res.user.role,
           },
         });
+
+        // Tải số lượng sản phẩm trong giỏ hàng
+        try {
+          const cartRes = await getCartApi();
+          if (cartRes && cartRes.success && cartRes.data) {
+            const count = cartRes.data.items.reduce((acc, item) => acc + item.quantity, 0);
+            setCartCount(count);
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy giỏ hàng ban đầu:", error);
+        }
       }
       setAppLoading(false);
     };
     fetchAccount();
   }, []);
+
 
   return (
     <div>
@@ -48,5 +61,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;

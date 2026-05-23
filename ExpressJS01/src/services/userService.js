@@ -20,7 +20,7 @@ const createUserService = async (name, email, password) => {
       name: name,
       email: email,
       password: hashPassword,
-      role: "User",
+      role: "user",
     });
     return result;
   } catch (error) {
@@ -46,6 +46,7 @@ const loginService = async (email1, password) => {
         const payload = {
           email: user.email,
           name: user.name,
+          role: user.role
         };
 
         const access_token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -57,6 +58,7 @@ const loginService = async (email1, password) => {
           user: {
             email: user.email,
             name: user.name,
+            role: user.role
           },
         };
       }

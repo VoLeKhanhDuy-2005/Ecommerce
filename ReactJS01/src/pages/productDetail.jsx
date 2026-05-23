@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Spin, InputNumber, notification, Tag } from "antd";
 import {
@@ -25,6 +25,8 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "swiper/css/thumbs";
+import { AuthContext } from "../components/context/auth.context";
+import { addToCartApi } from "../util/api";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -34,6 +36,8 @@ export default function ProductDetailPage() {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [thumbsSwiper, setThumbsSwiper] = useState(null); // Swiper thumbnail
   const viewCounted = useRef(false);
+  
+  const { auth, setCartCount } = useContext(AuthContext);
 
   useEffect(() => {
     // Reset flag khi chuyển sang sản phẩm khác
@@ -93,22 +97,56 @@ export default function ProductDetailPage() {
       currency: "VND",
     }).format(price);
 
-  // Xử lý thêm vào giỏ hàng
-  const handleAddToCart = () => {
-    if (quantity > product.stock) {
-      notification.error({
-        message: "Không đủ hàng",
-        description: `Chỉ còn ${product.stock} phần, vui lòng chọn số lượng phù hợp.`,
+  // Xử lý thêm vào giỏ hàng thực tế
+  const handleAddToCart = async () => {
+    if (!auth.isAuthenticated) {
+      notification.warning({
+        message: "Chưa đăng nhập",
+        description: "Vui lòng đăng nhập tài khoản để đặt mua sản phẩm này!",
         placement: "topRight",
       });
       return;
     }
-    notification.success({
-      message: "🛒 Đã thêm vào giỏ hàng",
-      description: `${quantity} phần "${product.name}"`,
-      placement: "topRight",
-    });
+
+    if (quantity > product.stock) {
+      notification.error({
+        message: "Không đủ hàng",
+        description: `Chỉ còn ${product.stock} phần trong kho, vui lòng chọn số lượng phù hợp.`,
+        placement: "topRight",
+      });
+      return;
+    }
+
+    try {
+      const res = await addToCartApi(product._id, quantity);
+      if (res && res.success) {
+        notification.success({
+          message: "🛒 Đã thêm vào giỏ hàng",
+          description: `Đã thêm ${quantity} phần "${product.name}" vào giỏ hàng thành công!`,
+          placement: "topRight",
+        });
+
+        // Cập nhật số lượng hiển thị trên Badge Header
+        if (res.data && res.data.items) {
+          const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
+          setCartCount(totalItems);
+        }
+      } else {
+        notification.error({
+          message: "Lỗi thêm giỏ hàng",
+          description: res.message || "Không thể thêm sản phẩm vào giỏ hàng.",
+          placement: "topRight",
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Lỗi hệ thống",
+        description: error.message || "Đã xảy ra lỗi khi kết nối đến server.",
+        placement: "topRight",
+      });
+    }
   };
+
 
   if (isLoading) {
     return (
@@ -311,7 +349,7 @@ export default function ProductDetailPage() {
                   Giá bán
                 </p>
                 <p className="text-4xl font-black text-orange-600 tracking-tight">
-                  {formatPrice(product.price)}
+                  {formatPrice(product.discountPrice && product.discountPrice !== 0 ? product.discountPrice : product.price)}
                 </p>
                 {product.isHot && (
                   <p className="text-orange-500 text-xs font-medium mt-2 flex items-center gap-1">
@@ -375,7 +413,7 @@ export default function ProductDetailPage() {
                   key={item._id}
                   id={item._id}
                   name={item.name}
-                  price={formatPrice(item.price)}
+                  price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
                   image={item.images[0]}
                   categoryName={item.categoryName}
                   rating={item.rating}

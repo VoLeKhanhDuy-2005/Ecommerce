@@ -7,6 +7,8 @@ export const AuthContext = createContext({
         name: ""
     },
     appLoading: true,
+    cartCount: 0,
+    setCartCount: () => {}
 });
 
 export const AuthWrapper = (props) => {
@@ -19,12 +21,13 @@ export const AuthWrapper = (props) => {
     });
 
     const [appLoading, setAppLoading] = useState(true);
+    const [cartCount, setCartCount] = useState(0);
 
     return (
         <AuthContext.Provider value={{
-            auth, setAuth, appLoading, setAppLoading
+            auth, setAuth, appLoading, setAppLoading, cartCount, setCartCount
         }}>
             {props.children}
         </AuthContext.Provider>
     );
-}
+}

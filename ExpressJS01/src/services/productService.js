@@ -29,7 +29,7 @@ const getProductsWithFilters = async (query) => {
     maxPrice,
     sort,
     page = 1,
-    limit = 12,
+    limit = 8,
   } = query;
 
   const filter = {};
