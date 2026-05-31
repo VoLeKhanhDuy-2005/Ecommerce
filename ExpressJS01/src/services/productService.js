@@ -9,7 +9,7 @@ const getHomePageProducts = async () => {
   ] = await Promise.all([
     Product.find().sort({ createdAt: -1 }).limit(10),
     Product.find().sort({ sold: -1 }).limit(10),
-    Product.find({ discountPrice: { $gt: 0 } }).limit(12),
+    Product.find({ discountPrice: { $gt: 0 } }).sort({ discountPercent: -1 }).limit(12),
     Product.find().sort({ views: -1 }).limit(10),
   ]);
 

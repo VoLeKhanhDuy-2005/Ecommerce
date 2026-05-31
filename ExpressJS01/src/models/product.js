@@ -21,6 +21,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Giá sản phẩm không được để trống"],
       min: [0, "Giá không được âm"],
     },
+    discountPercent : {
+      type: Number,
+      required: [true, "Phần trăm giảm không được để trống"],
+      min: [0, "Phần trăm giảm không được âm"],
+    },
     discountPrice: {
       type: Number,
       default: 0,

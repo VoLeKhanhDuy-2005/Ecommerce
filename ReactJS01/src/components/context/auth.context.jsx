@@ -1,22 +1,28 @@
 import { createContext, useState } from 'react';
 
-export const AuthContext = createContext({
-    isAuthenticated: false,
-    user: {
-        email: "",
-        name: ""
+export const AuthContext = createContext({// default value cho createContext
+    auth: {
+        isAuthenticated: false,
+        user: {
+            email: "",
+            name: "",
+            role: "user"
+        }
     },
     appLoading: true,
     cartCount: 0,
+    setAuth: () => {},//hàm giả (dummy function) để tránh lỗi khi component dùng context nhưng chưa được bọc bởi AuthWrapper
+    setAppLoading: () => {},
     setCartCount: () => {}
 });
 
-export const AuthWrapper = (props) => {
+export const AuthWrapper = (props) => {//Context Provider
     const [auth, setAuth] = useState({
         isAuthenticated: false,
         user: {
             email: "",
-            name: ""
+            name: "",
+            role: "user"
         }
     });
 
@@ -30,4 +36,4 @@ export const AuthWrapper = (props) => {
             {props.children}
         </AuthContext.Provider>
     );
-}
+}

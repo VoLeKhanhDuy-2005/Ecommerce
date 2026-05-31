@@ -28,13 +28,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const maxDiscountPercent =
     products.promotions.length > 0
-      ? Math.max(
-          ...products.promotions.map((product) =>
-            Math.round(
-              ((product.price - product.discountPrice) / product.price) * 100,
-            ),
-          ),
-        )
+      ? products.promotions[0].discountPercent
       : 0;
 
   useEffect(() => {

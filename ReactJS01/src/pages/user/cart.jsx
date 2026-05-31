@@ -277,7 +277,7 @@ export default function CartPage() {
               </h2>
 
               {cart.items.map((item) => {
-                const isDiscounted = item.product.discountPrice && item.product.discountPrice > 0;
+                const isDiscounted = item.product.price != item.product.discountPrice;
                 const activePrice = isDiscounted ? item.product.discountPrice : item.product.price;
                 const originalPrice = item.product.price;
 
@@ -475,7 +475,7 @@ export default function CartPage() {
                         {item.product.name}
                       </span>
                       <span className="text-gray-400 text-2xs">x{item.quantity}</span>
-                      <span className="text-gray-800 font-bold">{formatPrice(activePrice * item.quantity)}</span>
+                      <span className="text-gray-800 font-bold">{formatPrice(activePrice)}</span>
                     </div>
                   );
                 })}

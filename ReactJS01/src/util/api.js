@@ -76,6 +76,10 @@ const cancelOrderApi = (orderId, reason) => {
   return axios.post(`/v1/api/orders/${orderId}/cancel`, { reason });
 };
 
+const markOrderAsReceivedApi = (orderId) => {
+  return axios.post(`/v1/api/orders/${orderId}/received`);
+};
+
 const verifyMomoPaymentApi = (orderId) => {
   return axios.post(`/v1/api/orders/${orderId}/verify-momo`);
 };
@@ -108,6 +112,7 @@ export {
   getMyOrdersApi,
   getOrderDetailsApi,
   cancelOrderApi,
+  markOrderAsReceivedApi,
   verifyMomoPaymentApi,
   getShopOrdersApi,
   updateShopOrderStatusApi,

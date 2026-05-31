@@ -5,6 +5,8 @@ const {
   getUser,
   getAccount,
   getCurrentUser,
+  handleRefreshToken,
+  handleLogout,
 } = require("../controllers/userController");
 const {
   searchProducts,
@@ -25,6 +27,7 @@ const {
   getMyOrders,
   getOrderDetails,
   cancelOrder,
+  markOrderAsReceived,
   getShopOrders,
   updateShopOrderStatus,
   handleShopCancelRequest,
@@ -44,6 +47,8 @@ routerAPI.get("/", (req, res) => {
 
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
+routerAPI.post("/refresh-token", handleRefreshToken);
+routerAPI.post("/logout", handleLogout);
 
 routerAPI.get("/user", getUser);
 routerAPI.get("/user/me", getCurrentUser);
@@ -64,6 +69,7 @@ routerAPI.post("/orders", createOrder);
 routerAPI.get("/orders", getMyOrders);
 routerAPI.get("/orders/:id", getOrderDetails);
 routerAPI.post("/orders/:id/cancel", cancelOrder);
+routerAPI.post("/orders/:id/received", markOrderAsReceived);
 routerAPI.post("/orders/:id/verify-momo", verifyMomoPayment);
 
 routerAPI.get("/admin/orders", isAdmin, getShopOrders);

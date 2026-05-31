@@ -52,9 +52,16 @@ const loginService = async (email1, password) => {
         const access_token = jwt.sign(payload, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRE,
         });
+
+        // Tạo refresh token lưu ở cookie
+        const refresh_token = jwt.sign(payload, process.env.REFRESH_JWT_SECRET, {
+          expiresIn: process.env.REFRESH_JWT_EXPIRE,
+        });
+
         return {
           EC: 0,
           access_token,
+          refresh_token,
           user: {
             email: user.email,
             name: user.name,
@@ -71,6 +78,34 @@ const loginService = async (email1, password) => {
   } catch (error) {
     console.log(error);
     return null;
+  }
+};
+
+const refreshTokenService = async (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = {
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role
+    };
+
+    // Tạo access_token mới
+    const access_token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE,
+    });
+
+    return {
+      EC: 0,
+      access_token,
+      user: payload
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EC: 1,
+      EM: "Refresh token không hợp lệ hoặc đã hết hạn"
+    };
   }
 };
 
@@ -117,4 +152,5 @@ module.exports = {
   loginService,
   getUserService,
   getCurrentUserService,
+  refreshTokenService,
 };

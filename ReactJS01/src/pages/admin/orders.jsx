@@ -31,8 +31,8 @@ export default function AdminOrdersPage() {
     );
   }
 
-  const fetchShopOrders = async () => {
-    setIsLoading(true);
+  const fetchShopOrders = async (isAutoRefresh = false) => {
+    if (!isAutoRefresh) setIsLoading(true);
     try {
       const res = await getShopOrdersApi();
       if (res && res.success) {
@@ -59,6 +59,17 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     fetchShopOrders();
   }, []);
+
+  // TỰ ĐỘNG TẢI LẠI TRANG CHẠY NGẦM MỖI 10 GIÂY
+  useEffect(() => {
+    if (!auth.isAuthenticated) return;
+
+    const autoRefreshTimer = setInterval(() => {
+      fetchShopOrders(true);
+    }, 10 * 1000);
+
+    return () => clearInterval(autoRefreshTimer);
+  }, [auth.isAuthenticated]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -239,7 +250,7 @@ export default function AdminOrdersPage() {
                 </div>
               )}
 
-              {ord.status !== "Cancelled" && ord.status !== "Delivered"  && (
+              {ord.status !== "Cancelled" && ord.status !== "Delivered" && (
                 <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/70 space-y-2">
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                     <ShoppingOutlined /> Thao tác xử lý quy trình vận đơn
@@ -282,17 +293,7 @@ export default function AdminOrdersPage() {
                       </Button>
                     )}
 
-                    {ord.status === "Shipping" && (
-                      <Button
-                        size="small"
-                        type="primary"
-                        icon={<GiftOutlined />}
-                        className="text-xs rounded-xl h-8 font-bold px-4 bg-emerald-600 border-none hover:bg-emerald-700"
-                        onClick={() => handleUpdateStatus(ord._id, "Delivered")}
-                      >
-                        Xác nhận đã giao
-                      </Button>
-                    )}
+
 
                     {ord.status !== "Delivered" &&
                       ord.status !== "Shipping" && (

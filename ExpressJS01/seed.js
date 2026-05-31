@@ -178,7 +178,8 @@ const seedData = async () => {
         const name = `${prefix} ${suffix} ${i < 5 ? "Đặc biệt " + i : i < 10 ? "Mới " + i : "Ngon " + i}`;
         const price = randomInt(2, 15) * 10000;
         const hasDiscount = Math.random() > 0.5;
-        const discountPrice = hasDiscount ? price - randomInt(1, 3) * 5000 : 0;
+        const discountPercent = hasDiscount ? randomInt(1, 4) * 10 : 0; // 10%, 20%, 30%, 40%
+        const discountPrice = hasDiscount ? Math.round(price * (1 - discountPercent / 100)) : price;
         const rating = Number((Math.random() * 2 + 3).toFixed(1));// kết quả từ 3.0 -> 5.0
 
         const imagesForProduct = [];
@@ -191,7 +192,8 @@ const seedData = async () => {
           slug: generateSlug(name),
           description: `Một phần ${name} cực kỳ hấp dẫn, nguyên liệu tươi ngon được chọn lọc kỹ càng. Đảm bảo mang đến trải nghiệm tuyệt vời cho bạn!`,
           price: price,
-          discountPrice: discountPrice > 0 ? discountPrice : price,
+          discountPercent: discountPercent,
+          discountPrice: discountPrice,
           images: imagesForProduct,
           category: catId,
           stock: randomInt(10, 100),

@@ -12,10 +12,10 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
-import { getMyOrdersApi, getOrderDetailsApi, cancelOrderApi, verifyMomoPaymentApi } from "../../util/api";
+import { getMyOrdersApi, getOrderDetailsApi, cancelOrderApi, verifyMomoPaymentApi, getCartApi, markOrderAsReceivedApi } from "../../util/api";
 
 export default function OrdersPage() {
-  const { auth } = useContext(AuthContext);
+  const { auth, setCartCount } = useContext(AuthContext);
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [orders, setOrders] = useState([]);
@@ -25,6 +25,7 @@ export default function OrdersPage() {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [receiveLoading, setReceiveLoading] = useState(false);
   
   // State phục vụ đếm ngược thời gian hủy đơn (30 phút)
   const [timeLeftStr, setTimeLeftStr] = useState("");
@@ -59,6 +60,18 @@ export default function OrdersPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const refreshCartCount = async () => {
+    try {
+      const cartRes = await getCartApi();
+      if (cartRes && cartRes.success && cartRes.data) {
+        const totalItems = cartRes.data.items.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật badge giỏ hàng:", error);
     }
   };
 
@@ -103,6 +116,7 @@ export default function OrdersPage() {
           setIsVerifyingMomo(false);
           // Xóa các tham số MoMo trên thanh địa chỉ để URL sạch sẽ
           setSearchParams({});
+          await refreshCartCount();
           fetchOrders(orderId);
         }
       } else {
@@ -189,6 +203,34 @@ export default function OrdersPage() {
       });
     } finally {
       setCancelLoading(false);
+    }
+  };
+
+  // Xác nhận đã nhận hàng qua API
+  const handleMarkAsReceived = async () => {
+    setReceiveLoading(true);
+    try {
+      const res = await markOrderAsReceivedApi(selectedOrder._id);
+      if (res && res.success) {
+        notification.success({
+          message: "Thành công",
+          description: "Cảm ơn bạn đã xác nhận nhận hàng!",
+        });
+        fetchOrders(selectedOrder._id);
+      } else {
+        notification.error({
+          message: "Lỗi",
+          description: res.message || "Không thể xác nhận đơn hàng.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error({
+        message: "Lỗi hệ thống",
+        description: "Không thể kết nối đến máy chủ.",
+      });
+    } finally {
+      setReceiveLoading(false);
     }
   };
 
@@ -395,36 +437,55 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                {/* Phần Đếm Ngược & Hủy Đơn */}
-                {selectedOrder.status !== "Cancelled" && selectedOrder.status !== "Delivered" && selectedOrder.status !== "Shipping" && (
+                {/* Phần Đếm Ngược & Hủy Đơn / Xác nhận nhận hàng */}
+                {selectedOrder.status !== "Cancelled" && selectedOrder.status !== "Delivered" && (
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <ClockCircleOutlined className="text-orange-500 text-lg animate-spin" style={{ animationDuration: '6s' }} />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian hủy đơn còn lại</p>
-                        <p className="text-base font-black text-gray-700 mt-0.5">{timeLeftStr || "Đang tính toán..."}</p>
-                      </div>
-                    </div>
-
-                    {canCancel ? (
-                      selectedOrder.cancelRequest ? (
-                        <div className="flex flex-col items-end gap-1">
-                          <Tag color="warning" className="m-0 rounded-lg py-1 px-3 font-semibold text-xs animate-pulse">
-                            ⏳ Đang chờ duyệt hủy đơn
-                          </Tag>
-                          <span className="text-[10px] text-gray-400">Shop đang chuẩn bị hàng, đang xử lý yêu cầu</span>
+                    {selectedOrder.status === "Shipping" ? (
+                      <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <p className="font-bold text-gray-800 text-sm">Đơn hàng đang được giao đến bạn!</p>
+                          <p className="text-xs text-gray-500 mt-1">Vui lòng xác nhận sau khi bạn đã nhận được hàng thành công.</p>
                         </div>
-                      ) : (
                         <button
-                          onClick={openCancelModal}
-                          className="px-5 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
+                          onClick={handleMarkAsReceived}
+                          disabled={receiveLoading}
+                          className="px-5 py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl hover:bg-emerald-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
                         >
-                          <CloseCircleOutlined />
-                          {selectedOrder.status === "Preparing" ? "Gửi Yêu Cầu Hủy Đơn" : "Hủy Đơn Hàng"}
+                          <CheckCircleOutlined />
+                          Đã Nhận Được Hàng
                         </button>
-                      )
+                      </div>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">🔒 Đơn hàng đã được khóa (không thể hủy)</span>
+                      <>
+                        <div className="flex items-center gap-3">
+                          <ClockCircleOutlined className="text-orange-500 text-lg animate-spin" style={{ animationDuration: '6s' }} />
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian hủy đơn còn lại</p>
+                            <p className="text-base font-black text-gray-700 mt-0.5">{timeLeftStr || "Đang tính toán..."}</p>
+                          </div>
+                        </div>
+
+                        {canCancel ? (
+                          selectedOrder.cancelRequest ? (
+                            <div className="flex flex-col items-end gap-1">
+                              <Tag color="warning" className="m-0 rounded-lg py-1 px-3 font-semibold text-xs animate-pulse">
+                                ⏳ Đang chờ duyệt hủy đơn
+                              </Tag>
+                              <span className="text-[10px] text-gray-400">Shop đang chuẩn bị hàng, đang xử lý yêu cầu</span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={openCancelModal}
+                              className="px-5 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
+                            >
+                              <CloseCircleOutlined />
+                              {selectedOrder.status === "Preparing" ? "Gửi Yêu Cầu Hủy Đơn" : "Hủy Đơn Hàng"}
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">🔒 Đơn hàng đã được khóa (không thể hủy)</span>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -447,7 +508,7 @@ export default function OrdersPage() {
                           <p className="font-bold text-gray-800">{item.name}</p>
                           <p className="text-gray-400 text-2xs mt-0.5">Số lượng: {item.quantity}</p>
                         </div>
-                        <span className="font-bold text-gray-800">{formatPrice(item.price * item.quantity)}</span>
+                        <span className="font-bold text-gray-800">{formatPrice(item.price)}</span>
                       </div>
                     ))}
                   </div>
