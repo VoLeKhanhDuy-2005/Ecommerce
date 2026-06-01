@@ -4,6 +4,13 @@ const Cart = require("../models/cart");
 const crypto = require("crypto");
 const https = require("https");
 
+// Ref Tích hợp MoMo: https://www.youtube.com/watch?v=ZlvwqtfCEUM
+// Test Visa:
+// Name: NGUYEN VAN A
+// 4111 1111 1111 1111
+// 05/26
+// CSV: 111
+
 // MoMo Sandbox Credentials
 const MOMO_PARTNER_CODE = "MOMO";
 const MOMO_ACCESS_KEY = "F8BBA842ECF85";

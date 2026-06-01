@@ -157,16 +157,6 @@ export default function AdminOrdersPage() {
             <span>Quản Lý Đơn Hàng Cửa Hàng</span>
           </h1>
         </div>
-        
-        <Button
-          type="primary"
-          icon={<ReloadOutlined spin={isLoading} />}
-          loading={isLoading}
-          onClick={fetchShopOrders}
-          className="rounded-xl font-bold bg-purple-600 hover:bg-purple-700 border-none shadow-sm self-start sm:self-center"
-        >
-          Làm mới
-        </Button>
       </div>
 
       {isLoading ? (

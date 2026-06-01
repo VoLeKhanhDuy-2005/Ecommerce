@@ -39,7 +39,7 @@ const getAccount = async (req, res) => {
 }
 
 const handleRefreshToken = async (req, res) => {
-    const refresh_token = req.cookies.refreshToken;
+    const refresh_token = req.cookies.refresh_token;
     
     if (!refresh_token) {
         return res.status(401).json({ EC: 1, EM: "Không tìm thấy refresh token trong cookie" });

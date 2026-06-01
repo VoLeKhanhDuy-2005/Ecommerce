@@ -83,7 +83,7 @@ const loginService = async (email1, password) => {
 
 const refreshTokenService = async (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.REFRESH_JWT_SECRET);
     const payload = {
       email: decoded.email,
       name: decoded.name,

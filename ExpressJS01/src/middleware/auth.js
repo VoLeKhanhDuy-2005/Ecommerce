@@ -3,7 +3,14 @@ const jwt = require("jsonwebtoken");
 
 const auth = (req, res, next) => {
   const white_lists = ["/", "/register", "/login", "/products", "/refresh-token", "/logout"];
-  if (white_lists.find((item) => "/v1/api" + item === req.originalUrl)) {
+  
+  // Cho phép các route bắt đầu bằng danh sách whitelist đi qua mà không cần check token
+  const isWhiteListed = white_lists.some((item) => {
+    if (item === "/") return req.originalUrl === "/v1/api" || req.originalUrl === "/v1/api/";
+    return req.originalUrl.startsWith("/v1/api" + item);
+  });// Trả về true nếu ít nhất một phần tử thỏa điều kiện
+
+  if (isWhiteListed) {
     next();
   } else {
     if (req?.headers?.authorization?.split(" ")?.[1]) {
