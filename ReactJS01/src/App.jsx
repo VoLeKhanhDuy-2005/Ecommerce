@@ -19,6 +19,7 @@ function App() {
             email: res.user.email,
             name: res.user.name,
             role: res.user.role,
+            avatar: res.user.avatarURL,
           },
         });
 

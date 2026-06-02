@@ -3,20 +3,20 @@ const express = require("express"); //commonjs
 const configViewEngine = require("./config/viewEngine");
 const apiRoutes = require("./routes/api");
 const connection = require("./config/database");
-const { getHomepage } = require("./controllers/homeController");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const Order = require("./models/order");
 const app = express(); //cấu hình app là express
 const port = process.env.PORT || 8888;
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); //config cors cho phép gửi cookie
+app.use(cors({ origin: "http://localhost:5173", credentials: true })); 
+//config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
+//trong các req đến server
 app.use(cookieParser()); //config req.cookies
 app.use(express.json()); // //config req.body cho json
 app.use(express.urlencoded({ extended: true })); // for form data
 configViewEngine(app); //config template engine
 //config route cho view ejs
 const webAPI = express.Router();
-webAPI.get("/", getHomepage);
 app.use("/", webAPI);
 //khai báo route cho API
 app.use("/v1/api/", apiRoutes);

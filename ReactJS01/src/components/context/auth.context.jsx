@@ -6,7 +6,8 @@ export const AuthContext = createContext({// default value cho createContext
         user: {
             email: "",
             name: "",
-            role: "user"
+            role: "user",
+            avatar: ""
         }
     },
     appLoading: true,
@@ -22,7 +23,8 @@ export const AuthWrapper = (props) => {//Context Provider
         user: {
             email: "",
             name: "",
-            role: "user"
+            role: "user",
+            avatar: ""
         }
     });
 

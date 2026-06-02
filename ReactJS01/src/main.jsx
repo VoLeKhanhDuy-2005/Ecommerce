@@ -13,6 +13,7 @@ import ProductDetailPage from "./pages/productDetail.jsx";
 import SearchFilterPage from "./pages/search.jsx";
 import CartPage from "./pages/user/cart.jsx";
 import OrdersPage from "./pages/user/orders.jsx";
+import EditProfilePage from "./pages/user/editProfile.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 
 const router = createBrowserRouter([
@@ -43,7 +44,12 @@ const router = createBrowserRouter([
       {
         path: "orders",
         element: <OrdersPage />,
-      },{
+      },
+      {
+        path: "profile",
+        element: <EditProfilePage />,
+      },
+      {
         path: "admin/orders",
         element: <AdminOrdersPage />,
       },
@@ -58,7 +64,6 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
 ]);
-
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

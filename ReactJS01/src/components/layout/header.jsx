@@ -10,6 +10,7 @@ import {
   CloseOutlined,
   ShoppingCartOutlined,
   HistoryOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -70,18 +71,13 @@ const Header = () => {
   const userMenuItems = {
     items: [
       {
-        key: "info",
+        key: "profile",
         label: (
-          <div className="px-2 py-1">
-            <p className="font-semibold text-gray-800">
-              {auth?.user?.name || "Thành viên"}
-            </p>
-            <p className="text-xs text-gray-500">{auth?.user?.email}</p>
-          </div>
+          <Link to="/profile" className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition-colors">
+            <SettingOutlined /> Chỉnh sửa hồ sơ
+          </Link>
         ),
-        disabled: true,
       },
-      { type: "divider" },
       {
         key: "logout",
         label: (
@@ -147,6 +143,7 @@ const Header = () => {
                     size={32}
                     className="bg-gradient-to-br from-orange-400 to-red-500 text-white font-bold flex-shrink-0"
                     icon={<UserOutlined />}
+                    src={auth?.user?.avatar}
                   >
                     {auth?.user?.name?.[0]?.toUpperCase()}
                   </Avatar>

@@ -28,6 +28,28 @@ const userSchema = new mongoose.Schema(
       },
       default: "user",
     },
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    gender: {
+      type: String,
+      enum: ["MALE", "FEMALE", ""],
+      default: "",
+    },
+    address: {
+      type: String,
+      default: "",
+    },
+    birthday: {
+      type: String,
+      default: "",
+    },
+    avatarName: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true, // Tự động tạo createdAt và updatedAt

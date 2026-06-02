@@ -1,4 +1,5 @@
-const { createUserService, loginService, getUserService, getCurrentUserService, refreshTokenService } = require("../services/userService");
+const { createUserService, loginService, getUserService, getCurrentUserService, refreshTokenService, updateProfile } = require("../services/userService");
+const User = require("../models/user");
 
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -15,6 +16,8 @@ const handleLogin = async (req, res) => {
             httpOnly: true,
             secure: false, // Set là true nếu chạy trên HTTPS
             sameSite: "strict",
+            // Trình duyệt chỉ gửi cookie nếu bạn đang ở trang A (nganhang.com)
+            // và thực hiện hành động (nhấp link, gửi biểu mẫu, gọi API) dẫn đến trang A 
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
         // Xóa refresh_token khỏi response body để bảo mật
@@ -34,10 +37,6 @@ const getCurrentUser = async (req, res) => {
     return res.status(200).json(data)
 }
 
-const getAccount = async (req, res) => {
-    return res.status(200).json(req.user)
-}
-
 const handleRefreshToken = async (req, res) => {
     const refresh_token = req.cookies.refresh_token;
     
@@ -55,6 +54,17 @@ const handleLogout = (req, res) => {
     return res.status(200).json({ EC: 0, EM: "Đăng xuất thành công" });
 }
 
+const handleUpdateProfile = async (req, res) => {
+    try {
+        const result = await updateProfile(req.user.email, req.body, req.file);
+        if (result.EC === 0)
+            return res.status(200).json({ success: true, message: "Cập nhật thành công", data: result.data });
+        return res.status(400).json({ success: false, message: result.EM });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message || "Lỗi server" });
+    }
+}
+
 module.exports = {
-    createUser, handleLogin, getUser, getAccount, getCurrentUser, handleRefreshToken, handleLogout
+    createUser, handleLogin, getUser, getCurrentUser, handleRefreshToken, handleLogout, handleUpdateProfile
 }

@@ -7,6 +7,7 @@ const {
   getCurrentUser,
   handleRefreshToken,
   handleLogout,
+  handleUpdateProfile,
 } = require("../controllers/userController");
 const {
   searchProducts,
@@ -35,7 +36,7 @@ const {
 } = require("../controllers/orderController");
 const auth = require("../middleware/auth");
 const isAdmin=require("../middleware/isAdmin")
-const delay = require("../middleware/delay");
+const { validateAvatar } = require("../middleware/fileValidate.middleware");
 
 const routerAPI = express.Router();
 
@@ -52,7 +53,7 @@ routerAPI.post("/logout", handleLogout);
 
 routerAPI.get("/user", getUser);
 routerAPI.get("/user/me", getCurrentUser);
-routerAPI.get("/account", delay, getAccount);
+routerAPI.put("/user/profile", validateAvatar, handleUpdateProfile);
 
 routerAPI.get("/products", getHomePageProducts);
 routerAPI.get("/products/search", searchProducts);

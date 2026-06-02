@@ -96,6 +96,14 @@ const handleShopCancelRequestApi = (orderId, action) => {
   return axios.post(`/v1/api/admin/orders/${orderId}/cancel-request`, { action });
 };
 
+const updateProfileApi = (formData) => {
+  return axios.put("/v1/api/user/profile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -117,5 +125,6 @@ export {
   getShopOrdersApi,
   updateShopOrderStatusApi,
   handleShopCancelRequestApi,
+  updateProfileApi,
 };
 
