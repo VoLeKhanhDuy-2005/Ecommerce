@@ -12,7 +12,7 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 //config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
 //trong các req đến server
 app.use(cookieParser()); //config req.cookies
-app.use(express.json()); // //config req.body cho json
+app.use(express.json()); //config req.body cho json
 app.use(express.urlencoded({ extended: true })); // for form data
 configViewEngine(app); //config template engine
 //config route cho view ejs

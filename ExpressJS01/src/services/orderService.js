@@ -35,6 +35,7 @@ const postHTTPS = (url, data) => {
     };
 
     const req = https.request(options, (res) => {
+      // là bất đồng bộ -> không trả kết quả ngay, không muốn block luồng chính -> Promise
       let body = "";
       res.on("data", (chunk) => {
         body += chunk;
@@ -43,7 +44,7 @@ const postHTTPS = (url, data) => {
         try {
           resolve(JSON.parse(body));
         } catch (e) {
-          resolve({ error: "Failed to parse JSON response: " + body });
+          reject({ error: "Failed to parse JSON response: " + body });
         }
       });
     });
