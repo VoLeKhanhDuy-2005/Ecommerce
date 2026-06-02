@@ -9,25 +9,36 @@ import { foodCategories } from "../util/constants";
 const { Search } = Input;
 
 export default function SearchFilterPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // Trạng thái bộ lọc - đồng bộ với URL params
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [category, setCategory] = useState(
-    searchParams.get("category") || "all",
-  );
-  const [priceRange, setPriceRange] = useState(
-    searchParams.get("price") || "all",
-  );
-
-  const [currentPage, setCurrentPage] = useState(
-    parseInt(searchParams.get("page")) || 1,
-  );
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 8;
-
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Bắt đầu là true để load ngay khi vào trang
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialFilters = {
+    query: searchParams.get("q") || "",
+    category: searchParams.get("category") || "all",
+    priceRange: searchParams.get("price") || "all",
+    currentPage: parseInt(searchParams.get("page")) || 1,
+  };
+  const filterReducer = (state, action) => {
+    switch (action.type) {
+      case "SET_QUERY":
+        return { ...state, query: action.payload, currentPage: 1 };
+      case "SET_CATEGORY":
+        return { ...state, category: action.payload, currentPage: 1 };
+      case "SET_PRICE":
+        return { ...state, priceRange: action.payload, currentPage: 1 };
+      case "SET_PAGE":
+        return { ...state, currentPage: action.payload };
+      case "RESET":
+        return initialFilters;
+      default:
+        return state;
+    }
+    const [filters, dispatch] = useReducer(filterReducer, initialFilters);
+  };
 
   // Gọi tìm kiếm mỗi khi bộ lọc thay đổi
   useEffect(() => {
@@ -72,8 +83,7 @@ export default function SearchFilterPage() {
 
   // Cập nhật query + URL khi gõ tìm kiếm
   const handleSearch = (value) => {
-    setQuery(value);
-    setCurrentPage(1);
+    dispatch({ type: "SET_QUERY", payload: value });
     const params = new URLSearchParams(searchParams);
     value ? params.set("q", value) : params.delete("q");
     params.set("page", 1);
@@ -82,8 +92,7 @@ export default function SearchFilterPage() {
 
   // Cập nhật bộ lọc danh mục + URL
   const handleCategoryChange = (value) => {
-    setCategory(value);
-    setCurrentPage(1);
+    dispatch({ type: "SET_CATEGORY", payload: value });
     const params = new URLSearchParams(searchParams);
     value !== "all" ? params.set("category", value) : params.delete("category");
     params.set("page", 1);
@@ -92,29 +101,25 @@ export default function SearchFilterPage() {
 
   // Cập nhật bộ lọc giá + URL
   const handlePriceChange = (value) => {
-    setPriceRange(value);
-    setCurrentPage(1);
+    dispatch({ type: "SET_PRICE", payload: value });
     const params = new URLSearchParams(searchParams);
     value !== "all" ? params.set("price", value) : params.delete("price");
     params.set("page", 1);
     setSearchParams(params);
   };
 
-  const handleResetFilters = () => {
-    setQuery("");
-    setCategory("all");
-    setPriceRange("all");
-    setCurrentPage(1);
-    const params = new URLSearchParams();
-    setSearchParams(params);
-  };
-
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    dispatch({ type: "SET_PAGE", payload: page });
     const params = new URLSearchParams(searchParams);
     params.set("page", page);
     setSearchParams(params);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleResetFilters = () => {
+    dispatch({ type: "RESET" });
+    const params = new URLSearchParams();
+    setSearchParams(params);
   };
 
   const formatPrice = (price) =>
@@ -270,7 +275,11 @@ export default function SearchFilterPage() {
                     key={item._id}
                     id={item._id}
                     name={item.name}
-                    price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
+                    price={formatPrice(
+                      item.discountPrice && item.discountPrice !== 0
+                        ? item.discountPrice
+                        : item.price,
+                    )}
                     image={item.images[0]}
                     categoryName={item.categoryName}
                     badge={item.isHot ? "Hot 🔥" : item.isNew ? "New" : null}

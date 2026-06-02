@@ -133,7 +133,12 @@ export default function CartPage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setDeliveryInfo((prev) => ({
-      ...prev,
+      ...prev,//spread syntax 
+      // sao chép toàn bộ các thuộc tính (dữ liệu) hiện tại từ state cũ (prev)
+      // sang một state mới, trước khi cập nhật đè lên thuộc tính mới
+      // -> do State trong React là bất biến (immutable).
+      // Nếu chỉ cập nhật trực tiếp deliveryInfo[name] = value,
+      // React sẽ không nhận diện được sự thay đổi và giao diện (UI) sẽ không được cập nhật
       [name]: value,
     }));
   };

@@ -12,10 +12,8 @@ export const AuthContext = createContext({// default value cho createContext
             address: ""
         }
     },
-    appLoading: true,
     cartCount: 0,
     setAuth: () => {},//hàm giả (dummy function) để tránh lỗi khi component dùng context nhưng chưa được bọc bởi AuthWrapper
-    setAppLoading: () => {},
     setCartCount: () => {}
 });
 
@@ -31,13 +29,10 @@ export const AuthWrapper = (props) => {//Context Provider
             address: ""
         }
     });
-
-    const [appLoading, setAppLoading] = useState(true);
     const [cartCount, setCartCount] = useState(0);
-
     return (
         <AuthContext.Provider value={{
-            auth, setAuth, appLoading, setAppLoading, cartCount, setCartCount
+            auth, setAuth, cartCount, setCartCount
         }}>
             {props.children}
         </AuthContext.Provider>

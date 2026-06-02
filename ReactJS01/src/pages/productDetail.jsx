@@ -34,7 +34,8 @@ export default function ProductDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [similarProducts, setSimilarProducts] = useState([]);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null); // Swiper thumbnail
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  // Swiper thumbnail: kết hợp giữa thư viện cuộn trang (Swiper slider) và các hình ảnh thu nhỏ (thumbnail)
   const viewCounted = useRef(false);
   
   const { auth, setCartCount } = useContext(AuthContext);

@@ -6,11 +6,11 @@ import { AuthContext } from "./components/context/auth.context";
 import { Spin } from "antd";
 
 function App() {
-  const { setAuth, appLoading, setAppLoading, setCartCount } = useContext(AuthContext);
-
+  const { setAuth, setCartCount } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchAccount = async () => {
-      setAppLoading(true);
+      setIsLoading(true);
       const res = await getCurrentUserApi();
       if (res && res.EC === 0 && res.user) {
         setAuth({
@@ -36,7 +36,7 @@ function App() {
           console.error("Lỗi khi lấy giỏ hàng ban đầu:", error);
         }
       }
-      setAppLoading(false);
+      setIsLoading(false);
     };
     fetchAccount();
   }, []);
@@ -44,7 +44,7 @@ function App() {
 
   return (
     <div>
-      {appLoading === true ? (
+      {isLoading === true ? (
         <div
           style={{
             position: "fixed",

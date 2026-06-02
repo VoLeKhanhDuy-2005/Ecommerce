@@ -30,7 +30,7 @@ export default function OrdersPage() {
   // State phục vụ đếm ngược thời gian hủy đơn (30 phút)
   const [timeLeftStr, setTimeLeftStr] = useState("");
   const [canCancel, setCanCancel] = useState(false);
-  const hasCalledVerify = React.useRef(false);
+  const hasCalledVerify = React.useRef(false);// useRef cờ hiệu tránh Strict Mode gọi 2 lần liên tục
 
   // Lấy lịch sử mua hàng
   const fetchOrders = async (selectOrderId = null) => {
