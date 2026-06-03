@@ -514,13 +514,6 @@ const updateShopOrderStatus = async (orderIdParams, status) => {
         });
       }
     }
-    if (oldStatus === "Cancelled" && status !== "Cancelled") {
-      for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: -item.quantity, sold: item.quantity },
-        });
-      }
-    }
     await order.save();
     return {
       statusCode: 200,

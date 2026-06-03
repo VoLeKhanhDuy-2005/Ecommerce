@@ -3,7 +3,6 @@ const {
   createUser,
   handleLogin,
   getUser,
-  getAccount,
   getCurrentUser,
   handleRefreshToken,
   handleLogout,
@@ -32,7 +31,6 @@ const {
   getShopOrders,
   updateShopOrderStatus,
   handleShopCancelRequest,
-  timeTravelOrder,
 } = require("../controllers/orderController");
 const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
@@ -51,7 +49,7 @@ routerAPI.post("/login", handleLogin);
 routerAPI.post("/refresh-token", handleRefreshToken);
 routerAPI.post("/logout", handleLogout);
 
-routerAPI.get("/user", getUser);
+routerAPI.get("/user", isAdmin, getUser);
 routerAPI.get("/user/me", getCurrentUser);
 routerAPI.put("/user/profile", validateAvatar, handleUpdateProfile);
 
