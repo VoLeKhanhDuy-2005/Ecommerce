@@ -8,7 +8,7 @@ const errorHandler = require("./middleware/errorHandler");
 const Order = require("./models/order");
 const app = express(); //cấu hình app là express
 const port = process.env.PORT || 8888;
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); 
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true })); 
 //config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
 //trong các req đến server
 app.use(cookieParser()); //config req.cookies
