@@ -113,5 +113,18 @@ npm run dev
 
 ---
 
+## Deploy information
+- BE: render
+
+- FE: vercel
+
+- link: https://ecommerce-rho-opal-64.vercel.app/
+
+- email: admin@ecommerce.com - pass: 123456
+
+- email: vlkd1001@gmail.com - pass: 123456
+
+---
+
 ## Author
 **Võ Lê Khánh Duy**
