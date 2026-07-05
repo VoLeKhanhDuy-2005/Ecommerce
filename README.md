@@ -3,6 +3,7 @@
 A professional, production-ready Fullstack Web Application built with the modern MERN stack (MongoDB, Express, React, Node.js). Designed with performance, scalability, and security in mind.
 
 ## Table of Contents
+
 - [Technologies Used](#technologies-used)
   - [Backend (`ExpressJS01`)](#backend-expressjs01)
   - [Frontend (`ReactJS01`)](#frontend-reactjs01)
@@ -18,6 +19,7 @@ A professional, production-ready Fullstack Web Application built with the modern
 ## Technologies Used
 
 ### Backend (`ExpressJS01`)
+
 - **Core Framework**: Node.js & Express v5
 - **Database**: MongoDB (Mongoose)
 - **Caching**: Redis
@@ -27,6 +29,7 @@ A professional, production-ready Fullstack Web Application built with the modern
 - **Security & Middlewares**: CORS, Cookie-parser, dotenv
 
 ### Frontend (`ReactJS01`)
+
 - **Core Framework**: React 19 + Vite
 - **Styling & UI**: Tailwind CSS, Ant Design (antd)
 - **Icons & Assets**: Lucide React, Swiper (Carousels)
@@ -54,25 +57,31 @@ A professional, production-ready Fullstack Web Application built with the modern
 ## Installation & Setup
 
 ### Prerequisites
+
 Make sure you have the following installed on your local machine:
+
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - [MongoDB](https://www.mongodb.com/) (Local instance or MongoDB Atlas)
 - [Redis](https://redis.io/)
 
 ### 1. Clone the repository
+
 ```bash
 git clone <your-repository-url>
 cd VoLeKhanhDuy_23110196_FullStackNodeJS01_11_05_2026
 ```
 
 ### 2. Backend Setup (`ExpressJS01`)
+
 Open a terminal and navigate to the backend directory:
+
 ```bash
 cd ExpressJS01
 npm install
 ```
 
 Create a `.env` file in the `ExpressJS01` directory and configure the required environment variables:
+
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
@@ -85,18 +94,22 @@ AWS_BUCKET_NAME=your_aws_s3_bucket
 ```
 
 Start the backend development server:
+
 ```bash
 npm run dev
 ```
 
 ### 3. Frontend Setup (`ReactJS01`)
+
 Open a new terminal and navigate to the frontend directory:
+
 ```bash
 cd ReactJS01
 npm install
 ```
 
 Start the frontend development server:
+
 ```bash
 npm run dev
 ```
@@ -114,6 +127,7 @@ npm run dev
 ---
 
 ## Deploy information
+
 - BE: Render
 
 - FE: Vercel
@@ -129,4 +143,5 @@ npm run dev
 ---
 
 ## Author
+
 **Võ Lê Khánh Duy**
