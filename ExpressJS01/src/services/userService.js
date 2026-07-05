@@ -48,12 +48,13 @@ const sendRegisterOTPService = async (email) => {
       return { EC: 1, EM: "Email đã tồn tại trong hệ thống" };
     }
     const otp = await generateOTP(email, "register");
-    const isSent = await sendOTPEmail(email, otp, "register");
-    if (isSent) {
-      return { EC: 0, EM: "Mã OTP đã được gửi đến email của bạn" };
-    } else {
-      return { EC: 1, EM: "Lỗi gửi email OTP" };
-    }
+
+    // Gửi email ở background (không dùng await) để frontend phản hồi ngay lập tức
+    sendOTPEmail(email, otp, "register").catch((err) => {
+      console.error("Lỗi gửi email ở background:", err);
+    });
+
+    return { EC: 0, EM: "Mã OTP đang được gửi đến email của bạn" };
   } catch (error) {
     return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
   }
@@ -66,12 +67,13 @@ const sendForgotPasswordOTPService = async (email) => {
       return { EC: 1, EM: "Email không tồn tại trong hệ thống" };
     }
     const otp = await generateOTP(email, "forgot");
-    const isSent = await sendOTPEmail(email, otp, "forgot");
-    if (isSent) {
-      return { EC: 0, EM: "Mã OTP đã được gửi đến email của bạn" };
-    } else {
-      return { EC: 1, EM: "Lỗi gửi email OTP" };
-    }
+
+    // Gửi email ở background
+    sendOTPEmail(email, otp, "forgot").catch((err) => {
+      console.error("Lỗi gửi email quên mật khẩu ở background:", err);
+    });
+
+    return { EC: 0, EM: "Mã OTP đang được gửi đến email của bạn" };
   } catch (error) {
     return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
   }
