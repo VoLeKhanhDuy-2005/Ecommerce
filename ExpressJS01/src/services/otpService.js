@@ -1,4 +1,5 @@
 const { redisClient } = require("../config/redis");
+const OTPModel = require("../models/otp");
 
 const OTP_TTL = parseInt(process.env.OTP_TTL) || 300; // Mặc định 5 phút
 
@@ -15,7 +16,11 @@ const generateOTP = async (email, type) => {
       await redisClient.setEx(key, OTP_TTL, otp);
       return otp;
     } else {
-      throw new Error("Redis không sẵn sàng để lưu OTP");
+      // Fallback: Lưu vào MongoDB
+      console.log("Redis không sẵn sàng, sử dụng MongoDB làm fallback lưu OTP");
+      await OTPModel.deleteMany({ email, type }); // Xóa OTP cũ nếu có
+      await OTPModel.create({ email, type, otp });
+      return otp;
     }
   } catch (error) {
     console.error("Lỗi khi tạo OTP:", error.message);
@@ -45,7 +50,26 @@ const verifyOTP = async (email, type, inputOtp) => {
         return { success: false, message: "Mã OTP không chính xác" };
       }
     } else {
-      throw new Error("Redis không sẵn sàng để xác thực OTP");
+      // Fallback: Xác thực bằng MongoDB
+      console.log(
+        "Redis không sẵn sàng, sử dụng MongoDB làm fallback xác thực OTP",
+      );
+      const storedOtpDoc = await OTPModel.findOne({ email, type });
+
+      if (!storedOtpDoc) {
+        return {
+          success: false,
+          message: "Mã OTP đã hết hạn hoặc không tồn tại",
+        };
+      }
+
+      if (storedOtpDoc.otp === inputOtp.toString()) {
+        // Xoá OTP sau khi xác thực thành công
+        await OTPModel.deleteOne({ _id: storedOtpDoc._id });
+        return { success: true, message: "Xác thực OTP thành công" };
+      } else {
+        return { success: false, message: "Mã OTP không chính xác" };
+      }
     }
   } catch (error) {
     console.error("Lỗi khi xác thực OTP:", error.message);
