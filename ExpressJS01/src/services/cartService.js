@@ -1,12 +1,59 @@
 const Cart = require("../models/cart");
 const Product = require("../models/product");
+const { redisClient } = require("../config/redis");
+const CART_CACHE_PREFIX = process.env.CART_CACHE_PREFIX || "cart:";
+const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 604800;
+
+const getCartCacheKey = (userEmail) => `${CART_CACHE_PREFIX}${userEmail}`;
+
+const cacheCart = async (userEmail, cartData) => {
+  try {
+    if (redisClient.isReady) {
+      await redisClient.setEx(
+        getCartCacheKey(userEmail),
+        CACHE_TTL,
+        JSON.stringify(cartData)
+      );
+    }
+  } catch (error) {
+    console.error(`Lỗi khi lưu cache cho cart ${userEmail}:`, error.message);
+  }
+};
+
+const invalidateCartCache = async (userEmail) => {
+  try {
+    if (redisClient.isReady) {
+      await redisClient.del(getCartCacheKey(userEmail));
+    }
+  } catch (error) {
+    console.error(`Lỗi khi xóa cache cho cart ${userEmail}:`, error.message);
+  }
+};
 
 const getCart = async (userEmail) => {
   try {
+    // Check Cache (Read-Aside)
+    if (redisClient.isReady) {
+      try {
+        const cachedCart = await redisClient.get(getCartCacheKey(userEmail));
+        if (cachedCart) {
+          console.log(`[Cache Hit] Lấy giỏ hàng từ Redis cho ${userEmail}`);
+          return { statusCode: 200, success: true, data: JSON.parse(cachedCart) };
+        }
+      } catch (cacheError) {
+        console.error(`[Cache Error] Lỗi đọc từ Redis: ${cacheError.message}`);
+      }
+    }
+
+    console.log(`[Cache Miss] Đọc giỏ hàng từ MongoDB cho ${userEmail}`);
+    // Fetch from DB
     let cart = await Cart.findOne({ userEmail }).populate("items.product");
     if (!cart) {
       cart = await Cart.create({ userEmail, items: [] });
     }
+
+    // Update Cache
+    await cacheCart(userEmail, cart);
     return { statusCode: 200, success: true, data: cart };
   } catch (error) {
     return {
@@ -66,6 +113,8 @@ const addToCart = async (userEmail, productId, quantity = 1) => {
       "items.product",
     );
 
+    // Write-Through: Update Cache with fresh data
+    await cacheCart(userEmail, updatedCart);
     return {
       statusCode: 200,
       success: true,
@@ -142,6 +191,9 @@ const updateCartItem = async (userEmail, productId, quantity) => {
     const updatedCart = await Cart.findOne({ userEmail }).populate(
       "items.product",
     );
+
+    // Write-Through: Update Cache
+    await cacheCart(userEmail, updatedCart);
     return {
       statusCode: 200,
       success: true,
@@ -180,6 +232,9 @@ const deleteCartItem = async (userEmail, productId) => {
     const updatedCart = await Cart.findOne({ userEmail }).populate(
       "items.product",
     );
+
+    // Write-Through: Update Cache
+    await cacheCart(userEmail, updatedCart);
     return {
       statusCode: 200,
       success: true,
@@ -201,6 +256,7 @@ const clearCart = async (userEmail) => {
     if (cart) {
       cart.items = [];
       await cart.save();
+      await invalidateCartCache(userEmail);
     }
 
     return { statusCode: 200, success: true, message: "Đã xóa sạch giỏ hàng" };
