@@ -10,7 +10,7 @@ export default function EditProfilePage() {
   const navigate = useNavigate();
   const { auth, setAuth } = useContext(AuthContext);
   const user = auth.user;
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -147,8 +147,8 @@ export default function EditProfilePage() {
             name: formData.fullname,
             phone: formData.phone,
             address: formData.address,
-            avatar: res.data?.avatarURL || auth.user.avatar
-          }
+            avatar: res.data?.avatarURL || auth.user.avatar,
+          },
         });
 
         setTimeout(() => {
@@ -215,7 +215,9 @@ export default function EditProfilePage() {
                     placeholder="Nhập họ tên của bạn"
                   />
                   {fieldErrors.fullname && (
-                    <p className="text-red-500 text-sm mt-1.5 font-medium">{fieldErrors.fullname}</p>
+                    <p className="text-red-500 text-sm mt-1.5 font-medium">
+                      {fieldErrors.fullname}
+                    </p>
                   )}
                 </div>
 
@@ -254,7 +256,9 @@ export default function EditProfilePage() {
                     placeholder="Nhập số điện thoại"
                   />
                   {fieldErrors.phone && (
-                    <p className="text-red-500 text-sm mt-1.5 font-medium">{fieldErrors.phone}</p>
+                    <p className="text-red-500 text-sm mt-1.5 font-medium">
+                      {fieldErrors.phone}
+                    </p>
                   )}
                 </div>
 
@@ -303,7 +307,7 @@ export default function EditProfilePage() {
                     <span className="text-4xl text-gray-300">👤</span>
                   )}
                 </div>
-                
+
                 <label
                   htmlFor="avatar-input"
                   className="absolute bottom-1 right-1 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-orange-600 transition-colors border-2 border-white"
@@ -321,7 +325,8 @@ export default function EditProfilePage() {
                 />
               </div>
               <p className="text-xs text-gray-400 mt-4 text-center">
-                Cho phép định dạng JPG, PNG. <br/>Kích thước tối đa 2MB.
+                Cho phép định dạng JPG, PNG. <br />
+                Kích thước tối đa 2MB.
               </p>
             </div>
           </div>

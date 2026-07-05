@@ -27,8 +27,8 @@ const resolveAvatarKey = (data) => {
 };
 
 const checkValidImageExtensionFile = (file) => {
-  return (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png');
-}
+  return file.mimetype === "image/jpeg" || file.mimetype === "image/png";
+};
 
 const getImagePresignedUrl = async (data) => {
   const key = resolveAvatarKey(data);
@@ -44,15 +44,17 @@ const getImagePresignedUrl = async (data) => {
 };
 
 const deleteOldAndInsertNewImageInS3 = async (data, file) => {
-  if(!checkValidImageExtensionFile(file))
+  if (!checkValidImageExtensionFile(file))
     throw new Error("Định dạng file không hợp lệ! Chỉ chấp nhận ảnh JPG/PNG.");
 
   const oldKey = resolveAvatarKey(data);
   if (oldKey) {
-    await s3.send(new DeleteObjectCommand({
-      Bucket: bucketName,
-      Key: oldKey,
-    }));
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: oldKey,
+      }),
+    );
   }
 
   const imageName = randomImageName();
@@ -66,7 +68,7 @@ const deleteOldAndInsertNewImageInS3 = async (data, file) => {
       Key: imageName,
       Body: buffer,
       ContentType: file.mimetype,
-    })
+    }),
   );
   return imageName;
 };

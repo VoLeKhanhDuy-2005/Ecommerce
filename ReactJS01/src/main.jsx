@@ -12,6 +12,7 @@ import LoginPage from "./pages/login.jsx";
 import ProductDetailPage from "./pages/productDetail.jsx";
 import SearchFilterPage from "./pages/search.jsx";
 import CartPage from "./pages/user/cart.jsx";
+import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import OrdersPage from "./pages/user/orders.jsx";
 import EditProfilePage from "./pages/user/editProfile.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
   {
     path: "login",
     element: <LoginPage />,
+  },
+  {
+    path: "forgot-password",
+    element: <ForgotPasswordPage />,
   },
 ]);
 

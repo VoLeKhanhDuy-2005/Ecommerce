@@ -1,14 +1,30 @@
 import axios from "./axios.customize";
 
-const createUserApi = (name, email, password) => {
+const registerApi = (name, email, password, otp) => {
   const URL_API = "/v1/api/register";
   const data = {
     name,
     email,
     password,
+    otp,
   };
 
   return axios.post(URL_API, data);
+};
+
+const sendRegisterOtpApi = (email) => {
+  const URL_API = "/v1/api/register/send-otp";
+  return axios.post(URL_API, { email });
+};
+
+const sendForgotPasswordOtpApi = (email) => {
+  const URL_API = "/v1/api/forgot-password/send-otp";
+  return axios.post(URL_API, { email });
+};
+
+const resetPasswordApi = (email, otp, newPassword) => {
+  const URL_API = "/v1/api/forgot-password";
+  return axios.post(URL_API, { email, otp, newPassword });
 };
 
 const loginApi = (email, password) => {
@@ -37,7 +53,7 @@ const getProductsApi = () => {
 };
 
 const getActivePromotionsApi = () => {
-    return axios.get('/v1/api/promotions/active');
+  return axios.get("/v1/api/promotions/active");
 };
 
 const getCartApi = () => {
@@ -93,7 +109,9 @@ const updateShopOrderStatusApi = (orderId, status) => {
 };
 
 const handleShopCancelRequestApi = (orderId, action) => {
-  return axios.post(`/v1/api/admin/orders/${orderId}/cancel-request`, { action });
+  return axios.post(`/v1/api/admin/orders/${orderId}/cancel-request`, {
+    action,
+  });
 };
 
 const updateProfileApi = (formData) => {
@@ -105,7 +123,7 @@ const updateProfileApi = (formData) => {
 };
 
 export {
-  createUserApi,
+  registerApi,
   loginApi,
   getUserApi,
   getCurrentUserApi,
@@ -126,5 +144,7 @@ export {
   updateShopOrderStatusApi,
   handleShopCancelRequestApi,
   updateProfileApi,
+  sendRegisterOtpApi,
+  sendForgotPasswordOtpApi,
+  resetPasswordApi,
 };
-

@@ -179,8 +179,10 @@ const seedData = async () => {
         const price = randomInt(2, 15) * 10000;
         const hasDiscount = Math.random() > 0.5;
         const discountPercent = hasDiscount ? randomInt(1, 4) * 10 : 0; // 10%, 20%, 30%, 40%
-        const discountPrice = hasDiscount ? Math.round(price * (1 - discountPercent / 100)) : price;
-        const rating = Number((Math.random() * 2 + 3).toFixed(1));// kết quả từ 3.0 -> 5.0
+        const discountPrice = hasDiscount
+          ? Math.round(price * (1 - discountPercent / 100))
+          : price;
+        const rating = Number((Math.random() * 2 + 3).toFixed(1)); // kết quả từ 3.0 -> 5.0
 
         const imagesForProduct = [];
         const catImages = images[catName];

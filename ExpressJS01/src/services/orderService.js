@@ -440,7 +440,8 @@ const markOrderAsReceived = async (orderIdParams, userEmail) => {
       return {
         statusCode: 400,
         success: false,
-        message: "Chỉ có thể xác nhận đã nhận khi đơn hàng đang được giao (Shipping).",
+        message:
+          "Chỉ có thể xác nhận đã nhận khi đơn hàng đang được giao (Shipping).",
       };
     }
 

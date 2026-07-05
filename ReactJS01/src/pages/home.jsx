@@ -27,9 +27,7 @@ export default function Home() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const maxDiscountPercent =
-    products.promotions.length > 0
-      ? products.promotions[0].discountPercent
-      : 0;
+    products.promotions.length > 0 ? products.promotions[0].discountPercent : 0;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +62,7 @@ export default function Home() {
   // useEffect(() => {}, []): Chỉ chạy 1 lần duy nhất khi component mount
   // useEffect(() => {}, [count]): Chạy lại mỗi khi count thay đổi
   // useEffect(() => {}, [a, b]): Chạy lại khi a hoặc b thay đổi
-  // Nếu không có [] -> mỗi lần render lại sẽ gọi API lại -> vòng lặp vô tận 
+  // Nếu không có [] -> mỗi lần render lại sẽ gọi API lại -> vòng lặp vô tận
   // vì setProducts trigger render -> render trigger fetchData -> lại setProducts...
 
   // Vòng đời của một component:
@@ -157,7 +155,7 @@ export default function Home() {
                 slidesPerView={1.2}
                 navigation
                 pagination={{ clickable: true }}
-                autoplay={{ delay: 3000}}
+                autoplay={{ delay: 3000 }}
                 breakpoints={{
                   640: { slidesPerView: 2.2 },
                   1024: { slidesPerView: 2.5 },
@@ -170,7 +168,11 @@ export default function Home() {
                     <ProductCard
                       id={item._id}
                       name={item.name}
-                      price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
+                      price={formatPrice(
+                        item.discountPrice && item.discountPrice !== 0
+                          ? item.discountPrice
+                          : item.price,
+                      )}
                       image={item.images[0]}
                       categoryName={item.categoryName}
                       badge="Sale"

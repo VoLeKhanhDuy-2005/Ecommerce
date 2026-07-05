@@ -1,28 +1,29 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+require("dotenv").config();
+const mongoose = require("mongoose");
 
-const dbState = [{
+const dbState = [
+  {
     value: 0,
-    label: "Disconnected"
-},
-{
+    label: "Disconnected",
+  },
+  {
     value: 1,
-    label: "Connected"
-},
-{
+    label: "Connected",
+  },
+  {
     value: 2,
-    label: "Connecting"
-},
-{
+    label: "Connecting",
+  },
+  {
     value: 3,
-    label: "Disconnecting"
-}];
-
+    label: "Disconnecting",
+  },
+];
 
 const connection = async () => {
-    await mongoose.connect(process.env.MONGO_DB_URL);
-    const state = Number(mongoose.connection.readyState);
-    console.log(dbState.find(f => f.value === state).label, "to database"); // connected to db
-}
+  await mongoose.connect(process.env.MONGO_DB_URL);
+  const state = Number(mongoose.connection.readyState);
+  console.log(dbState.find((f) => f.value === state).label, "to database"); // connected to db
+};
 
 module.exports = connection;

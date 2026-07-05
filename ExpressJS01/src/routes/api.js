@@ -1,12 +1,15 @@
 const express = require("express");
 const {
-  createUser,
+  register,
   handleLogin,
   getUser,
   getCurrentUser,
   handleRefreshToken,
   handleLogout,
   handleUpdateProfile,
+  handleSendRegisterOTP,
+  handleSendForgotOTP,
+  handleResetPassword,
 } = require("../controllers/userController");
 const {
   searchProducts,
@@ -44,8 +47,11 @@ routerAPI.get("/", (req, res) => {
   return res.status(200).json("Hello world api");
 });
 
-routerAPI.post("/register", createUser);
+routerAPI.post("/register/send-otp", handleSendRegisterOTP);
+routerAPI.post("/register", register);
 routerAPI.post("/login", handleLogin);
+routerAPI.post("/forgot-password/send-otp", handleSendForgotOTP);
+routerAPI.post("/forgot-password", handleResetPassword);
 routerAPI.post("/refresh-token", handleRefreshToken);
 routerAPI.post("/logout", handleLogout);
 

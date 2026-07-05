@@ -29,7 +29,10 @@ function App() {
         try {
           const cartRes = await getCartApi();
           if (cartRes && cartRes.success && cartRes.data) {
-            const count = cartRes.data.items.reduce((acc, item) => acc + item.quantity, 0);
+            const count = cartRes.data.items.reduce(
+              (acc, item) => acc + item.quantity,
+              0,
+            );
             setCartCount(count);
           }
         } catch (error) {
@@ -40,7 +43,6 @@ function App() {
     };
     fetchAccount();
   }, []);
-
 
   return (
     <div>
@@ -64,6 +66,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;

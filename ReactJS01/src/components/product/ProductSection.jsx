@@ -5,7 +5,12 @@ import { Navigation } from "swiper/modules";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "swiper/css";
 
-export default function ProductSection({ smallHeader, bigHeader, productData, badge }) {
+export default function ProductSection({
+  smallHeader,
+  bigHeader,
+  productData,
+  badge,
+}) {
   const swiperRef = useRef(null);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -14,7 +19,10 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
   const [totalPages, setTotalPages] = useState(1);
 
   const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
 
   // Cập nhật chỉ số trang khi Swiper thay đổi
   const handleSlideChange = (swiper) => {
@@ -34,7 +42,9 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="section-label text-orange-500 mb-1">{smallHeader}</p>
-          <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{bigHeader}</h3>
+          <h3 className="text-2xl sm:text-3xl font-black text-gray-900">
+            {bigHeader}
+          </h3>
         </div>
 
         {/* Nút điều hướng + bộ đếm trang */}
@@ -90,7 +100,7 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
           /* Không trượt liên tục - dừng ở đầu & cuối */
           loop={false}
           breakpoints={{
-            640:  { slidesPerView: 3, slidesPerGroup: 3 },
+            640: { slidesPerView: 3, slidesPerGroup: 3 },
             1024: { slidesPerView: 4, slidesPerGroup: 4 },
             1280: { slidesPerView: 5, slidesPerGroup: 5 },
           }}
@@ -109,7 +119,11 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
               <ProductCard
                 id={item._id}
                 name={item.name}
-                price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
+                price={formatPrice(
+                  item.discountPrice && item.discountPrice !== 0
+                    ? item.discountPrice
+                    : item.price,
+                )}
                 image={item.images[0]}
                 categoryName={item.categoryName}
                 badge={badge}

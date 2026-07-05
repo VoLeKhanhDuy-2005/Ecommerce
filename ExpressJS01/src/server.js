@@ -9,7 +9,12 @@ const errorHandler = require("./middleware/errorHandler");
 const Order = require("./models/order");
 const app = express(); //cấu hình app là express
 const port = process.env.PORT || 8888;
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true })); 
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 //config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
 //trong các req đến server
 app.use(cookieParser()); //config req.cookies
@@ -31,13 +36,18 @@ app.use(errorHandler);
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
         const result = await Order.updateMany(
           { status: "New", createdAt: { $lte: thirtyMinutesAgo } },
-          { $set: { status: "Confirmed" } }
+          { $set: { status: "Confirmed" } },
         );
         if (result.modifiedCount > 0) {
-          console.log(`[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`);
+          console.log(
+            `[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`,
+          );
         }
       } catch (err) {
-        console.error("Lỗi trong tiến trình quét tự động xác nhận đơn hàng:", err);
+        console.error(
+          "Lỗi trong tiến trình quét tự động xác nhận đơn hàng:",
+          err,
+        );
       }
     }, 60000); // Quét mỗi 60 giây tự động xác nhận đơn hàng quá 30 phút
 
@@ -48,4 +58,3 @@ app.use(errorHandler);
     console.log(">>> Error connect to DB: ", error);
   }
 })();
-

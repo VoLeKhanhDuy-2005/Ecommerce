@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   // Swiper thumbnail: kết hợp giữa thư viện cuộn trang (Swiper slider) và các hình ảnh thu nhỏ (thumbnail)
   const viewCounted = useRef(false);
-  
+
   const { auth, setCartCount } = useContext(AuthContext);
 
   useEffect(() => {
@@ -129,7 +129,10 @@ export default function ProductDetailPage() {
 
         // Cập nhật số lượng hiển thị trên Badge Header
         if (res.data && res.data.items) {
-          const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
+          const totalItems = res.data.items.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
           setCartCount(totalItems);
         }
       } else {
@@ -147,7 +150,6 @@ export default function ProductDetailPage() {
       });
     }
   };
-
 
   if (isLoading) {
     return (
@@ -350,7 +352,11 @@ export default function ProductDetailPage() {
                   Giá bán
                 </p>
                 <p className="text-4xl font-black text-orange-600 tracking-tight">
-                  {formatPrice(product.discountPrice && product.discountPrice !== 0 ? product.discountPrice : product.price)}
+                  {formatPrice(
+                    product.discountPrice && product.discountPrice !== 0
+                      ? product.discountPrice
+                      : product.price,
+                  )}
                 </p>
                 {product.isHot && (
                   <p className="text-orange-500 text-xs font-medium mt-2 flex items-center gap-1">
@@ -414,7 +420,11 @@ export default function ProductDetailPage() {
                   key={item._id}
                   id={item._id}
                   name={item.name}
-                  price={formatPrice(item.discountPrice && item.discountPrice !== 0 ? item.discountPrice : item.price)}
+                  price={formatPrice(
+                    item.discountPrice && item.discountPrice !== 0
+                      ? item.discountPrice
+                      : item.price,
+                  )}
                   image={item.images[0]}
                   categoryName={item.categoryName}
                   rating={item.rating}

@@ -3,7 +3,7 @@ import axios from "axios";
 // Set config defaults when creating the instance
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
-  withCredentials: true,// Cho phép gửi cookie lên server khác origin
+  withCredentials: true, // Cho phép gửi cookie lên server khác origin
 });
 
 // Alter defaults after instance has been created
@@ -37,14 +37,14 @@ instance.interceptors.response.use(
     // Xử lý tự động gọi refresh token khi lỗi 401 lấy access token mới khi hết hạn
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;// dừng không lặp retry vô hạn
+      originalRequest._retry = true; // dừng không lặp retry vô hạn
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/v1/api/refresh-token`,
           {},
-          { withCredentials: true }// Cho phép client gửi kèm cookie
+          { withCredentials: true }, // Cho phép client gửi kèm cookie
         );
-        
+
         if (res.data && res.data.access_token) {
           localStorage.setItem("access_token", res.data.access_token);
           // Gắn token mới vào header của request bị lỗi

@@ -7,14 +7,22 @@ const {
   deleteOldAndInsertNewImageInS3,
   getImagePresignedUrl,
 } = require("../services/fileService");
+const { generateOTP, verifyOTP } = require("./otpService");
+const { sendOTPEmail } = require("./emailService");
 
-const createUserService = async (name, email, password) => {
+const registerService = async (name, email, password, otp) => {
   try {
+    if (!otp) return { EC: 1, EM: "Vui lòng nhập mã OTP" };
+
+    const verification = await verifyOTP(email, "register", otp);
+    if (!verification.success) {
+      return { EC: 1, EM: verification.message };
+    }
+
     //check user exist
     const user = await User.findOne({ email });
     if (user) {
-      console.log(`>>> user exist, chọn 1 email khác: ${email}`);
-      return null;
+      return { EC: 1, EM: "Email đã tồn tại" };
     }
 
     //hash user password
@@ -26,10 +34,73 @@ const createUserService = async (name, email, password) => {
       password: hashPassword,
       role: "user",
     });
-    return result;
+    return { EC: 0, EM: "Đăng ký thành công", data: result };
   } catch (error) {
     console.log(error);
-    return null;
+    return { EC: -1, EM: "Lỗi hệ thống" };
+  }
+};
+
+const sendRegisterOTPService = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return { EC: 1, EM: "Email đã tồn tại trong hệ thống" };
+    }
+    const otp = await generateOTP(email, "register");
+    const isSent = await sendOTPEmail(email, otp, "register");
+    if (isSent) {
+      return { EC: 0, EM: "Mã OTP đã được gửi đến email của bạn" };
+    } else {
+      return { EC: 1, EM: "Lỗi gửi email OTP" };
+    }
+  } catch (error) {
+    return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
+  }
+};
+
+const sendForgotPasswordOTPService = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { EC: 1, EM: "Email không tồn tại trong hệ thống" };
+    }
+    const otp = await generateOTP(email, "forgot");
+    const isSent = await sendOTPEmail(email, otp, "forgot");
+    if (isSent) {
+      return { EC: 0, EM: "Mã OTP đã được gửi đến email của bạn" };
+    } else {
+      return { EC: 1, EM: "Lỗi gửi email OTP" };
+    }
+  } catch (error) {
+    return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
+  }
+};
+
+const resetPasswordService = async (email, otp, newPassword) => {
+  try {
+    if (!otp) return { EC: 1, EM: "Vui lòng nhập mã OTP" };
+    if (!newPassword || newPassword.length < 6)
+      return { EC: 1, EM: "Mật khẩu mới phải có ít nhất 6 ký tự" };
+
+    const verification = await verifyOTP(email, "forgot", otp);
+    if (!verification.success) {
+      return { EC: 1, EM: verification.message };
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { EC: 1, EM: "Không tìm thấy user" };
+    }
+
+    const hashPassword = await bcrypt.hash(newPassword, saltRounds);
+    user.password = hashPassword;
+    await user.save();
+
+    return { EC: 0, EM: "Đổi mật khẩu thành công" };
+  } catch (error) {
+    console.log(error);
+    return { EC: -1, EM: "Lỗi hệ thống" };
   }
 };
 
@@ -177,8 +248,7 @@ const updateProfile = async (email, body, file) => {
 
     user = await user.save();
     user = user.toObject();
-    if (user.avatarName)
-      user.avatarURL = await getImagePresignedUrl(user);
+    if (user.avatarName) user.avatarURL = await getImagePresignedUrl(user);
 
     return { EC: 0, EM: "Cập nhật hồ sơ thành công", data: user };
   } catch (error) {
@@ -191,10 +261,13 @@ const updateProfile = async (email, body, file) => {
 };
 
 module.exports = {
-  createUserService,
+  registerService,
   loginService,
   getUserService,
   getCurrentUserService,
   refreshTokenService,
   updateProfile,
+  sendRegisterOTPService,
+  sendForgotPasswordOTPService,
+  resetPasswordService,
 };

@@ -67,13 +67,15 @@ const Header = () => {
       : []),
   ];
 
-
   const userMenuItems = {
     items: [
       {
         key: "profile",
         label: (
-          <Link to="/profile" className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition-colors">
+          <Link
+            to="/profile"
+            className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition-colors"
+          >
             <SettingOutlined /> Chỉnh sửa hồ sơ
           </Link>
         ),

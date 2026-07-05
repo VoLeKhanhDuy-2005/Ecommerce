@@ -9,19 +9,18 @@ import {
   Row,
   Typography,
 } from "antd";
-import { registerApi, sendRegisterOtpApi } from "../util/api";
+import { sendForgotPasswordOtpApi, resetPasswordApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeftOutlined,
   LockOutlined,
-  UserOutlined,
   MailOutlined,
   SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const RegisterPage = () => {
+const ForgotPasswordPage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
@@ -42,18 +41,18 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const { email } = values;
-      const res = await sendRegisterOtpApi(email);
+      const res = await sendForgotPasswordOtpApi(email);
 
       if (res && res.EC === 0) {
         notification.success({
-          message: "Gửi OTP thành công",
-          description: "Vui lòng kiểm tra email của bạn để lấy mã OTP.",
+          message: "Đã gửi OTP",
+          description: "Mã xác thực đã được gửi đến email của bạn.",
         });
         setStep(2);
         setCountdown(300); // 5 phút
       } else {
         notification.error({
-          message: "Gửi OTP thất bại",
+          message: "Thất bại",
           description: res?.EM || "Đã có lỗi xảy ra. Vui lòng thử lại.",
         });
       }
@@ -70,21 +69,21 @@ const RegisterPage = () => {
   const onFinishStep2 = async (values) => {
     setLoading(true);
     try {
-      const { name, email, password, otp } = values;
-      const res = await registerApi(name, email, password, otp);
+      const { email, otp, newPassword } = values;
+      const res = await resetPasswordApi(email, otp, newPassword);
 
       if (res && res.EC === 0) {
         notification.success({
-          message: "Đăng ký thành công",
+          message: "Thành công",
           description:
-            "Bạn đã tạo tài khoản thành công. Vui lòng đăng nhập để tiếp tục.",
+            "Mật khẩu của bạn đã được thay đổi. Vui lòng đăng nhập bằng mật khẩu mới.",
         });
         navigate("/login");
       } else {
         notification.error({
-          message: "Đăng ký thất bại",
+          message: "Thất bại",
           description:
-            res?.EM || "Không thể tạo tài khoản. Vui lòng thử lại sau.",
+            res?.EM || "Không thể đổi mật khẩu. Vui lòng kiểm tra lại OTP.",
         });
       }
     } catch (error) {
@@ -101,7 +100,7 @@ const RegisterPage = () => {
     const email = form.getFieldValue("email");
     setLoading(true);
     try {
-      const res = await sendRegisterOtpApi(email);
+      const res = await sendForgotPasswordOtpApi(email);
       if (res && res.EC === 0) {
         notification.success({
           message: "Đã gửi lại mã OTP",
@@ -160,50 +159,33 @@ const RegisterPage = () => {
                 fontSize: "28px",
               }}
             >
-              {step === 1 ? "✨" : "📩"}
+              🔑
             </div>
             <Title level={3} style={{ marginBottom: 8 }}>
-              {step === 1 ? "Đăng ký tài khoản" : "Xác thực Email"}
+              Quên mật khẩu
             </Title>
             <Text type="secondary">
               {step === 1
-                ? "Tạo tài khoản để đặt món và nhận ưu đãi."
-                : "Vui lòng nhập mã OTP gồm 6 chữ số vừa được gửi đến email của bạn."}
+                ? "Nhập email của bạn để nhận mã khôi phục mật khẩu."
+                : "Vui lòng nhập mã OTP gồm 6 chữ số và mật khẩu mới."}
             </Text>
           </div>
           <Form
             form={form}
-            name="register"
+            name="forgot-password"
             onFinish={step === 1 ? onFinishStep1 : onFinishStep2}
             autoComplete="off"
             layout="vertical"
           >
-            {/* Bước 1: Nhập thông tin */}
+            {/* Bước 1: Nhập email */}
             <div style={{ display: step === 1 ? "block" : "none" }}>
-              <Form.Item
-                label="Tên của bạn"
-                name="name"
-                rules={[
-                  {
-                    required: step === 1,
-                    message: "Vui lòng nhập tên của bạn",
-                  },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  size="large"
-                  placeholder="Nguyễn Văn A"
-                />
-              </Form.Item>
-
               <Form.Item
                 label="Email"
                 name="email"
                 rules={[
                   {
-                    required: step === 1,
-                    message: "Vui lòng nhập email",
+                    required: true,
+                    message: "Vui lòng nhập email đã đăng ký",
                   },
                   {
                     type: "email",
@@ -217,30 +199,9 @@ const RegisterPage = () => {
                   placeholder="name@example.com"
                 />
               </Form.Item>
-
-              <Form.Item
-                label="Mật khẩu"
-                name="password"
-                rules={[
-                  {
-                    required: step === 1,
-                    message: "Vui lòng nhập mật khẩu",
-                  },
-                  {
-                    min: 6,
-                    message: "Mật khẩu phải từ 6 ký tự trở lên",
-                  },
-                ]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  size="large"
-                  placeholder="Tạo mật khẩu"
-                />
-              </Form.Item>
             </div>
 
-            {/* Bước 2: Nhập OTP */}
+            {/* Bước 2: Nhập OTP và Mật khẩu mới */}
             <div style={{ display: step === 2 ? "block" : "none" }}>
               <Form.Item
                 label="Mã OTP"
@@ -261,6 +222,27 @@ const RegisterPage = () => {
                   size="large"
                   placeholder="Nhập 6 số OTP"
                   maxLength={6}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Mật khẩu mới"
+                name="newPassword"
+                rules={[
+                  {
+                    required: step === 2,
+                    message: "Vui lòng nhập mật khẩu mới",
+                  },
+                  {
+                    min: 6,
+                    message: "Mật khẩu phải từ 6 ký tự trở lên",
+                  },
+                ]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  size="large"
+                  placeholder="Nhập mật khẩu mới"
                 />
               </Form.Item>
 
@@ -289,7 +271,7 @@ const RegisterPage = () => {
                 size="large"
                 loading={loading}
               >
-                {step === 1 ? "Tiếp tục" : "Đăng ký"}
+                {step === 1 ? "Gửi mã xác thực" : "Đổi mật khẩu"}
               </Button>
             </Form.Item>
 
@@ -301,7 +283,7 @@ const RegisterPage = () => {
                   size="large"
                   onClick={() => setStep(1)}
                 >
-                  Quay lại sửa thông tin
+                  Quay lại nhập Email
                 </Button>
               </Form.Item>
             )}
@@ -309,23 +291,10 @@ const RegisterPage = () => {
 
           <Divider />
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
-            }}
-          >
-            <Text type="secondary">Đã có tài khoản?</Text>
-            <Link to="/login" style={{ fontWeight: 600, color: "#fa541c" }}>
-              Đăng nhập
-            </Link>
-          </div>
-
           <div style={{ textAlign: "center" }}>
-            <Link to="/">
-              <ArrowLeftOutlined /> Quay lại trang chủ
+            <Text type="secondary">Nhớ lại mật khẩu? </Text>
+            <Link to="/login" style={{ fontWeight: 600, color: "#fa541c" }}>
+              Đăng nhập ngay
             </Link>
           </div>
         </div>
@@ -334,4 +303,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default ForgotPasswordPage;

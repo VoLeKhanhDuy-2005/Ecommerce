@@ -114,9 +114,11 @@ npm run dev
 ---
 
 ## Deploy information
-- BE: render
+- BE: Render
 
-- FE: vercel
+- FE: Vercel
+
+- Redis server: Upstash
 
 - link: https://ecommerce-rho-opal-64.vercel.app/
 

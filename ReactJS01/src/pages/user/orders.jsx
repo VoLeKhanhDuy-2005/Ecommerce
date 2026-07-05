@@ -12,12 +12,19 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
-import { getMyOrdersApi, getOrderDetailsApi, cancelOrderApi, verifyMomoPaymentApi, getCartApi, markOrderAsReceivedApi } from "../../util/api";
+import {
+  getMyOrdersApi,
+  getOrderDetailsApi,
+  cancelOrderApi,
+  verifyMomoPaymentApi,
+  getCartApi,
+  markOrderAsReceivedApi,
+} from "../../util/api";
 
 export default function OrdersPage() {
   const { auth, setCartCount } = useContext(AuthContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,11 +33,11 @@ export default function OrdersPage() {
   const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
   const [receiveLoading, setReceiveLoading] = useState(false);
-  
+
   // State phục vụ đếm ngược thời gian hủy đơn (30 phút)
   const [timeLeftStr, setTimeLeftStr] = useState("");
   const [canCancel, setCanCancel] = useState(false);
-  const hasCalledVerify = React.useRef(false);// useRef cờ hiệu tránh Strict Mode gọi 2 lần liên tục
+  const hasCalledVerify = React.useRef(false); // useRef cờ hiệu tránh Strict Mode gọi 2 lần liên tục
 
   // Lấy lịch sử mua hàng
   const fetchOrders = async (selectOrderId = null) => {
@@ -41,13 +48,13 @@ export default function OrdersPage() {
         if (res.data.length > 0) {
           // Chọn đơn hàng được chỉ định hoặc mặc định chọn đơn hàng đầu tiên
           if (selectOrderId) {
-            const found = res.data.find(o => o._id === selectOrderId);
+            const found = res.data.find((o) => o._id === selectOrderId);
             setSelectedOrder(found || res.data[0]);
           } else if (!selectedOrder) {
             setSelectedOrder(res.data[0]);
           } else {
             // Cập nhật lại thông tin đơn hàng đang chọn
-            const found = res.data.find(o => o._id === selectedOrder._id);
+            const found = res.data.find((o) => o._id === selectedOrder._id);
             setSelectedOrder(found || res.data[0]);
           }
         }
@@ -67,7 +74,10 @@ export default function OrdersPage() {
     try {
       const cartRes = await getCartApi();
       if (cartRes && cartRes.success && cartRes.data) {
-        const totalItems = cartRes.data.items.reduce((sum, item) => sum + item.quantity, 0);
+        const totalItems = cartRes.data.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
         setCartCount(totalItems);
       }
     } catch (error) {
@@ -84,7 +94,7 @@ export default function OrdersPage() {
       if (orderId) {
         if (hasCalledVerify.current) return;
         hasCalledVerify.current = true;
-        
+
         setIsVerifyingMomo(true);
         try {
           if (resultCode === "0") {
@@ -92,18 +102,21 @@ export default function OrdersPage() {
             if (res && res.success) {
               notification.success({
                 message: "💳 Thanh toán MoMo thành công!",
-                description: "Đơn hàng của bạn đã được thanh toán và đang chuẩn bị.",
+                description:
+                  "Đơn hàng của bạn đã được thanh toán và đang chuẩn bị.",
                 duration: 6,
               });
             } else {
               notification.error({
                 message: "Thanh toán thất bại",
-                description: res.message || "Giao dịch MoMo bị hủy hoặc không thành công.",
+                description:
+                  res.message || "Giao dịch MoMo bị hủy hoặc không thành công.",
               });
             }
           } else {
             // Khi MoMo trả về mã lỗi (khác 0)
-            const message = searchParams.get("message") || "Người dùng hủy thanh toán.";
+            const message =
+              searchParams.get("message") || "Người dùng hủy thanh toán.";
             await verifyMomoPaymentApi(orderId); // Cập nhật sang Failed
             notification.error({
               message: "Thanh toán MoMo thất bại",
@@ -131,10 +144,15 @@ export default function OrdersPage() {
 
   // Bộ đếm ngược thời gian hủy đơn (30 phút)
   useEffect(() => {
-    if (!selectedOrder || selectedOrder.status === "Cancelled" || selectedOrder.status === "Delivered" || selectedOrder.status === "Shipping") {
+    if (
+      !selectedOrder ||
+      selectedOrder.status === "Cancelled" ||
+      selectedOrder.status === "Delivered" ||
+      selectedOrder.status === "Shipping"
+    ) {
       // Kiểm tra xem đơn hàng có thể hủy được không
-      setCanCancel(false);// không cho phép hủy
-      setTimeLeftStr("");// xóa hiển thị đếm ngược thời gian
+      setCanCancel(false); // không cho phép hủy
+      setTimeLeftStr(""); // xóa hiển thị đếm ngược thời gian
       return;
     }
 
@@ -152,7 +170,9 @@ export default function OrdersPage() {
         setCanCancel(true);
         const minutes = Math.floor(remainingMs / 60000);
         const seconds = Math.floor((remainingMs % 60000) / 1000);
-        setTimeLeftStr(`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
+        setTimeLeftStr(
+          `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
+        );
       }
     }, 1000);
 
@@ -163,7 +183,11 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!auth.isAuthenticated || !selectedOrder) return;
     // Nếu đơn hàng đã hoàn thành (Delivered) hoặc đã hủy (Cancelled), dừng bộ quét để tiết kiệm RAM
-    if (selectedOrder.status === "Delivered" || selectedOrder.status === "Cancelled") return;
+    if (
+      selectedOrder.status === "Delivered" ||
+      selectedOrder.status === "Cancelled"
+    )
+      return;
 
     const autoRefreshTimer = setInterval(() => {
       fetchOrders(selectedOrder._id);
@@ -173,7 +197,6 @@ export default function OrdersPage() {
 
   // Mở modal xác nhận hủy đơn
   const openCancelModal = () => {
-
     setCancelReason("");
     setIsCancelModalOpen(true);
   };
@@ -242,7 +265,9 @@ export default function OrdersPage() {
     }).format(price);
 
   const getPaymentMethodLabel = (method) => {
-    return method === "MOMO" ? "Ví điện tử MoMo" : "Thanh toán khi nhận hàng (COD)";
+    return method === "MOMO"
+      ? "Ví điện tử MoMo"
+      : "Thanh toán khi nhận hàng (COD)";
   };
 
   const getPaymentStatusTag = (status) => {
@@ -292,7 +317,9 @@ export default function OrdersPage() {
       <div className="min-h-[85vh] flex flex-col items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-sm p-12 text-center max-w-sm w-full border border-gray-100">
           <p className="text-6xl mb-4">📦</p>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Chưa đăng nhập</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
+            Chưa đăng nhập
+          </h2>
           <p className="text-gray-500 text-sm mb-6">
             Vui lòng đăng nhập tài khoản để xem và theo dõi đơn hàng của bạn.
           </p>
@@ -311,8 +338,12 @@ export default function OrdersPage() {
     return (
       <div className="min-h-[85vh] flex flex-col items-center justify-center">
         <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
-        <h2 className="text-xl font-bold text-gray-800 mt-6 mb-2">Đang xác thực giao dịch MoMo...</h2>
-        <p className="text-gray-400 text-sm animate-pulse">Vui lòng không đóng trình duyệt hoặc quay lại trang trước.</p>
+        <h2 className="text-xl font-bold text-gray-800 mt-6 mb-2">
+          Đang xác thực giao dịch MoMo...
+        </h2>
+        <p className="text-gray-400 text-sm animate-pulse">
+          Vui lòng không đóng trình duyệt hoặc quay lại trang trước.
+        </p>
       </div>
     );
   }
@@ -330,14 +361,18 @@ export default function OrdersPage() {
     <div className="max-w-6xl mx-auto px-4 py-8 pb-20">
       <div className="flex items-center gap-3 mb-8">
         <div className="w-1.5 h-8 bg-gradient-to-b from-orange-500 to-red-500 rounded-full" />
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Theo Dõi Đơn Hàng</h1>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+          Theo Dõi Đơn Hàng
+        </h1>
       </div>
 
       {orders.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-100 p-16 text-center shadow-sm">
           <Empty
             description={
-              <span className="text-gray-500 text-sm font-medium">Bạn chưa đặt mua đơn hàng nào.</span>
+              <span className="text-gray-500 text-sm font-medium">
+                Bạn chưa đặt mua đơn hàng nào.
+              </span>
             }
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
@@ -352,8 +387,10 @@ export default function OrdersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cột Trái: Danh sách đơn hàng (1/3 width) */}
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-gray-700 px-1">Lịch sử đặt hàng ({orders.length})</h2>
-            
+            <h2 className="text-base font-bold text-gray-700 px-1">
+              Lịch sử đặt hàng ({orders.length})
+            </h2>
+
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
               {orders.map((ord) => {
                 const isSelected = selectedOrder?._id === ord._id;
@@ -377,11 +414,15 @@ export default function OrdersPage() {
                     <div className="text-xs text-gray-500 space-y-1 mb-2">
                       <div className="flex items-center gap-1.5">
                         <CalendarOutlined />
-                        <span>{new Date(ord.createdAt).toLocaleString("vi-VN")}</span>
+                        <span>
+                          {new Date(ord.createdAt).toLocaleString("vi-VN")}
+                        </span>
                       </div>
                       <div className="font-medium text-gray-600">
                         {ord.items.length} món • Tổng:{" "}
-                        <span className="font-bold text-orange-600">{formatPrice(ord.totalAmount)}</span>
+                        <span className="font-bold text-orange-600">
+                          {formatPrice(ord.totalAmount)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -398,10 +439,14 @@ export default function OrdersPage() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">
-                      Chi Tiết Đơn Hàng #{selectedOrder._id.slice(-6).toUpperCase()}
+                      Chi Tiết Đơn Hàng #
+                      {selectedOrder._id.slice(-6).toUpperCase()}
                     </h3>
                     <p className="text-xs text-gray-400 mt-1">
-                      Đặt lúc: {new Date(selectedOrder.createdAt).toLocaleString("vi-VN")}
+                      Đặt lúc:{" "}
+                      {new Date(selectedOrder.createdAt).toLocaleString(
+                        "vi-VN",
+                      )}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -430,76 +475,107 @@ export default function OrdersPage() {
                   <div className="bg-red-50 p-5 rounded-2xl border border-red-100 flex items-start gap-3">
                     <StopOutlined className="text-red-500 text-lg mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-red-800 text-sm">Đơn hàng này đã bị HỦY</h4>
+                      <h4 className="font-bold text-red-800 text-sm">
+                        Đơn hàng này đã bị HỦY
+                      </h4>
                       <p className="text-xs text-red-600 mt-1">
-                        Lý do hủy đơn: <span className="font-semibold">{selectedOrder.cancelReason || "Không rõ lý do"}</span>
+                        Lý do hủy đơn:{" "}
+                        <span className="font-semibold">
+                          {selectedOrder.cancelReason || "Không rõ lý do"}
+                        </span>
                       </p>
                     </div>
                   </div>
                 )}
 
                 {/* Phần Đếm Ngược & Hủy Đơn / Xác nhận nhận hàng */}
-                {selectedOrder.status !== "Cancelled" && selectedOrder.status !== "Delivered" && (
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    {selectedOrder.status === "Shipping" ? (
-                      <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <p className="font-bold text-gray-800 text-sm">Đơn hàng đang được giao đến bạn!</p>
-                          <p className="text-xs text-gray-500 mt-1">Vui lòng xác nhận sau khi bạn đã nhận được hàng thành công.</p>
-                        </div>
-                        <button
-                          onClick={handleMarkAsReceived}
-                          disabled={receiveLoading}
-                          className="px-5 py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl hover:bg-emerald-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
-                        >
-                          <CheckCircleOutlined />
-                          Đã Nhận Được Hàng
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-3">
-                          <ClockCircleOutlined className="text-orange-500 text-lg animate-spin" style={{ animationDuration: '6s' }} />
+                {selectedOrder.status !== "Cancelled" &&
+                  selectedOrder.status !== "Delivered" && (
+                    <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      {selectedOrder.status === "Shipping" ? (
+                        <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
                           <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian hủy đơn còn lại</p>
-                            <p className="text-base font-black text-gray-700 mt-0.5">{timeLeftStr || "Đang tính toán..."}</p>
+                            <p className="font-bold text-gray-800 text-sm">
+                              Đơn hàng đang được giao đến bạn!
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Vui lòng xác nhận sau khi bạn đã nhận được hàng
+                              thành công.
+                            </p>
                           </div>
+                          <button
+                            onClick={handleMarkAsReceived}
+                            disabled={receiveLoading}
+                            className="px-5 py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl hover:bg-emerald-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
+                          >
+                            <CheckCircleOutlined />
+                            Đã Nhận Được Hàng
+                          </button>
                         </div>
-
-                        {canCancel ? (
-                          selectedOrder.cancelRequest ? (
-                            <div className="flex flex-col items-end gap-1">
-                              <Tag color="warning" className="m-0 rounded-lg py-1 px-3 font-semibold text-xs animate-pulse">
-                                ⏳ Đang chờ duyệt hủy đơn
-                              </Tag>
-                              <span className="text-[10px] text-gray-400">Shop đang chuẩn bị hàng, đang xử lý yêu cầu</span>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <ClockCircleOutlined
+                              className="text-orange-500 text-lg animate-spin"
+                              style={{ animationDuration: "6s" }}
+                            />
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Thời gian hủy đơn còn lại
+                              </p>
+                              <p className="text-base font-black text-gray-700 mt-0.5">
+                                {timeLeftStr || "Đang tính toán..."}
+                              </p>
                             </div>
+                          </div>
+
+                          {canCancel ? (
+                            selectedOrder.cancelRequest ? (
+                              <div className="flex flex-col items-end gap-1">
+                                <Tag
+                                  color="warning"
+                                  className="m-0 rounded-lg py-1 px-3 font-semibold text-xs animate-pulse"
+                                >
+                                  ⏳ Đang chờ duyệt hủy đơn
+                                </Tag>
+                                <span className="text-[10px] text-gray-400">
+                                  Shop đang chuẩn bị hàng, đang xử lý yêu cầu
+                                </span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={openCancelModal}
+                                className="px-5 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
+                              >
+                                <CloseCircleOutlined />
+                                {selectedOrder.status === "Preparing"
+                                  ? "Gửi Yêu Cầu Hủy Đơn"
+                                  : "Hủy Đơn Hàng"}
+                              </button>
+                            )
                           ) : (
-                            <button
-                              onClick={openCancelModal}
-                              className="px-5 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
-                            >
-                              <CloseCircleOutlined />
-                              {selectedOrder.status === "Preparing" ? "Gửi Yêu Cầu Hủy Đơn" : "Hủy Đơn Hàng"}
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">🔒 Đơn hàng đã được khóa (không thể hủy)</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
+                            <span className="text-xs text-gray-400 italic">
+                              🔒 Đơn hàng đã được khóa (không thể hủy)
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
 
                 {/* Danh Sách Món Ăn Trong Đơn */}
                 <div className="space-y-4">
                   <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                    <ShoppingOutlined className="text-orange-500" /> Thực đơn đã chọn
+                    <ShoppingOutlined className="text-orange-500" /> Thực đơn đã
+                    chọn
                   </h4>
-                  
+
                   <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl px-4 bg-gray-50/50">
                     {selectedOrder.items.map((item, index) => (
-                      <div key={index} className="py-3 flex items-center gap-3 text-xs">
+                      <div
+                        key={index}
+                        className="py-3 flex items-center gap-3 text-xs"
+                      >
                         <img
                           src={item.image || "https://placehold.co/100"}
                           alt={item.name}
@@ -507,16 +583,24 @@ export default function OrdersPage() {
                         />
                         <div className="flex-grow">
                           <p className="font-bold text-gray-800">{item.name}</p>
-                          <p className="text-gray-400 text-2xs mt-0.5">Số lượng: {item.quantity}</p>
+                          <p className="text-gray-400 text-2xs mt-0.5">
+                            Số lượng: {item.quantity}
+                          </p>
                         </div>
-                        <span className="font-bold text-gray-800">{formatPrice(item.price)}</span>
+                        <span className="font-bold text-gray-800">
+                          {formatPrice(item.price)}
+                        </span>
                       </div>
                     ))}
                   </div>
 
                   <div className="flex justify-between items-center bg-orange-50/20 px-4 py-3 rounded-2xl border border-orange-100/30">
-                    <span className="text-sm font-bold text-gray-700">Tổng cộng hóa đơn:</span>
-                    <span className="text-lg font-black text-orange-600">{formatPrice(selectedOrder.totalAmount)}</span>
+                    <span className="text-sm font-bold text-gray-700">
+                      Tổng cộng hóa đơn:
+                    </span>
+                    <span className="text-lg font-black text-orange-600">
+                      {formatPrice(selectedOrder.totalAmount)}
+                    </span>
                   </div>
                 </div>
 
@@ -524,16 +608,40 @@ export default function OrdersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 pt-6">
                   {/* Người nhận */}
                   <div className="space-y-2 text-xs">
-                    <h4 className="font-bold text-gray-800 text-sm">📍 Thông tin giao hàng</h4>
-                    <p className="text-gray-600"><span className="text-gray-400">Người nhận:</span> <span className="font-semibold text-gray-800">{selectedOrder.customerName}</span></p>
-                    <p className="text-gray-600"><span className="text-gray-400">Điện thoại:</span> <span className="font-semibold text-gray-800">{selectedOrder.phoneNumber}</span></p>
-                    <p className="text-gray-600 leading-relaxed"><span className="text-gray-400">Địa chỉ:</span> <span className="font-semibold text-gray-800">{selectedOrder.shippingAddress}</span></p>
+                    <h4 className="font-bold text-gray-800 text-sm">
+                      📍 Thông tin giao hàng
+                    </h4>
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Người nhận:</span>{" "}
+                      <span className="font-semibold text-gray-800">
+                        {selectedOrder.customerName}
+                      </span>
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Điện thoại:</span>{" "}
+                      <span className="font-semibold text-gray-800">
+                        {selectedOrder.phoneNumber}
+                      </span>
+                    </p>
+                    <p className="text-gray-600 leading-relaxed">
+                      <span className="text-gray-400">Địa chỉ:</span>{" "}
+                      <span className="font-semibold text-gray-800">
+                        {selectedOrder.shippingAddress}
+                      </span>
+                    </p>
                   </div>
 
                   {/* Thanh toán */}
                   <div className="space-y-2 text-xs">
-                    <h4 className="font-bold text-gray-800 text-sm">💳 Chi tiết thanh toán</h4>
-                    <p className="text-gray-600"><span className="text-gray-400">Hình thức:</span> <span className="font-semibold text-gray-800">{getPaymentMethodLabel(selectedOrder.paymentMethod)}</span></p>
+                    <h4 className="font-bold text-gray-800 text-sm">
+                      💳 Chi tiết thanh toán
+                    </h4>
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Hình thức:</span>{" "}
+                      <span className="font-semibold text-gray-800">
+                        {getPaymentMethodLabel(selectedOrder.paymentMethod)}
+                      </span>
+                    </p>
                     <div className="flex items-center gap-1">
                       <span className="text-gray-400">Trạng thái:</span>
                       {getPaymentStatusTag(selectedOrder.paymentStatus)}
@@ -551,7 +659,9 @@ export default function OrdersPage() {
         title={
           <span className="flex items-center gap-2 text-red-500 font-bold text-base">
             <ExclamationCircleOutlined />
-            {selectedOrder?.status === "Preparing" ? "Gửi yêu cầu hủy đơn hàng" : "Hủy đơn hàng này"}
+            {selectedOrder?.status === "Preparing"
+              ? "Gửi yêu cầu hủy đơn hàng"
+              : "Hủy đơn hàng này"}
           </span>
         }
         open={isCancelModalOpen}

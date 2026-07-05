@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Spin, InputNumber, notification, Button, Empty, Steps, Input } from "antd";
+import {
+  Spin,
+  InputNumber,
+  notification,
+  Button,
+  Empty,
+  Steps,
+  Input,
+} from "antd";
 import {
   DeleteOutlined,
   ShoppingCartOutlined,
@@ -22,7 +30,7 @@ import {
 export default function CartPage() {
   const navigate = useNavigate();
   const { auth, setCartCount } = useContext(AuthContext);
-  
+
   const [currentStep, setCurrentStep] = useState(0);
   const [cart, setCart] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +53,10 @@ export default function CartPage() {
       if (res && res.success) {
         setCart(res.data);
         // Cập nhật số lượng Badge trên Header
-        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
+        const totalItems = res.data.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
         setCartCount(totalItems);
       }
     } catch (error) {
@@ -73,7 +84,10 @@ export default function CartPage() {
       const res = await updateCartItemApi(productId, quantity);
       if (res && res.success) {
         setCart(res.data);
-        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
+        const totalItems = res.data.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
         setCartCount(totalItems);
       } else {
         notification.error({
@@ -96,7 +110,10 @@ export default function CartPage() {
       const res = await deleteCartItemApi(productId);
       if (res && res.success) {
         setCart(res.data);
-        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
+        const totalItems = res.data.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
         setCartCount(totalItems);
         notification.success({
           message: "Đã xóa sản phẩm",
@@ -116,9 +133,10 @@ export default function CartPage() {
   const calculateTotal = () => {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce((sum, item) => {
-      const productPrice = item.product.discountPrice && item.product.discountPrice > 0 
-        ? item.product.discountPrice 
-        : item.product.price;
+      const productPrice =
+        item.product.discountPrice && item.product.discountPrice > 0
+          ? item.product.discountPrice
+          : item.product.price;
       return sum + productPrice * item.quantity;
     }, 0);
   };
@@ -133,7 +151,7 @@ export default function CartPage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setDeliveryInfo((prev) => ({
-      ...prev,//spread syntax 
+      ...prev, //spread syntax
       // sao chép toàn bộ các thuộc tính (dữ liệu) hiện tại từ state cũ (prev)
       // sang một state mới, trước khi cập nhật đè lên thuộc tính mới
       // -> do State trong React là bất biến (immutable).
@@ -146,10 +164,15 @@ export default function CartPage() {
   // Tiến hành thanh toán / đặt đơn hàng
   const handlePlaceOrder = async () => {
     const { customerName, phoneNumber, shippingAddress } = deliveryInfo;
-    if (!customerName.trim() || !phoneNumber.trim() || !shippingAddress.trim()) {
+    if (
+      !customerName.trim() ||
+      !phoneNumber.trim() ||
+      !shippingAddress.trim()
+    ) {
       notification.warning({
         message: "Thông tin giao hàng thiếu",
-        description: "Vui lòng nhập đầy đủ Tên, Số điện thoại và Địa chỉ nhận hàng.",
+        description:
+          "Vui lòng nhập đầy đủ Tên, Số điện thoại và Địa chỉ nhận hàng.",
       });
       return;
     }
@@ -162,9 +185,10 @@ export default function CartPage() {
         shippingAddress,
         paymentMethod,
         items: cart.items.map((item) => {
-          const productPrice = item.product.discountPrice && item.product.discountPrice > 0 
-            ? item.product.discountPrice 
-            : item.product.price;
+          const productPrice =
+            item.product.discountPrice && item.product.discountPrice > 0
+              ? item.product.discountPrice
+              : item.product.price;
           return {
             productId: item.product._id,
             name: item.product.name,
@@ -183,9 +207,10 @@ export default function CartPage() {
         if (paymentMethod === "MOMO" && res.payUrl) {
           notification.success({
             message: "Đặt đơn thành công",
-            description: "Đang chuyển hướng sang cổng thanh toán ví MoMo Sandbox...",
+            description:
+              "Đang chuyển hướng sang cổng thanh toán ví MoMo Sandbox...",
           });
-          
+
           // Mở tab thanh toán MoMo
           window.location.href = res.payUrl;
         } else {
@@ -218,7 +243,9 @@ export default function CartPage() {
       <div className="min-h-[85vh] flex flex-col items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-sm p-12 text-center max-w-sm w-full border border-gray-100">
           <p className="text-6xl mb-4">🔒</p>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Chưa đăng nhập</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
+            Chưa đăng nhập
+          </h2>
           <p className="text-gray-500 text-sm mb-6">
             Vui lòng đăng nhập tài khoản để xem và quản lý giỏ hàng của bạn.
           </p>
@@ -249,10 +276,7 @@ export default function CartPage() {
       <div className="mb-8">
         <Steps
           current={currentStep}
-          items={[
-            { title: "Giỏ hàng" },
-            { title: "Giao hàng & Thanh toán" },
-          ]}
+          items={[{ title: "Giỏ hàng" }, { title: "Giao hàng & Thanh toán" }]}
           className="max-w-md mx-auto"
         />
       </div>
@@ -263,7 +287,9 @@ export default function CartPage() {
           <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-sm">
             <Empty
               description={
-                <span className="text-gray-500 text-sm">Giỏ hàng của bạn đang trống rỗng.</span>
+                <span className="text-gray-500 text-sm">
+                  Giỏ hàng của bạn đang trống rỗng.
+                </span>
               }
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
@@ -278,18 +304,27 @@ export default function CartPage() {
           <div className="space-y-6">
             <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm divide-y divide-gray-100">
               <h2 className="text-lg font-bold text-gray-800 pb-4 flex items-center gap-2">
-                <ShoppingCartOutlined className="text-orange-500" /> Chi tiết giỏ hàng ({cart.items.length} món)
+                <ShoppingCartOutlined className="text-orange-500" /> Chi tiết
+                giỏ hàng ({cart.items.length} món)
               </h2>
 
               {cart.items.map((item) => {
-                const isDiscounted = item.product.price != item.product.discountPrice;
-                const activePrice = isDiscounted ? item.product.discountPrice : item.product.price;
+                const isDiscounted =
+                  item.product.price != item.product.discountPrice;
+                const activePrice = isDiscounted
+                  ? item.product.discountPrice
+                  : item.product.price;
                 const originalPrice = item.product.price;
 
                 return (
-                  <div key={item.product._id} className="py-4 flex items-center gap-4">
+                  <div
+                    key={item.product._id}
+                    className="py-4 flex items-center gap-4"
+                  >
                     <img
-                      src={item.product.images?.[0] || "https://placehold.co/100"}
+                      src={
+                        item.product.images?.[0] || "https://placehold.co/100"
+                      }
                       alt={item.product.name}
                       className="w-16 h-16 rounded-xl object-cover border border-gray-100"
                     />
@@ -301,7 +336,7 @@ export default function CartPage() {
                       >
                         {item.product.name}
                       </Link>
-                      
+
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-gray-500">Giá:</span>
                         <span className="text-sm font-bold text-orange-600">
@@ -321,11 +356,15 @@ export default function CartPage() {
                         min={1}
                         max={item.product.stock}
                         value={item.quantity}
-                        onChange={(value) => handleQuantityChange(item.product._id, value)}
+                        onChange={(value) =>
+                          handleQuantityChange(item.product._id, value)
+                        }
                         size="small"
                         className="w-16 rounded-lg text-center"
                       />
-                      <span className="text-[10px] text-gray-400">Kho: {item.product.stock}</span>
+                      <span className="text-[10px] text-gray-400">
+                        Kho: {item.product.stock}
+                      </span>
                     </div>
 
                     {/* Nút xóa */}
@@ -344,7 +383,9 @@ export default function CartPage() {
             <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-gray-400">Tổng thanh toán</p>
-                <p className="text-2xl font-black text-orange-600">{formatPrice(calculateTotal())}</p>
+                <p className="text-2xl font-black text-orange-600">
+                  {formatPrice(calculateTotal())}
+                </p>
               </div>
 
               <button
@@ -365,10 +406,12 @@ export default function CartPage() {
               <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
                 📍 Thông tin giao hàng
               </h2>
-              
+
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">Họ và tên người nhận</label>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    Họ và tên người nhận
+                  </label>
                   <Input
                     name="customerName"
                     prefix={<UserOutlined className="text-gray-400" />}
@@ -380,7 +423,9 @@ export default function CartPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">Số điện thoại</label>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    Số điện thoại
+                  </label>
                   <Input
                     name="phoneNumber"
                     prefix={<PhoneOutlined className="text-gray-400" />}
@@ -392,7 +437,9 @@ export default function CartPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">Địa chỉ nhận hàng</label>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    Địa chỉ nhận hàng
+                  </label>
                   <Input.TextArea
                     name="shippingAddress"
                     placeholder="Địa chỉ cụ thể (Số nhà, Tên đường, Phường/Xã, Quận/Huyện...)"
@@ -422,7 +469,9 @@ export default function CartPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800 text-sm">Thanh toán khi nhận hàng (COD)</span>
+                    <span className="font-bold text-gray-800 text-sm">
+                      Thanh toán khi nhận hàng (COD)
+                    </span>
                     <input
                       type="radio"
                       checked={paymentMethod === "COD"}
@@ -430,7 +479,9 @@ export default function CartPage() {
                       className="accent-orange-500 w-4 h-4"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">Nhận hàng và thanh toán tiền mặt trực tiếp cho shipper.</p>
+                  <p className="text-xs text-gray-400">
+                    Nhận hàng và thanh toán tiền mặt trực tiếp cho shipper.
+                  </p>
                   <span className="text-2xl mt-1">💵</span>
                 </div>
 
@@ -444,7 +495,9 @@ export default function CartPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800 text-sm">Ví Điện Tử MoMo (Sandbox)</span>
+                    <span className="font-bold text-gray-800 text-sm">
+                      Ví Điện Tử MoMo (Sandbox)
+                    </span>
                     <input
                       type="radio"
                       checked={paymentMethod === "MOMO"}
@@ -452,9 +505,14 @@ export default function CartPage() {
                       className="accent-purple-600 w-4 h-4"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">Tích hợp thanh toán thật qua cổng thử nghiệm Sandbox của ví MoMo.</p>
+                  <p className="text-xs text-gray-400">
+                    Tích hợp thanh toán thật qua cổng thử nghiệm Sandbox của ví
+                    MoMo.
+                  </p>
                   <span className="text-lg font-black text-purple-600 mt-1 flex items-center gap-1.5">
-                    <span className="w-6 h-6 bg-pink-500 text-white rounded-lg flex items-center justify-center text-xs font-bold font-sans">Mo</span>
+                    <span className="w-6 h-6 bg-pink-500 text-white rounded-lg flex items-center justify-center text-xs font-bold font-sans">
+                      Mo
+                    </span>
                     MoMo Payment
                   </span>
                 </div>
@@ -471,24 +529,36 @@ export default function CartPage() {
 
               <div className="max-h-40 overflow-y-auto space-y-2.5 pr-1">
                 {cart.items.map((item) => {
-                  const activePrice = item.product.discountPrice && item.product.discountPrice > 0 
-                    ? item.product.discountPrice 
-                    : item.product.price;
+                  const activePrice =
+                    item.product.discountPrice && item.product.discountPrice > 0
+                      ? item.product.discountPrice
+                      : item.product.price;
                   return (
-                    <div key={item.product._id} className="flex justify-between items-center text-xs">
+                    <div
+                      key={item.product._id}
+                      className="flex justify-between items-center text-xs"
+                    >
                       <span className="text-gray-600 font-medium line-clamp-1 max-w-[120px]">
                         {item.product.name}
                       </span>
-                      <span className="text-gray-400 text-2xs">x{item.quantity}</span>
-                      <span className="text-gray-800 font-bold">{formatPrice(activePrice)}</span>
+                      <span className="text-gray-400 text-2xs">
+                        x{item.quantity}
+                      </span>
+                      <span className="text-gray-800 font-bold">
+                        {formatPrice(activePrice)}
+                      </span>
                     </div>
                   );
                 })}
               </div>
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
-                <span className="text-sm font-semibold text-gray-500">Thành tiền:</span>
-                <span className="text-lg font-black text-orange-600">{formatPrice(calculateTotal())}</span>
+                <span className="text-sm font-semibold text-gray-500">
+                  Thành tiền:
+                </span>
+                <span className="text-lg font-black text-orange-600">
+                  {formatPrice(calculateTotal())}
+                </span>
               </div>
 
               <div className="space-y-2 pt-2">
@@ -497,12 +567,14 @@ export default function CartPage() {
                   onClick={handlePlaceOrder}
                   loading={isSubmitting}
                   className={`w-full h-11 rounded-xl font-bold border-none ${
-                    paymentMethod === "MOMO" 
-                      ? "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90" 
+                    paymentMethod === "MOMO"
+                      ? "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90"
                       : "bg-orange-500 hover:bg-orange-600"
                   }`}
                 >
-                  {paymentMethod === "MOMO" ? "Thanh toán qua MoMo" : "Đặt hàng COD"}
+                  {paymentMethod === "MOMO"
+                    ? "Thanh toán qua MoMo"
+                    : "Đặt hàng COD"}
                 </Button>
 
                 <button

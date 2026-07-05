@@ -40,16 +40,16 @@ const LoginPage = () => {
         user: {
           email: res?.user?.email ?? "",
           name: res?.user?.name ?? "",
-          role: res.user.role
+          role: res.user.role,
         },
       });
       if (res.user.role === "admin") {
-          console.log(res.user.role)
-          navigate("/admin/orders");
-        } else {
-          console.log("USER")
-          navigate("/");
-        }
+        console.log(res.user.role);
+        navigate("/admin/orders");
+      } else {
+        console.log("USER");
+        navigate("/");
+      }
     } else {
       notification.error({
         message: "LOGIN USER",
@@ -145,6 +145,18 @@ const LoginPage = () => {
                 size="large"
                 placeholder="Nhập mật khẩu"
               />
+            </Form.Item>
+
+            <Form.Item
+              style={{
+                textAlign: "right",
+                marginTop: "-12px",
+                marginBottom: "24px",
+              }}
+            >
+              <Link to="/forgot-password" style={{ color: "#fa541c" }}>
+                Quên mật khẩu?
+              </Link>
             </Form.Item>
 
             <Form.Item style={{ marginBottom: 0 }}>

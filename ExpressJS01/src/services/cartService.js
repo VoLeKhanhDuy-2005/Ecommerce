@@ -12,7 +12,7 @@ const cacheCart = async (userEmail, cartData) => {
       await redisClient.setEx(
         getCartCacheKey(userEmail),
         CACHE_TTL,
-        JSON.stringify(cartData)
+        JSON.stringify(cartData),
       );
     }
   } catch (error) {
@@ -38,7 +38,11 @@ const getCart = async (userEmail) => {
         const cachedCart = await redisClient.get(getCartCacheKey(userEmail));
         if (cachedCart) {
           console.log(`[Cache Hit] Lấy giỏ hàng từ Redis cho ${userEmail}`);
-          return { statusCode: 200, success: true, data: JSON.parse(cachedCart) };
+          return {
+            statusCode: 200,
+            success: true,
+            data: JSON.parse(cachedCart),
+          };
         }
       } catch (cacheError) {
         console.error(`[Cache Error] Lỗi đọc từ Redis: ${cacheError.message}`);

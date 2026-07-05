@@ -5,8 +5,8 @@
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "allowJs": true,          // <--- Thêm dòng này để cho phép file .js/.jsx
-    "checkJs": false,         // <--- Thêm dòng này để không bắt lỗi cú pháp file .js
+    "allowJs": true, // <--- Thêm dòng này để cho phép file .js/.jsx
+    "checkJs": false, // <--- Thêm dòng này để không bắt lỗi cú pháp file .js
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
 
     /* Linting */
-    "strict": false,          // <--- Chuyển thành false nếu dự án dùng thuần JS để tránh ép kiểu nghiêm ngặt
+    "strict": false, // <--- Chuyển thành false nếu dự án dùng thuần JS để tránh ép kiểu nghiêm ngặt
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,

@@ -67,7 +67,14 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["New", "Confirmed", "Preparing", "Shipping", "Delivered", "Cancelled"],
+      enum: [
+        "New",
+        "Confirmed",
+        "Preparing",
+        "Shipping",
+        "Delivered",
+        "Cancelled",
+      ],
       default: "New",
     },
     cancelRequest: {
@@ -84,7 +91,7 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Order = mongoose.model("order", orderSchema);

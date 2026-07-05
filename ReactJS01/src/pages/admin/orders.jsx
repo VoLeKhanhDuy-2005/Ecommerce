@@ -240,69 +240,75 @@ export default function AdminOrdersPage() {
                 </div>
               )}
 
-              {ord.status !== "Cancelled" && ord.status !== "Delivered" && ord.status !== "Shipping" && (
-                <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/70 space-y-2">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                    <ShoppingOutlined /> Thao tác xử lý quy trình vận đơn
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {ord.status === "New" && (
-                      <Button
-                        size="small"
-                        type="primary"
-                        ghost
-                        icon={<CheckOutlined />}
-                        className="text-xs rounded-xl h-8 font-bold px-4 border-purple-500 text-purple-600 hover:text-purple-700 hover:border-purple-600"
-                        onClick={() => handleUpdateStatus(ord._id, "Confirmed")}
-                      >
-                        Xác nhận đơn
-                      </Button>
-                    )}
-
-                    {ord.status === "Confirmed" && (
-                      <Button
-                        size="small"
-                        type="dashed"
-                        icon={<SendOutlined />}
-                        className="text-xs rounded-xl h-8 font-semibold px-4 border-orange-400 text-orange-600 hover:text-orange-700"
-                        onClick={() => handleUpdateStatus(ord._id, "Preparing")}
-                      >
-                        Chuẩn bị món
-                      </Button>
-                    )}
-
-                    {ord.status === "Preparing" && (
-                      <Button
-                        size="small"
-                        type="primary"
-                        icon={<DoubleRightOutlined />}
-                        className="text-xs rounded-xl h-8 font-bold px-4 bg-indigo-600 border-none hover:bg-indigo-700"
-                        onClick={() => handleUpdateStatus(ord._id, "Shipping")}
-                      >
-                        Đang giao
-                      </Button>
-                    )}
-
-
-
-                    {ord.status !== "Delivered" &&
-                      ord.status !== "Shipping" && (
+              {ord.status !== "Cancelled" &&
+                ord.status !== "Delivered" &&
+                ord.status !== "Shipping" && (
+                  <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/70 space-y-2">
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                      <ShoppingOutlined /> Thao tác xử lý quy trình vận đơn
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ord.status === "New" && (
                         <Button
                           size="small"
-                          danger
+                          type="primary"
                           ghost
-                          icon={<CloseOutlined />}
-                          className="text-xs rounded-xl h-8 font-semibold px-4"
+                          icon={<CheckOutlined />}
+                          className="text-xs rounded-xl h-8 font-bold px-4 border-purple-500 text-purple-600 hover:text-purple-700 hover:border-purple-600"
                           onClick={() =>
-                            handleUpdateStatus(ord._id, "Cancelled")
+                            handleUpdateStatus(ord._id, "Confirmed")
                           }
                         >
-                          Hủy đơn
+                          Xác nhận đơn
                         </Button>
                       )}
+
+                      {ord.status === "Confirmed" && (
+                        <Button
+                          size="small"
+                          type="dashed"
+                          icon={<SendOutlined />}
+                          className="text-xs rounded-xl h-8 font-semibold px-4 border-orange-400 text-orange-600 hover:text-orange-700"
+                          onClick={() =>
+                            handleUpdateStatus(ord._id, "Preparing")
+                          }
+                        >
+                          Chuẩn bị món
+                        </Button>
+                      )}
+
+                      {ord.status === "Preparing" && (
+                        <Button
+                          size="small"
+                          type="primary"
+                          icon={<DoubleRightOutlined />}
+                          className="text-xs rounded-xl h-8 font-bold px-4 bg-indigo-600 border-none hover:bg-indigo-700"
+                          onClick={() =>
+                            handleUpdateStatus(ord._id, "Shipping")
+                          }
+                        >
+                          Đang giao
+                        </Button>
+                      )}
+
+                      {ord.status !== "Delivered" &&
+                        ord.status !== "Shipping" && (
+                          <Button
+                            size="small"
+                            danger
+                            ghost
+                            icon={<CloseOutlined />}
+                            className="text-xs rounded-xl h-8 font-semibold px-4"
+                            onClick={() =>
+                              handleUpdateStatus(ord._id, "Cancelled")
+                            }
+                          >
+                            Hủy đơn
+                          </Button>
+                        )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           ))}
         </div>
