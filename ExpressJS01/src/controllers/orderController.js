@@ -73,7 +73,12 @@ const markOrderAsReceived = async (req, res, next) => {
 
 const getShopOrders = async (req, res, next) => {
   try {
-    const { statusCode, ...data } = await orderService.getShopOrders();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { statusCode, ...data } = await orderService.getShopOrders(
+      page,
+      limit,
+    );
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);

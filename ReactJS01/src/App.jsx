@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Header from "./components/layout/header";
 import { getCurrentUserApi, getCartApi } from "./util/api";
 import { useContext, useEffect, useState } from "react";
@@ -8,6 +8,8 @@ import { Spin } from "antd";
 function App() {
   const { setAuth, setCartCount } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchAccount = async () => {
       setIsLoading(true);
@@ -24,6 +26,12 @@ function App() {
             address: res.user.address,
           },
         });
+
+        if (res.user.role === "admin") {
+          navigate("/admin/orders");
+          setIsLoading(false);
+          return;
+        }
 
         // Tải số lượng sản phẩm trong giỏ hàng
         try {

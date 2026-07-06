@@ -4,8 +4,10 @@ import App from "./App.jsx";
 import "./index.css";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import AdminLayout from "./components/layout/adminLayout.jsx";
 import AdminOrdersPage from "./pages/admin/orders.jsx";
 import AdminCategoriesPage from "./pages/admin/categories.jsx";
+import AdminProductsPage from "./pages/admin/products.jsx";
 import RegisterPage from "./pages/register.jsx";
 import UserPage from "./pages/admin/users.jsx";
 import HomePage from "./pages/home.jsx";
@@ -28,10 +30,6 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "user",
-        element: <UserPage />,
-      },
-      {
         path: "product/:id",
         element: <ProductDetailPage />,
       },
@@ -51,13 +49,27 @@ const router = createBrowserRouter([
         path: "profile",
         element: <EditProfilePage />,
       },
+    ],
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
       {
-        path: "admin/orders",
+        path: "users",
+        element: <UserPage />,
+      },
+      {
+        path: "orders",
         element: <AdminOrdersPage />,
       },
       {
-        path: "admin/categories",
+        path: "categories",
         element: <AdminCategoriesPage />,
+      },
+      {
+        path: "products",
+        element: <AdminProductsPage />,
       },
     ],
   },

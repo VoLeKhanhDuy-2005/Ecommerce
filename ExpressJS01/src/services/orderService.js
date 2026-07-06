@@ -464,15 +464,32 @@ const markOrderAsReceived = async (orderIdParams, userEmail) => {
   }
 };
 
-const getShopOrders = async () => {
+const getShopOrders = async (page = 1, limit = 10) => {
   try {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     await Order.updateMany(
       { status: "New", createdAt: { $lte: thirtyMinutesAgo } },
       { $set: { status: "Confirmed" } },
     );
-    const orders = await Order.find({}).sort({ createdAt: -1 });
-    return { statusCode: 200, success: true, data: orders };
+
+    const skip = (page - 1) * limit;
+    const total = await Order.countDocuments();
+    const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      statusCode: 200,
+      success: true,
+      data: orders,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   } catch (error) {
     return {
       statusCode: 500,

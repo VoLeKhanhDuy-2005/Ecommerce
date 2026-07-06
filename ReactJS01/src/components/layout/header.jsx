@@ -12,10 +12,12 @@ import {
   HistoryOutlined,
   SettingOutlined,
   AppstoreOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { Avatar, Dropdown } from "antd";
+import { logoutApi } from "../../util/api";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -23,7 +25,12 @@ const Header = () => {
   const { auth, setAuth, cartCount } = useContext(AuthContext);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.log(e);
+    }
     localStorage.removeItem("access_token");
     setAuth({ isAuthenticated: false, user: { email: "", name: "" } });
     navigate("/");
@@ -31,47 +38,37 @@ const Header = () => {
 
   const isAdmin = auth.isAuthenticated && auth.user.role === "admin";
 
-  const navLinks = [
-    { to: "/", label: "Trang chủ", icon: <HomeOutlined /> },
-    { to: "/search", label: "Tìm kiếm", icon: <SearchOutlined /> },
-    ...(auth.isAuthenticated
-      ? isAdmin
-        ? [
-            {
-              to: "/admin/orders",
-              label: "Quản lý đơn hàng",
-              icon: <HistoryOutlined />,
-            },
-            {
-              to: "/user",
-              label: "Quản lý User",
-              icon: <UsergroupAddOutlined />,
-            },
-            {
-              to: "/admin/categories",
-              label: "Quản lý danh mục",
-              icon: <AppstoreOutlined />,
-            },
-          ]
-        : [
-            {
-              to: "/cart",
-              label: (
-                <span className="flex items-center gap-1">
-                  Giỏ hàng
-                  {cartCount > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 text-2xs bg-red-500 text-white rounded-full font-bold leading-none min-w-4 text-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </span>
-              ),
-              icon: <ShoppingCartOutlined />,
-            },
-            { to: "/orders", label: "Đơn hàng", icon: <HistoryOutlined /> },
-          ]
-      : []),
-  ];
+  const navLinks = isAdmin
+    ? [
+        {
+          to: "/admin/orders",
+          label: "Trang Quản Trị",
+          icon: <AppstoreOutlined />,
+        },
+      ]
+    : [
+        { to: "/", label: "Trang chủ", icon: <HomeOutlined /> },
+        { to: "/search", label: "Tìm kiếm", icon: <SearchOutlined /> },
+        ...(auth.isAuthenticated
+          ? [
+              {
+                to: "/cart",
+                label: (
+                  <span className="flex items-center gap-1">
+                    Giỏ hàng
+                    {cartCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 text-2xs bg-red-500 text-white rounded-full font-bold leading-none min-w-4 text-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </span>
+                ),
+                icon: <ShoppingCartOutlined />,
+              },
+              { to: "/orders", label: "Đơn hàng", icon: <HistoryOutlined /> },
+            ]
+          : []),
+      ];
 
   const userMenuItems = {
     items: [

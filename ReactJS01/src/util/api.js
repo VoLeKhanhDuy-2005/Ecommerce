@@ -42,6 +42,10 @@ const getUserApi = () => {
   return axios.get(URL_API);
 };
 
+const logoutApi = () => {
+  return axios.post("/v1/api/logout");
+};
+
 const getCurrentUserApi = () => {
   const URL_API = "/v1/api/user/me";
   return axios.get(URL_API);
@@ -104,8 +108,8 @@ const verifyMomoPaymentApi = (orderId) => {
   return axios.post(`/v1/api/orders/${orderId}/verify-momo`);
 };
 
-const getShopOrdersApi = () => {
-  return axios.get("/v1/api/admin/orders");
+const getShopOrdersApi = (page = 1, limit = 10) => {
+  return axios.get(`/v1/api/admin/orders?page=${page}&limit=${limit}`);
 };
 
 const updateShopOrderStatusApi = (orderId, status) => {
@@ -142,9 +146,30 @@ const deleteCategoryApi = (id) => {
   return axios.delete(`/v1/api/admin/categories/${id}`);
 };
 
+const getAdminProductsApi = () => {
+  return axios.get("/v1/api/admin/products");
+};
+
+const createProductApi = (data) => {
+  return axios.post("/v1/api/admin/products", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+const updateProductApi = (id, data) => {
+  return axios.put(`/v1/api/admin/products/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+const deleteProductApi = (id) => {
+  return axios.delete(`/v1/api/admin/products/${id}`);
+};
+
 export {
   registerApi,
   loginApi,
+  logoutApi,
   getUserApi,
   getCurrentUserApi,
   getProductsApi,
@@ -171,4 +196,8 @@ export {
   createCategoryApi,
   updateCategoryApi,
   deleteCategoryApi,
+  getAdminProductsApi,
+  createProductApi,
+  updateProductApi,
+  deleteProductApi,
 };

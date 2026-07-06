@@ -32,38 +32,32 @@ const checkValidImageExtensionFile = (file) => {
   return file.mimetype === "image/jpeg" || file.mimetype === "image/png";
 };
 
-const getImagePresignedUrl = async (data) => {
-  const key = resolveImageKey(data);
-  if (!key) return null;
-
-  const getObjectParams = {
-    Bucket: bucketName,
-    Key: key,
-  };
+const getImagePresignedUrlByKey = async (key) => {
+  if (!key || key.startsWith("http")) return key;
+  const getObjectParams = { Bucket: bucketName, Key: key };
   return await getSignedUrl(s3, new GetObjectCommand(getObjectParams), {
-    expiresIn: 60, // 60 seconds
+    expiresIn: 60,
   });
 };
 
-const deleteOldAndInsertNewImageInS3 = async (data, file) => {
-  if (!checkValidImageExtensionFile(file))
+const getImagePresignedUrl = async (data) => {
+  const key = resolveImageKey(data);
+  return await getImagePresignedUrlByKey(key);
+};
+
+const deleteFileFromS3ByKey = async (key) => {
+  if (!key || key.startsWith("http")) return;
+  await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
+};
+
+const uploadFileToS3 = async (file) => {
+  if (!checkValidImageExtensionFile(file)) {
     throw new Error("Định dạng file không hợp lệ! Chỉ chấp nhận ảnh JPG/PNG.");
-
-  const oldKey = resolveImageKey(data);
-  if (oldKey) {
-    await s3.send(
-      new DeleteObjectCommand({
-        Bucket: bucketName,
-        Key: oldKey,
-      }),
-    );
   }
-
   const imageName = randomImageName();
   const buffer = await sharp(file.buffer)
     .resize({ height: 500, width: 500, fit: "contain" })
     .toBuffer();
-
   await s3.send(
     new PutObjectCommand({
       Bucket: bucketName,
@@ -75,7 +69,16 @@ const deleteOldAndInsertNewImageInS3 = async (data, file) => {
   return imageName;
 };
 
+const deleteOldAndInsertNewImageInS3 = async (data, file) => {
+  const oldKey = resolveImageKey(data);
+  if (oldKey) await deleteFileFromS3ByKey(oldKey);
+  return await uploadFileToS3(file);
+};
+
 module.exports = {
   getImagePresignedUrl,
+  getImagePresignedUrlByKey,
   deleteOldAndInsertNewImageInS3,
+  uploadFileToS3,
+  deleteFileFromS3ByKey,
 };

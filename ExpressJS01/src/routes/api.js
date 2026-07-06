@@ -1,4 +1,13 @@
 const express = require("express");
+
+const auth = require("../middleware/auth");
+const isAdmin = require("../middleware/isAdmin");
+const {
+  validateAvatar,
+  validateCategoryImage,
+  validateProductImages,
+} = require("../middleware/fileValidate");
+
 const {
   register,
   handleLogin,
@@ -41,20 +50,15 @@ const {
   updateCategory,
   deleteCategory,
 } = require("../controllers/categoryController");
-const auth = require("../middleware/auth");
-const isAdmin = require("../middleware/isAdmin");
 const {
-  validateAvatar,
-  validateCategoryImage,
-} = require("../middleware/fileValidate");
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} = require("../controllers/adminProductController");
 
 const routerAPI = express.Router();
-
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
-
-routerAPI.get("/", (req, res) => {
-  return res.status(200).json("Hello world api");
-});
 
 routerAPI.post("/register/send-otp", handleSendRegisterOTP);
 routerAPI.post("/register", register);
@@ -108,5 +112,20 @@ routerAPI.put(
   updateCategory,
 );
 routerAPI.delete("/admin/categories/:id", isAdmin, deleteCategory);
+
+routerAPI.get("/admin/products", isAdmin, getAllProducts);
+routerAPI.post(
+  "/admin/products",
+  isAdmin,
+  validateProductImages,
+  createProduct,
+);
+routerAPI.put(
+  "/admin/products/:id",
+  isAdmin,
+  validateProductImages,
+  updateProduct,
+);
+routerAPI.delete("/admin/products/:id", isAdmin, deleteProduct);
 
 module.exports = routerAPI;

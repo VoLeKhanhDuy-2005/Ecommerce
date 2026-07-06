@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, Tag, notification, Empty, Spin, Card } from "antd";
+import { Button, Tag, notification, Empty, Spin, Card, Pagination } from "antd";
 import {
   AppstoreOutlined,
   CheckOutlined,
@@ -22,6 +22,11 @@ export default function AdminOrdersPage() {
   const { auth } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   if (!auth.isAuthenticated) {
     return (
@@ -31,12 +36,23 @@ export default function AdminOrdersPage() {
     );
   }
 
-  const fetchShopOrders = async (isAutoRefresh = false) => {
+  const fetchShopOrders = async (
+    isAutoRefresh = false,
+    page = pagination.current,
+    limit = pagination.pageSize,
+  ) => {
     if (!isAutoRefresh) setIsLoading(true);
     try {
-      const res = await getShopOrdersApi();
+      const res = await getShopOrdersApi(page, limit);
       if (res && res.success) {
         setOrders(res.data);
+        if (res.meta) {
+          setPagination({
+            current: res.meta.page,
+            pageSize: res.meta.limit,
+            total: res.meta.total,
+          });
+        }
       } else {
         notification.error({
           message: "Lỗi tải đơn hàng",
@@ -65,11 +81,11 @@ export default function AdminOrdersPage() {
     if (!auth.isAuthenticated) return;
 
     const autoRefreshTimer = setInterval(() => {
-      fetchShopOrders(true);
+      fetchShopOrders(true, pagination.current, pagination.pageSize);
     }, 10 * 1000);
 
     return () => clearInterval(autoRefreshTimer);
-  }, [auth.isAuthenticated]);
+  }, [auth.isAuthenticated, pagination.current, pagination.pageSize]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -311,6 +327,19 @@ export default function AdminOrdersPage() {
                 )}
             </div>
           ))}
+
+          <div className="flex justify-end mt-6">
+            <Pagination
+              current={pagination.current}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onChange={(page, pageSize) =>
+                fetchShopOrders(false, page, pageSize)
+              }
+              showSizeChanger
+              showTotal={(total) => `Tổng số ${total} đơn hàng`}
+            />
+          </div>
         </div>
       )}
     </div>
