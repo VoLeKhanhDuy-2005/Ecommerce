@@ -78,7 +78,7 @@ productSchema.index({ sold: -1 });
 productSchema.index({ views: -1 });
 
 // Tự động tạo slug từ name nếu chưa có
-productSchema.pre("save", function (next) {
+productSchema.pre("save", function () {
   if (this.isModified("name") || !this.slug) {
     this.slug = this.name
       .toLowerCase()
@@ -89,7 +89,6 @@ productSchema.pre("save", function (next) {
       .trim()
       .replace(/\s+/g, "-");
   }
-  next();
 });
 
 const Product = mongoose.model("product", productSchema);
