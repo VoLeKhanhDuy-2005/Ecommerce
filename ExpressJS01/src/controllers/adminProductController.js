@@ -163,13 +163,11 @@ const updateProduct = async (req, res) => {
       new: true,
       runValidators: true,
     });
-    return res
-      .status(200)
-      .json({
-        EC: 0,
-        EM: "Cập nhật sản phẩm thành công",
-        data: updatedProduct,
-      });
+    return res.status(200).json({
+      EC: 0,
+      EM: "Cập nhật sản phẩm thành công",
+      data: updatedProduct,
+    });
   } catch (error) {
     console.error("Error updating product:", error);
     return res.status(500).json({ EC: -1, EM: "Lỗi server: " + error.message });
