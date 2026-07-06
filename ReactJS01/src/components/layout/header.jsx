@@ -11,6 +11,7 @@ import {
   ShoppingCartOutlined,
   HistoryOutlined,
   SettingOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -45,6 +46,11 @@ const Header = () => {
               to: "/user",
               label: "Quản lý User",
               icon: <UsergroupAddOutlined />,
+            },
+            {
+              to: "/admin/categories",
+              label: "Quản lý danh mục",
+              icon: <AppstoreOutlined />,
             },
           ]
         : [

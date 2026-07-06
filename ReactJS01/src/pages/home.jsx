@@ -10,7 +10,7 @@ import { AuthContext } from "../components/context/auth.context";
 import ProductCard from "../components/product/ProductCard";
 import ProductSection from "../components/product/ProductSection";
 import axios from "../util/axios.customize";
-import { foodCategories } from "../util/constants";
+import { getCategoriesApi } from "../util/api";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -25,6 +25,7 @@ export default function Home() {
     promotions: [],
     mostViewed: [],
   });
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const maxDiscountPercent =
     products.promotions.length > 0 ? products.promotions[0].discountPercent : 0;
@@ -32,25 +33,37 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/v1/api/products");
-        if (res && res.data) {
+        const [catRes, prodRes] = await Promise.all([
+          getCategoriesApi(),
+          axios.get("/v1/api/products"),
+        ]);
+
+        let fetchedCategories = [];
+        if (catRes && catRes.EC === 0) {
+          fetchedCategories = catRes.data;
+          setCategories(fetchedCategories);
+        }
+
+        if (prodRes && prodRes.data) {
           const mapCategoryName = (products) =>
             products.map((p) => ({
               ...p,
               categoryName:
-                foodCategories.find((c) => c.id === p.category)?.name ||
-                p.category,
+                fetchedCategories.find((c) => c.categoryId === p.category)
+                  ?.name || p.category,
             }));
-          const mappedPromotions = mapCategoryName(res.data.promotions || []);
+          const mappedPromotions = mapCategoryName(
+            prodRes.data.promotions || [],
+          );
           setProducts({
-            newest: mapCategoryName(res.data.newest || []),
-            bestSelling: mapCategoryName(res.data.bestSelling || []),
+            newest: mapCategoryName(prodRes.data.newest || []),
+            bestSelling: mapCategoryName(prodRes.data.bestSelling || []),
             promotions: mappedPromotions,
-            mostViewed: mapCategoryName(res.data.mostViewed || []),
+            mostViewed: mapCategoryName(prodRes.data.mostViewed || []),
           });
         }
       } catch (err) {
-        console.error("Lỗi khi tải sản phẩm:", err);
+        console.error("Lỗi khi tải dữ liệu:", err);
       } finally {
         setIsLoading(false);
       }
@@ -198,19 +211,32 @@ export default function Home() {
 
       {/* 2. DANH MỤC MÓN ĂN*/}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="mb-6 flex flex-col items-center sm:items-start">
+          <p className="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-1">
+            Đa dạng lựa chọn
+          </p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Danh Mục Món Ăn 🍽️
+          </h2>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {foodCategories.map((cat, idx) => {
-            const catEmojis = ["🍔", "🍜", "🧋", "🍮"];
+          {categories.map((cat) => {
             return (
               <Link
-                key={cat.id}
-                to={`/search?category=${cat.id}`}
-                className="group bg-white rounded-2xl p-5 flex flex-col items-center gap-2 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1 transition-all text-center"
+                key={cat._id}
+                to={`/search?category=${cat.categoryId}`}
+                className="group bg-white rounded-2xl flex flex-col items-center shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1 transition-all text-center overflow-hidden"
               >
-                <span className="text-3xl">{catEmojis[idx] || "🍽️"}</span>
-                <span className="font-semibold text-gray-700 text-sm group-hover:text-orange-600 transition-colors">
-                  {cat.name}
-                </span>
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="w-full h-32 object-cover"
+                />
+                <div className="p-3 w-full">
+                  <span className="font-semibold text-gray-700 text-sm group-hover:text-orange-600 transition-colors">
+                    {cat.name}
+                  </span>
+                </div>
               </Link>
             );
           })}

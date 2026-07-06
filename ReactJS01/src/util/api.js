@@ -47,6 +47,10 @@ const getCurrentUserApi = () => {
   return axios.get(URL_API);
 };
 
+const getCategoriesApi = () => {
+  return axios.get("/v1/api/categories");
+};
+
 const getProductsApi = () => {
   const URL_API = "/v1/api/products";
   return axios.get(URL_API);
@@ -122,6 +126,22 @@ const updateProfileApi = (formData) => {
   });
 };
 
+const createCategoryApi = (data) => {
+  return axios.post("/v1/api/admin/categories", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+const updateCategoryApi = (id, data) => {
+  return axios.put(`/v1/api/admin/categories/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+const deleteCategoryApi = (id) => {
+  return axios.delete(`/v1/api/admin/categories/${id}`);
+};
+
 export {
   registerApi,
   loginApi,
@@ -147,4 +167,8 @@ export {
   sendRegisterOtpApi,
   sendForgotPasswordOtpApi,
   resetPasswordApi,
+  getCategoriesApi,
+  createCategoryApi,
+  updateCategoryApi,
+  deleteCategoryApi,
 };

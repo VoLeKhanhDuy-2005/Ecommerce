@@ -35,9 +35,18 @@ const {
   updateShopOrderStatus,
   handleShopCancelRequest,
 } = require("../controllers/orderController");
+const {
+  createCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/categoryController");
 const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
-const { validateAvatar } = require("../middleware/fileValidate");
+const {
+  validateAvatar,
+  validateCategoryImage,
+} = require("../middleware/fileValidate");
 
 const routerAPI = express.Router();
 
@@ -84,5 +93,20 @@ routerAPI.post(
   isAdmin,
   handleShopCancelRequest,
 );
+
+routerAPI.get("/categories", getAllCategories);
+routerAPI.post(
+  "/admin/categories",
+  isAdmin,
+  validateCategoryImage,
+  createCategory,
+);
+routerAPI.put(
+  "/admin/categories/:id",
+  isAdmin,
+  validateCategoryImage,
+  updateCategory,
+);
+routerAPI.delete("/admin/categories/:id", isAdmin, deleteCategory);
 
 module.exports = routerAPI;

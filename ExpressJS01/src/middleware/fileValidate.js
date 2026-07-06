@@ -62,4 +62,39 @@ const validateAvatar = (req, res, next) => {
   });
 };
 
-module.exports = { validateAvatar };
+const validateCategoryImage = (req, res, next) => {
+  upload.single("image")(req, res, async (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return next(new Error("File quá lớn! Tối đa chỉ được 2MB."));
+      }
+      return next(new Error(err.message));
+    }
+
+    if (err) {
+      return next(new Error(err.message));
+    }
+
+    if (!req.file) {
+      return next();
+    }
+
+    const type = await fileTypeFromBuffer(req.file.buffer);
+
+    if (!type) {
+      return next(new Error("File không hợp lệ"));
+    }
+
+    if (
+      type.mime !== "image/jpeg" &&
+      type.mime !== "image/png" &&
+      type.mime !== "image/webp"
+    ) {
+      return next(new Error("File phải là ảnh JPEG, PNG hoặc WebP thật"));
+    }
+
+    next();
+  });
+};
+
+module.exports = { validateAvatar, validateCategoryImage };

@@ -10,6 +10,7 @@ const auth = (req, res, next) => {
     "/refresh-token",
     "/logout",
     "/forgot-password",
+    "/categories",
   ];
 
   // Cho phép các route bắt đầu bằng danh sách whitelist đi qua mà không cần check token

@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import ProductCard from "../components/product/ProductCard";
 import axios from "../util/axios.customize";
-import { foodCategories } from "../util/constants";
+import { getCategoriesApi } from "../util/api";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   Navigation,
@@ -48,17 +48,30 @@ export default function ProductDetailPage() {
       setIsLoading(true);
       setThumbsSwiper(null); // Reset thumbnail khi chuyển sản phẩm
       try {
-        const res = await axios.get(`/v1/api/products/${id}`);
+        const [res, catRes] = await Promise.all([
+          axios.get(`/v1/api/products/${id}`),
+          getCategoriesApi(),
+        ]);
+
         if (res && res.data && res.data.product) {
           const prod = res.data.product;
           const related = res.data.relatedProducts || [];
 
+          let fetchedCategories = [];
+          if (catRes && catRes.EC === 0) {
+            fetchedCategories = catRes.data;
+          }
+
           // Thêm categoryName cho UI vì backend chỉ trả về category id
-          const cat = foodCategories.find((c) => c.id === prod.category);
+          const cat = fetchedCategories.find(
+            (c) => c.categoryId === prod.category,
+          );
           prod.categoryName = cat ? cat.name : prod.category;
 
           related.forEach((r) => {
-            const rCat = foodCategories.find((c) => c.id === r.category);
+            const rCat = fetchedCategories.find(
+              (c) => c.categoryId === r.category,
+            );
             r.categoryName = rCat ? rCat.name : r.category;
           });
 

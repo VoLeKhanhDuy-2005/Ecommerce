@@ -21,9 +21,11 @@ const s3 = new S3Client({
 const randomImageName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString("hex");
 
-const resolveAvatarKey = (data) => {
+const resolveImageKey = (data) => {
   if (!data) return null;
-  return data.profile?.avatarName || data.avatarName || null;
+  const key = data.profile?.avatarName || data.avatarName || data.image || null;
+  if (key && key.startsWith("http")) return null;
+  return key;
 };
 
 const checkValidImageExtensionFile = (file) => {
@@ -31,7 +33,7 @@ const checkValidImageExtensionFile = (file) => {
 };
 
 const getImagePresignedUrl = async (data) => {
-  const key = resolveAvatarKey(data);
+  const key = resolveImageKey(data);
   if (!key) return null;
 
   const getObjectParams = {
@@ -47,7 +49,7 @@ const deleteOldAndInsertNewImageInS3 = async (data, file) => {
   if (!checkValidImageExtensionFile(file))
     throw new Error("Định dạng file không hợp lệ! Chỉ chấp nhận ảnh JPG/PNG.");
 
-  const oldKey = resolveAvatarKey(data);
+  const oldKey = resolveImageKey(data);
   if (oldKey) {
     await s3.send(
       new DeleteObjectCommand({

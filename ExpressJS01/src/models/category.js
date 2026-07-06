@@ -14,6 +14,10 @@ const categorySchema = new mongoose.Schema(
       required: [true, "Tên danh mục không được để trống"],
       trim: true,
     },
+    image: {
+      type: String,
+      required: [true, "Hình ảnh danh mục không được để trống"],
+    },
   },
   {
     timestamps: true,

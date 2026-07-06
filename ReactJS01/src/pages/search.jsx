@@ -4,7 +4,7 @@ import { Input, Spin, Empty, Radio, Divider, Pagination } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import ProductCard from "../components/product/ProductCard";
 import axios from "../util/axios.customize";
-import { foodCategories } from "../util/constants";
+import { getCategoriesApi } from "../util/api";
 
 const { Search } = Input;
 
@@ -12,6 +12,7 @@ export default function SearchFilterPage() {
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 8;
   const [results, setResults] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Bắt đầu là true để load ngay khi vào trang
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,14 +62,26 @@ export default function SearchFilterPage() {
         if (maxPrice) params.maxPrice = maxPrice;
         params.page = currentPage;
 
-        const res = await axios.get("/v1/api/products/search", { params });
+        const [res, catRes] = await Promise.all([
+          axios.get("/v1/api/products/search", { params }),
+          categories.length === 0
+            ? getCategoriesApi()
+            : Promise.resolve({ EC: 0, data: categories }),
+        ]);
+
+        let currentCategories = categories;
+        if (categories.length === 0 && catRes && catRes.EC === 0) {
+          currentCategories = catRes.data;
+          setCategories(currentCategories);
+        }
+
         if (res && res.data) {
           const mapCategoryName = (products) =>
             products.map((p) => ({
               ...p,
               categoryName:
-                foodCategories.find((c) => c.id === p.category)?.name ||
-                p.category,
+                currentCategories.find((c) => c.categoryId === p.category)
+                  ?.name || p.category,
             }));
           setResults(mapCategoryName(res.data.products || []));
           setTotalItems(res.data.total || 0);
@@ -129,9 +142,6 @@ export default function SearchFilterPage() {
       currency: "VND",
     }).format(price);
 
-  // Danh sách emoji ứng với các danh mục
-  const catEmojis = { c1: "🍔", c2: "🍜", c3: "🧋", c4: "🍮" };
-
   return (
     <div className="pb-20">
       {/* ── Khu vực tìm kiếm (Search Header) ── */}
@@ -176,17 +186,24 @@ export default function SearchFilterPage() {
                   >
                     Tất cả
                   </Radio>
-                  {foodCategories.map((cat) => (
-                    <Radio
-                      key={cat.id}
-                      value={cat.id}
-                      className="py-2 px-3 hover:bg-orange-50 rounded-xl transition-colors w-full"
-                    >
-                      <span>
-                        {catEmojis[cat.id] || "🍽️"} {cat.name}
-                      </span>
-                    </Radio>
-                  ))}
+                  {categories.map((cat) => {
+                    return (
+                      <Radio
+                        key={cat._id}
+                        value={cat.categoryId}
+                        className="py-2 px-3 hover:bg-orange-50 rounded-xl transition-colors w-full"
+                      >
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={cat.image}
+                            alt={cat.name}
+                            className="w-6 h-6 object-contain"
+                          />
+                          <span>{cat.name}</span>
+                        </div>
+                      </Radio>
+                    );
+                  })}
                 </Radio.Group>
               </div>
 
