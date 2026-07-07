@@ -3,13 +3,14 @@ const { RedisStore } = require("rate-limit-redis");
 const { redisClient } = require("../config/redis");
 
 // Custom Redis store wrapper to handle connection errors
-const createRedisStore = () => {
+const createRedisStore = (prefix = "rl:") => {
   if (process.env.NODE_ENV === "test") {
     return undefined; // Use default MemoryStore in test environment
   }
   return new RedisStore({
     // rate-limit-redis v4 expects sendCommand
     sendCommand: (...args) => redisClient.sendCommand(args),
+    prefix: prefix,
   });
 };
 
@@ -19,7 +20,7 @@ const apiLimiter = rateLimit({
   limit: 100, // Limit each IP to 100 requests per `window`
   standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  store: createRedisStore(),
+  store: createRedisStore("rl_api:"),
   message: {
     EC: 429,
     EM: "Too many requests from this IP, please try again after 15 minutes",
@@ -33,7 +34,7 @@ const authLimiter = rateLimit({
   limit: 10, // Limit each IP to 10 requests per `window` for auth routes
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  store: createRedisStore(),
+  store: createRedisStore("rl_auth:"),
   message: {
     EC: 429,
     EM: "Too many authentication attempts from this IP, please try again after 15 minutes",
