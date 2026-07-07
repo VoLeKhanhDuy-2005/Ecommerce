@@ -7,6 +7,7 @@ const {
   validateCategoryImage,
   validateProductImages,
 } = require("../middleware/fileValidate");
+const { authLimiter } = require("../middleware/rateLimiter");
 
 const {
   register,
@@ -60,12 +61,12 @@ const {
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
 
-routerAPI.post("/register/send-otp", handleSendRegisterOTP);
-routerAPI.post("/register", register);
-routerAPI.post("/login", handleLogin);
-routerAPI.post("/forgot-password/send-otp", handleSendForgotOTP);
-routerAPI.post("/forgot-password", handleResetPassword);
-routerAPI.post("/refresh-token", handleRefreshToken);
+routerAPI.post("/register/send-otp", authLimiter, handleSendRegisterOTP);
+routerAPI.post("/register", authLimiter, register);
+routerAPI.post("/login", authLimiter, handleLogin);
+routerAPI.post("/forgot-password/send-otp", authLimiter, handleSendForgotOTP);
+routerAPI.post("/forgot-password", authLimiter, handleResetPassword);
+routerAPI.post("/refresh-token", authLimiter, handleRefreshToken);
 routerAPI.post("/logout", handleLogout);
 
 routerAPI.get("/user", isAdmin, getUser);

@@ -6,8 +6,10 @@ const { connectRedis } = require("./config/redis");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/errorHandler");
+const { apiLimiter } = require("./middleware/rateLimiter");
 const Order = require("./models/order");
 const app = express(); //cấu hình app là express
+app.set("trust proxy", 1); // Trust first proxy (Render) for rate limiting behind load balancers
 const port = process.env.PORT || 8888;
 app.use(
   cors({
@@ -24,7 +26,7 @@ app.use(express.urlencoded({ extended: true })); // for form data
 const webAPI = express.Router();
 app.use("/", webAPI);
 //khai báo route cho API
-app.use("/v1/api/", apiRoutes);
+app.use("/v1/api/", apiLimiter, apiRoutes);
 app.use(errorHandler);
 (async () => {
   try {
