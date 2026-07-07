@@ -59,6 +59,11 @@ const productSchema = new mongoose.Schema(
       min: [0, "Rating tối thiểu là 0"],
       max: [5, "Rating tối đa là 5"],
     },
+    reviewCount: {
+      type: Number,
+      default: 0,
+      min: [0, "Số lượng đánh giá không được âm"],
+    },
     views: {
       type: Number,
       default: 0,

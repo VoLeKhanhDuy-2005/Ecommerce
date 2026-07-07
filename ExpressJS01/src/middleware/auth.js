@@ -20,7 +20,12 @@ const auth = (req, res, next) => {
     return req.originalUrl.startsWith("/v1/api" + item);
   }); // Trả về true nếu ít nhất một phần tử thỏa điều kiện
 
-  if (isWhiteListed) {
+  // Bắt buộc xác thực cho tính năng gửi hoặc xoá đánh giá
+  const isReviewAction =
+    req.originalUrl.match(/\/v1\/api\/products\/.*\/reviews/) &&
+    ["POST", "DELETE"].includes(req.method);
+
+  if (isWhiteListed && !isReviewAction) {
     next();
   } else {
     if (req?.headers?.authorization?.split(" ")?.[1]) {
@@ -33,7 +38,7 @@ const auth = (req, res, next) => {
           email: decoded.email,
           name: decoded.name,
           role: decoded.role,
-          createdBy: "hoidanit",
+          createdBy: "volekhanhduy2005",
         };
         //console.log(">>> check token: ", decoded)
         next();

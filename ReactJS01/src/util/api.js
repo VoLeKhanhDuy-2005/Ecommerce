@@ -166,6 +166,22 @@ const deleteProductApi = (id) => {
   return axios.delete(`/v1/api/admin/products/${id}`);
 };
 
+const getProductReviewsApi = (productId, page = 1, limit = 5) => {
+  return axios.get(
+    `/v1/api/products/${productId}/reviews?page=${page}&limit=${limit}`,
+  );
+};
+
+const submitReviewApi = (productId, data) => {
+  const URL_API = `/v1/api/products/${productId}/reviews`;
+  return axios.post(URL_API, data);
+};
+
+const deleteReviewApi = (productId) => {
+  const URL_API = `/v1/api/products/${productId}/reviews`;
+  return axios.delete(URL_API);
+};
+
 export {
   registerApi,
   loginApi,
@@ -200,4 +216,7 @@ export {
   createProductApi,
   updateProductApi,
   deleteProductApi,
+  getProductReviewsApi,
+  submitReviewApi,
+  deleteReviewApi,
 };

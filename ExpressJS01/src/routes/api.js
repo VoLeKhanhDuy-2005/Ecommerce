@@ -57,6 +57,11 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controllers/adminProductController");
+const {
+  handleGetProductReviews,
+  handleAddReview,
+  handleDeleteReview,
+} = require("../controllers/reviewController");
 
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
@@ -77,6 +82,9 @@ routerAPI.get("/products", getHomePageProducts);
 routerAPI.get("/products/search", searchProducts);
 routerAPI.get("/products/:id", getProductDetail);
 routerAPI.patch("/products/:id/view", incrementView);
+routerAPI.get("/products/:id/reviews", handleGetProductReviews);
+routerAPI.post("/products/:id/reviews", handleAddReview);
+routerAPI.delete("/products/:id/reviews", handleDeleteReview);
 
 routerAPI.get("/cart", getCart);
 routerAPI.post("/cart", addToCart);

@@ -10,6 +10,7 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import ProductCard from "../components/product/ProductCard";
+import ProductReviews from "../components/product/ProductReviews";
 import axios from "../util/axios.customize";
 import { getCategoriesApi } from "../util/api";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -335,7 +336,10 @@ export default function ProductDetailPage() {
                 <div className="flex items-center gap-1.5 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
                   <StarFilled className="text-yellow-400" />
                   <span className="font-bold text-gray-800">
-                    {product.rating}
+                    {product.rating}{" "}
+                    <span className="text-gray-500 font-normal">
+                      ({product.reviewCount || 0} đánh giá)
+                    </span>
                   </span>
                 </div>
                 <div className="text-gray-500">
@@ -417,6 +421,23 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Khu vực Đánh giá */}
+        <ProductReviews
+          productId={product._id}
+          onReviewAdded={() => {
+            // fetch lại thông tin product (rating, reviewCount) sau khi đánh giá
+            axios.get(`/v1/api/products/${product._id}`).then((res) => {
+              if (res?.data?.product) {
+                setProduct((prev) => ({
+                  ...prev,
+                  rating: res.data.product.rating,
+                  reviewCount: res.data.product.reviewCount,
+                }));
+              }
+            });
+          }}
+        />
 
         {/*Sản phẩm tương tự*/}
         {similarProducts.length > 0 && (
