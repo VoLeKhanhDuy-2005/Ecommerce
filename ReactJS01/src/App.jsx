@@ -13,41 +13,46 @@ function App() {
   useEffect(() => {
     const fetchAccount = async () => {
       setIsLoading(true);
-      const res = await getCurrentUserApi();
-      if (res && res.EC === 0 && res.user) {
-        setAuth({
-          isAuthenticated: true,
-          user: {
-            email: res.user.email,
-            name: res.user.name,
-            role: res.user.role,
-            avatar: res.user.avatarURL,
-            phone: res.user.phone,
-            address: res.user.address,
-          },
-        });
+      try {
+        const res = await getCurrentUserApi();
+        if (res && res.EC === 0 && res.user) {
+          setAuth({
+            isAuthenticated: true,
+            user: {
+              email: res.user.email,
+              name: res.user.name,
+              role: res.user.role,
+              avatar: res.user.avatarURL,
+              phone: res.user.phone,
+              address: res.user.address,
+            },
+          });
 
-        if (res.user.role === "admin") {
-          navigate("/admin/orders");
-          setIsLoading(false);
-          return;
-        }
-
-        // Tải số lượng sản phẩm trong giỏ hàng
-        try {
-          const cartRes = await getCartApi();
-          if (cartRes && cartRes.success && cartRes.data) {
-            const count = cartRes.data.items.reduce(
-              (acc, item) => acc + item.quantity,
-              0,
-            );
-            setCartCount(count);
+          if (res.user.role === "admin") {
+            navigate("/admin/orders");
+            setIsLoading(false);
+            return;
           }
-        } catch (error) {
-          console.error("Lỗi khi lấy giỏ hàng ban đầu:", error);
+
+          // Tải số lượng sản phẩm trong giỏ hàng
+          try {
+            const cartRes = await getCartApi();
+            if (cartRes && cartRes.success && cartRes.data) {
+              const count = cartRes.data.items.reduce(
+                (acc, item) => acc + item.quantity,
+                0,
+              );
+              setCartCount(count);
+            }
+          } catch (error) {
+            console.error("Lỗi khi lấy giỏ hàng ban đầu:", error);
+          }
         }
+      } catch (error) {
+        console.error("Fetch account error:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchAccount();
   }, []);

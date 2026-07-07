@@ -55,7 +55,13 @@ instance.interceptors.response.use(
       } catch (refreshError) {
         // Nếu refresh token cũng hết hạn, buộc đăng xuất
         localStorage.removeItem("access_token");
-        window.location.href = "/login";
+        
+        // Không redirect nếu đang check user ban đầu để tránh kẹt ở trang login
+        const isCheckUserReq = originalRequest.url && originalRequest.url.includes("/user/me");
+        if (!isCheckUserReq) {
+          window.location.href = "/login";
+        }
+        
         return Promise.reject(refreshError);
       }
     }
