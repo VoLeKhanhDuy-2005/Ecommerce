@@ -9,12 +9,14 @@ vi.mock("../../util/api", () => ({
   getProductReviewsApi: vi.fn(),
   submitReviewApi: vi.fn(),
   deleteReviewApi: vi.fn(),
+  checkReviewEligibilityApi: vi.fn(),
 }));
 
 import {
   getProductReviewsApi,
   submitReviewApi,
   deleteReviewApi,
+  checkReviewEligibilityApi,
 } from "../../util/api";
 
 describe("ProductReviews Component", () => {
@@ -101,10 +103,14 @@ describe("ProductReviews Component", () => {
     });
   });
 
-  it("shows review form if authenticated", async () => {
+  it("shows review form if authenticated and eligible", async () => {
     getProductReviewsApi.mockResolvedValue({
       EC: 0,
       data: { reviews: [], total: 0 },
+    });
+    checkReviewEligibilityApi.mockResolvedValue({
+      EC: 0,
+      data: { canReview: true },
     });
 
     render(
@@ -118,6 +124,31 @@ describe("ProductReviews Component", () => {
       expect(
         screen.getByPlaceholderText(
           "Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé...",
+        ),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows eligibility error if authenticated but not eligible", async () => {
+    getProductReviewsApi.mockResolvedValue({
+      EC: 0,
+      data: { reviews: [], total: 0 },
+    });
+    checkReviewEligibilityApi.mockResolvedValue({
+      EC: 0,
+      data: { canReview: false },
+    });
+
+    render(
+      <AuthContext.Provider value={{ auth: { isAuthenticated: true } }}>
+        <ProductReviews productId="123" />
+      </AuthContext.Provider>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
         ),
       ).toBeInTheDocument();
     });
@@ -145,6 +176,10 @@ describe("ProductReviews Component", () => {
       data: { reviews: mockReviews, total: 2 },
     });
     deleteReviewApi.mockResolvedValue({ EC: 0 });
+    checkReviewEligibilityApi.mockResolvedValue({
+      EC: 0,
+      data: { canReview: true },
+    });
 
     // Mock window.confirm
     const confirmSpy = vi

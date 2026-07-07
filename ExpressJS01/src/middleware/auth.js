@@ -20,12 +20,15 @@ const auth = (req, res, next) => {
     return req.originalUrl.startsWith("/v1/api" + item);
   }); // Trả về true nếu ít nhất một phần tử thỏa điều kiện
 
-  // Bắt buộc xác thực cho tính năng gửi hoặc xoá đánh giá
+  // Bắt buộc xác thực cho tính năng gửi hoặc xoá đánh giá và kiểm tra quyền đánh giá
+  const isReviewEligibility =
+    req.originalUrl.match(/\/v1\/api\/products\/.*\/reviews\/eligibility/) &&
+    req.method === "GET";
   const isReviewAction =
     req.originalUrl.match(/\/v1\/api\/products\/.*\/reviews/) &&
     ["POST", "DELETE"].includes(req.method);
 
-  if (isWhiteListed && !isReviewAction) {
+  if (isWhiteListed && !isReviewAction && !isReviewEligibility) {
     next();
   } else {
     if (req?.headers?.authorization?.split(" ")?.[1]) {

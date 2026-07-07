@@ -14,6 +14,7 @@ import {
   getProductReviewsApi,
   submitReviewApi,
   deleteReviewApi,
+  checkReviewEligibilityApi,
 } from "../../util/api";
 import dayjs from "dayjs";
 
@@ -28,6 +29,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [canReview, setCanReview] = useState(false);
 
   const fetchReviews = async (currentPage) => {
     setLoading(true);
@@ -44,11 +46,28 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
     }
   };
 
+  const checkEligibility = async () => {
+    try {
+      const res = await checkReviewEligibilityApi(productId);
+      if (res && res.EC === 0 && res.data) {
+        setCanReview(res.data.canReview);
+      }
+    } catch (error) {
+      console.error("Lỗi kiểm tra quyền đánh giá:", error);
+    }
+  };
+
   useEffect(() => {
     if (productId) {
       fetchReviews(page);
     }
   }, [productId, page]);
+
+  useEffect(() => {
+    if (productId && auth?.isAuthenticated) {
+      checkEligibility();
+    }
+  }, [productId, auth?.isAuthenticated]);
 
   const handleSubmit = async () => {
     if (!rating) {
@@ -124,36 +143,43 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
 
       {/* Form đánh giá */}
       {auth.isAuthenticated ? (
-        <div className="bg-orange-50 rounded-2xl p-5 mb-8 border border-orange-100">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-            <span className="font-semibold text-gray-700">
-              Chất lượng sản phẩm:
-            </span>
-            <Rate
-              value={rating}
-              onChange={setRating}
-              className="text-orange-400 text-xl"
+        canReview ? (
+          <div className="bg-orange-50 rounded-2xl p-5 mb-8 border border-orange-100">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+              <span className="font-semibold text-gray-700">
+                Chất lượng sản phẩm:
+              </span>
+              <Rate
+                value={rating}
+                onChange={setRating}
+                className="text-orange-400 text-xl"
+              />
+            </div>
+            <TextArea
+              rows={3}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé..."
+              className="rounded-xl border-orange-200 focus:border-orange-400 hover:border-orange-300 mb-4"
             />
+            <div className="flex justify-end">
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                onClick={handleSubmit}
+                loading={submitting}
+                className="bg-orange-500 hover:bg-orange-600 border-none rounded-xl h-10 px-6 font-semibold"
+              >
+                Gửi đánh giá
+              </Button>
+            </div>
           </div>
-          <TextArea
-            rows={3}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé..."
-            className="rounded-xl border-orange-200 focus:border-orange-400 hover:border-orange-300 mb-4"
-          />
-          <div className="flex justify-end">
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSubmit}
-              loading={submitting}
-              className="bg-orange-500 hover:bg-orange-600 border-none rounded-xl h-10 px-6 font-semibold"
-            >
-              Gửi đánh giá
-            </Button>
+        ) : (
+          <div className="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-200 text-center text-gray-500">
+            Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành
+            công.
           </div>
-        </div>
+        )
       ) : (
         <div className="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-200 text-center text-gray-500">
           Vui lòng đăng nhập để đánh giá sản phẩm.

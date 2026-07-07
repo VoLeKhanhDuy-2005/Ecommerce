@@ -2,6 +2,7 @@ const {
   getProductReviews,
   addOrUpdateReview,
   deleteReview,
+  checkReviewEligibility,
 } = require("../services/reviewService");
 
 const handleGetProductReviews = async (req, res, next) => {
@@ -55,8 +56,20 @@ const handleDeleteReview = async (req, res, next) => {
   }
 };
 
+const handleCheckEligibility = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const email = req.user.email;
+    const result = await checkReviewEligibility(email, id);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   handleGetProductReviews,
   handleAddReview,
   handleDeleteReview,
+  handleCheckEligibility,
 };

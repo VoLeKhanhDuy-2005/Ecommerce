@@ -182,6 +182,11 @@ const deleteReviewApi = (productId) => {
   return axios.delete(URL_API);
 };
 
+const checkReviewEligibilityApi = (productId) => {
+  const URL_API = `/v1/api/products/${productId}/reviews/eligibility`;
+  return axios.get(URL_API);
+};
+
 export {
   registerApi,
   loginApi,
@@ -219,4 +224,5 @@ export {
   getProductReviewsApi,
   submitReviewApi,
   deleteReviewApi,
+  checkReviewEligibilityApi,
 };

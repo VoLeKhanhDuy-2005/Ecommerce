@@ -1,6 +1,7 @@
 const Review = require("../models/review");
 const Product = require("../models/product");
 const User = require("../models/user");
+const Order = require("../models/order");
 
 const updateProductRating = async (productId) => {
   const result = await Review.aggregate([
@@ -59,11 +60,24 @@ const addOrUpdateReview = async (email, productId, rating, comment) => {
     return { EC: 1, EM: "Người dùng không tồn tại" };
   }
 
-  // Cập nhật nếu đã có, hoặc tạo mới nếu chưa có
+  // Kiểm tra người dùng đã mua và nhận hàng chưa
+  const hasReceivedOrder = await Order.exists({
+    userEmail: email,
+    status: "Delivered",
+    "items.product": productId,
+  });
+
+  if (!hasReceivedOrder) {
+    return {
+      EC: 1,
+      EM: "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
+    };
+  }
+
   const review = await Review.findOneAndUpdate(
-    { user: user._id, product: productId },
+    { product: productId, user: user._id },
     { rating, comment },
-    { new: true, upsert: true, setDefaultsOnInsert: true },
+    { new: true, upsert: true },
   );
 
   await updateProductRating(productId);
@@ -98,8 +112,24 @@ const deleteReview = async (email, productId) => {
   };
 };
 
+const checkReviewEligibility = async (email, productId) => {
+  const hasReceivedOrder = await Order.exists({
+    userEmail: email,
+    status: "Delivered",
+    "items.product": productId,
+  });
+  return {
+    EC: 0,
+    EM: "Thành công",
+    data: {
+      canReview: !!hasReceivedOrder,
+    },
+  };
+};
+
 module.exports = {
   getProductReviews,
   addOrUpdateReview,
   deleteReview,
+  checkReviewEligibility,
 };

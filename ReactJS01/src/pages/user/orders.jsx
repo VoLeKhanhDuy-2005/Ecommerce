@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Spin, Steps, notification, Tag, Empty, Modal, Input } from "antd";
+import {
+  Spin,
+  Steps,
+  notification,
+  Tag,
+  Empty,
+  Modal,
+  Input,
+  Rate,
+} from "antd";
 import {
   ClockCircleOutlined,
   CloseCircleOutlined,
@@ -19,6 +28,7 @@ import {
   verifyMomoPaymentApi,
   getCartApi,
   markOrderAsReceivedApi,
+  submitReviewApi,
 } from "../../util/api";
 
 export default function OrdersPage() {
@@ -33,6 +43,12 @@ export default function OrdersPage() {
   const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
   const [receiveLoading, setReceiveLoading] = useState(false);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewProduct, setReviewProduct] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   // State phục vụ đếm ngược thời gian hủy đơn (30 phút)
   const [timeLeftStr, setTimeLeftStr] = useState("");
@@ -255,6 +271,43 @@ export default function OrdersPage() {
       });
     } finally {
       setReceiveLoading(false);
+    }
+  };
+
+  const openReviewModal = (productItem) => {
+    setReviewProduct(productItem);
+    setReviewRating(0);
+    setReviewComment("");
+    setIsReviewModalOpen(true);
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!reviewRating) {
+      notification.warning({ message: "Vui lòng chọn số sao" });
+      return;
+    }
+    setReviewLoading(true);
+    try {
+      const res = await submitReviewApi(reviewProduct.product, {
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      if (res && res.EC === 0) {
+        notification.success({ message: "Đánh giá thành công!" });
+        setIsReviewModalOpen(false);
+      } else {
+        notification.error({
+          message: "Đánh giá thất bại",
+          description: res.EM || "Có lỗi xảy ra",
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: error.response?.data?.EM || "Lỗi kết nối",
+      });
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -574,22 +627,36 @@ export default function OrdersPage() {
                     {selectedOrder.items.map((item, index) => (
                       <div
                         key={index}
-                        className="py-3 flex items-center gap-3 text-xs"
+                        className="py-3 flex items-center justify-between gap-3 text-xs"
                       >
-                        <img
-                          src={item.image || "https://placehold.co/100"}
-                          alt={item.name}
-                          className="w-12 h-12 rounded-lg object-cover border border-gray-100 bg-white"
-                        />
-                        <div className="flex-grow">
-                          <p className="font-bold text-gray-800">{item.name}</p>
-                          <p className="text-gray-400 text-2xs mt-0.5">
-                            Số lượng: {item.quantity}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.image || "https://placehold.co/100"}
+                            alt={item.name}
+                            className="w-12 h-12 rounded-lg object-cover border border-gray-100 bg-white"
+                          />
+                          <div className="flex-grow">
+                            <p className="font-bold text-gray-800">
+                              {item.name}
+                            </p>
+                            <p className="text-gray-400 text-[10px] mt-0.5">
+                              Số lượng: {item.quantity}
+                            </p>
+                          </div>
                         </div>
-                        <span className="font-bold text-gray-800">
-                          {formatPrice(item.price)}
-                        </span>
+                        <div className="flex flex-col items-end justify-center gap-1">
+                          <span className="font-bold text-gray-800">
+                            {formatPrice(item.price)}
+                          </span>
+                          {selectedOrder.status === "Delivered" && (
+                            <button
+                              onClick={() => openReviewModal(item)}
+                              className="text-orange-500 hover:text-orange-600 font-semibold underline text-[10px]"
+                            >
+                              Đánh giá
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -687,6 +754,62 @@ export default function OrdersPage() {
             className="rounded-xl placeholder-gray-300 text-xs"
           />
         </div>
+      </Modal>
+
+      {/* Modal Đánh giá sản phẩm */}
+      <Modal
+        title={
+          <span className="flex items-center gap-2 text-orange-500 font-bold text-base">
+            <span className="text-xl">★</span> Đánh giá sản phẩm
+          </span>
+        }
+        open={isReviewModalOpen}
+        onOk={handleReviewSubmit}
+        confirmLoading={reviewLoading}
+        onCancel={() => setIsReviewModalOpen(false)}
+        okText="Gửi đánh giá"
+        cancelText="Hủy"
+        okButtonProps={{
+          className: "bg-orange-500 hover:bg-orange-600 border-none rounded-xl",
+        }}
+        cancelButtonProps={{ className: "rounded-xl" }}
+      >
+        {reviewProduct && (
+          <div className="space-y-4 py-3">
+            <div className="flex items-center gap-3">
+              <img
+                src={reviewProduct.image || "https://placehold.co/100"}
+                alt={reviewProduct.name}
+                className="w-10 h-10 rounded-lg object-cover border"
+              />
+              <span className="font-bold text-gray-800 text-sm">
+                {reviewProduct.name}
+              </span>
+            </div>
+            <div>
+              <span className="block text-xs font-semibold mb-1">
+                Chất lượng:
+              </span>
+              <Rate
+                value={reviewRating}
+                onChange={setReviewRating}
+                className="text-orange-400"
+              />
+            </div>
+            <div>
+              <span className="block text-xs font-semibold mb-1">
+                Bình luận:
+              </span>
+              <Input.TextArea
+                rows={3}
+                placeholder="Chia sẻ trải nghiệm của bạn..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="rounded-xl text-sm"
+              />
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

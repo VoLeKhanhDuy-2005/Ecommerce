@@ -61,6 +61,7 @@ const {
   handleGetProductReviews,
   handleAddReview,
   handleDeleteReview,
+  handleCheckEligibility,
 } = require("../controllers/reviewController");
 
 const routerAPI = express.Router();
@@ -83,6 +84,7 @@ routerAPI.get("/products/search", searchProducts);
 routerAPI.get("/products/:id", getProductDetail);
 routerAPI.patch("/products/:id/view", incrementView);
 routerAPI.get("/products/:id/reviews", handleGetProductReviews);
+routerAPI.get("/products/:id/reviews/eligibility", handleCheckEligibility);
 routerAPI.post("/products/:id/reviews", handleAddReview);
 routerAPI.delete("/products/:id/reviews", handleDeleteReview);
 
