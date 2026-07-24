@@ -15,12 +15,13 @@ const createRedisStore = (prefix = "rl:") => {
 };
 
 // General limiter for all API routes
+const apiLimitCount = process.env.NODE_ENV === "production" ? 100 : 10000;
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per `window`
+  limit: apiLimitCount, // Limit each IP per `window`
   standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  store: createRedisStore("rl_api:"),
+  store: createRedisStore("rl_api_v2:"),
   message: {
     EC: 429,
     EM: "Too many requests from this IP, please try again after 15 minutes",
@@ -29,12 +30,13 @@ const apiLimiter = rateLimit({
 });
 
 // Strict limiter for authentication routes
+const authLimitCount = process.env.NODE_ENV === "production" ? 10 : 1000;
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 10, // Limit each IP to 10 requests per `window` for auth routes
+  limit: authLimitCount, // Limit each IP per `window` for auth routes
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  store: createRedisStore("rl_auth:"),
+  store: createRedisStore("rl_auth_v2:"),
   message: {
     EC: 429,
     EM: "Too many authentication attempts from this IP, please try again after 15 minutes",

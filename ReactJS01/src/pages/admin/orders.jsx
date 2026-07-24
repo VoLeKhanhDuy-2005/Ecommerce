@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Button, Tag, notification, Empty, Spin, Card, Pagination } from "antd";
 import {
-  AppstoreOutlined,
+  HistoryOutlined,
   CheckOutlined,
   SendOutlined,
   GiftOutlined,
@@ -24,7 +24,7 @@ export default function AdminOrdersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
 
@@ -169,7 +169,7 @@ export default function AdminOrdersPage() {
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <AppstoreOutlined className="text-purple-600" />
+            <HistoryOutlined className="text-purple-600" />
             <span>Quản Lý Đơn Hàng Cửa Hàng</span>
           </h1>
         </div>

@@ -89,36 +89,6 @@ export default function Home() {
       currency: "VND",
     }).format(price);
 
-  if (!auth.isAuthenticated) {
-    return (
-      <div className="min-h-[90vh] flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 sm:p-16 text-center max-w-md w-full border border-orange-100 relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-orange-100 opacity-60" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-red-100 opacity-50" />
-
-          <div className="relative z-10">
-            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg text-3xl">
-              🔒
-            </div>
-            <h2 className="text-2xl font-black mb-2 text-gray-900">
-              Bạn Chưa Đăng Nhập
-            </h2>
-            <p className="text-gray-500 mb-8 leading-relaxed">
-              Đăng nhập để xem thực đơn đầy đủ, ưu đãi độc quyền và đặt món
-              nhanh chóng.
-            </p>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-            >
-              Đăng nhập ngay <ArrowRightOutlined />
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center">

@@ -1,4 +1,29 @@
 const Product = require("../models/product");
+const { getImagePresignedUrlByKey } = require("./fileService");
+
+const mapProductImageUrls = async (products) => {
+  if (!Array.isArray(products)) {
+    const pObj = products.toObject ? products.toObject() : products;
+    if (pObj.images && pObj.images.length > 0) {
+      pObj.images = await Promise.all(
+        pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
+      );
+    }
+    return pObj;
+  }
+
+  return await Promise.all(
+    products.map(async (p) => {
+      const pObj = p.toObject ? p.toObject() : p;
+      if (pObj.images && pObj.images.length > 0) {
+        pObj.images = await Promise.all(
+          pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
+        );
+      }
+      return pObj;
+    })
+  );
+};
 
 const getHomePageProducts = async () => {
   const [
@@ -14,10 +39,10 @@ const getHomePageProducts = async () => {
   ]);
 
   return {
-    newest: newestProducts,
-    bestSelling: bestSellingProducts,
-    promotions: promotionalProducts,
-    mostViewed: mostViewedProducts,
+    newest: await mapProductImageUrls(newestProducts),
+    bestSelling: await mapProductImageUrls(bestSellingProducts),
+    promotions: await mapProductImageUrls(promotionalProducts),
+    mostViewed: await mapProductImageUrls(mostViewedProducts),
   };
 };
 
@@ -61,7 +86,7 @@ const getProductsWithFilters = async (query) => {
   ]);
 
   return {
-    products,
+    products: await mapProductImageUrls(products),
     total,
     page: Number(page),
     totalPages: Math.ceil(total / Number(limit)),
@@ -71,7 +96,7 @@ const getProductsWithFilters = async (query) => {
 const getProductById = async (id) => {
   const product = await Product.findById(id);
   if (!product) throw new Error("Sản phẩm không tồn tại");
-  return product;
+  return await mapProductImageUrls(product);
 };
 
 const incrementProductView = async (id) => {
@@ -81,11 +106,12 @@ const incrementProductView = async (id) => {
     { new: true },
   );
   if (!product) throw new Error("Sản phẩm không tồn tại");
-  return product;
+  return product; // We don't map images here because it just returns views
 };
 
 const getRelatedProducts = async (id, category) => {
-  return await Product.find({ category, _id: { $ne: id } }).limit(4);
+  const products = await Product.find({ category, _id: { $ne: id } }).limit(4);
+  return await mapProductImageUrls(products);
 };
 
 module.exports = {

@@ -24,7 +24,7 @@ const randomImageName = (bytes = 32) =>
 const resolveImageKey = (data) => {
   if (!data) return null;
   const key = data.profile?.avatarName || data.avatarName || data.image || null;
-  if (key && key.startsWith("http")) return null;
+  if (key && (key.startsWith("http") || key.startsWith("data:"))) return null;
   return key;
 };
 
@@ -33,11 +33,16 @@ const checkValidImageExtensionFile = (file) => {
 };
 
 const getImagePresignedUrlByKey = async (key) => {
-  if (!key || key.startsWith("http")) return key;
-  const getObjectParams = { Bucket: bucketName, Key: key };
-  return await getSignedUrl(s3, new GetObjectCommand(getObjectParams), {
-    expiresIn: 60,
-  });
+  if (!key || key.length > 255 || key.startsWith("http") || key.startsWith("data:")) return key;
+  try {
+    const getObjectParams = { Bucket: bucketName, Key: key };
+    return await getSignedUrl(s3, new GetObjectCommand(getObjectParams), {
+      expiresIn: 60,
+    });
+  } catch (error) {
+    console.error(`Error presigning URL for key ${key}:`, error.message);
+    return key;
+  }
 };
 
 const getImagePresignedUrl = async (data) => {
@@ -46,8 +51,12 @@ const getImagePresignedUrl = async (data) => {
 };
 
 const deleteFileFromS3ByKey = async (key) => {
-  if (!key || key.startsWith("http")) return;
-  await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
+  if (!key || key.length > 255 || key.startsWith("http") || key.startsWith("data:")) return;
+  try {
+    await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
+  } catch (error) {
+    console.error(`Failed to delete S3 object ${key}:`, error.message);
+  }
 };
 
 const uploadFileToS3 = async (file) => {

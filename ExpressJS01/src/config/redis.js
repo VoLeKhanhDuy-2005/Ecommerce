@@ -17,18 +17,11 @@ redisClient.on("reconnecting", () => {
   console.log("Đang thử kết nối lại với Redis...");
 });
 
-const connectRedis = async () => {
-  try {
-    await redisClient.connect();
-  } catch (error) {
-    console.error(
-      "Không thể kết nối đến Redis lúc khởi động. Hệ thống sẽ tiếp tục chạy bằng MongoDB.",
-      error.message,
-    );
-  }
-};
+// Start connecting immediately so that rate limiter commands can be queued
+redisClient.connect().catch((error) => {
+  console.error("Không thể kết nối đến Redis lúc khởi động. Hệ thống sẽ tiếp tục chạy bằng MongoDB.", error.message);
+});
 
 module.exports = {
   redisClient,
-  connectRedis,
 };

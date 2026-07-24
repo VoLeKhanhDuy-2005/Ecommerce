@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema(
       },
       default: "user",
     },
+    status: {
+      type: String,
+      enum: {
+        values: ["ACTIVE", "BANNED"],
+        message: "Trạng thái không hợp lệ: {VALUE}",
+      },
+      default: "ACTIVE",
+    },
     phone: {
       type: String,
       trim: true,

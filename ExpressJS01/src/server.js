@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express"); //commonjs
 const apiRoutes = require("./routes/api");
 const connection = require("./config/database");
-const { connectRedis } = require("./config/redis");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/errorHandler");
@@ -31,7 +30,6 @@ app.use(errorHandler);
 (async () => {
   try {
     await connection();
-    await connectRedis();
 
     setInterval(async () => {
       try {

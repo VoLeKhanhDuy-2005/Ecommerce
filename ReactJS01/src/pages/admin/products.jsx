@@ -18,6 +18,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   UploadOutlined,
+  ShoppingOutlined,
 } from "@ant-design/icons";
 import {
   getAdminProductsApi,
@@ -96,12 +97,21 @@ const AdminProductsPage = () => {
     // Xử lý imageUrls nếu có ảnh từ url ngoài
     let imageUrls = "";
     if (product.images && product.images.length > 0) {
-      const urls = product.images.filter((img) => img.startsWith("http"));
+      const urls = product.images.filter((img) => img.startsWith("http") && !img.includes("amazonaws.com"));
       if (urls.length > 0) {
         imageUrls = urls.join(", ");
         setImageOption("url");
       } else {
         setImageOption("upload");
+        // Convert S3 keys/URLs to Ant Design fileList format
+        const initialFileList = product.images.map((img, index) => ({
+          uid: `-${index}`,
+          name: `image-${index}`,
+          status: "done",
+          url: img,
+        }));
+        setFileList(initialFileList);
+        form.setFieldsValue({ uploadFiles: initialFileList });
       }
     } else {
       setImageOption("upload");
@@ -117,7 +127,6 @@ const AdminProductsPage = () => {
       imageUrls: imageUrls,
     });
 
-    setFileList([]);
     setIsModalVisible(true);
   };
 
@@ -182,9 +191,10 @@ const AdminProductsPage = () => {
         });
       }
     } catch (error) {
+      console.error("Submit error:", error);
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.EM || "Có lỗi xảy ra khi submit",
+        description: error.response?.data?.EM || error.message || "Có lỗi xảy ra khi submit",
       });
     }
   };
@@ -273,8 +283,14 @@ const AdminProductsPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản Lý Sản Phẩm</h1>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <ShoppingOutlined className="text-purple-600" />
+            <span>Quản Lý Sản Phẩm</span>
+          </h1>
+        </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -291,7 +307,7 @@ const AdminProductsPage = () => {
         rowKey="_id"
         loading={loading}
         bordered
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 6 }}
         className="bg-white rounded-lg shadow-sm"
       />
 
@@ -384,11 +400,30 @@ const AdminProductsPage = () => {
           </Form.Item>
 
           {imageOption === "url" ? (
-            <Form.Item name="imageUrls" label="URLs Hình ảnh">
+            <Form.Item 
+            name="imageUrls" 
+            label="URLs Hình ảnh"
+            rules={[{ required: true, message: "Vui lòng nhập ít nhất 1 link ảnh sản phẩm!" }]}
+            >
               <Input placeholder="https://image1.jpg, https://image2.png" />
             </Form.Item>
           ) : (
-            <Form.Item label="Tải ảnh lên">
+            <Form.Item 
+            label="Tải ảnh lên"
+            name="uploadFiles"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) return e;
+              return e?.fileList;
+            }}
+            rules={[
+              { 
+                required: true, 
+                type: 'array',
+                message: "Vui lòng chọn ít nhất 1 ảnh sản phẩm!" 
+              }
+            ]}
+            >
               <Upload
                 beforeUpload={() => false}
                 multiple

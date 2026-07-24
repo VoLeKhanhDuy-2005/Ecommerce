@@ -16,6 +16,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   UploadOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import {
   getCategoriesApi,
@@ -75,11 +76,17 @@ const AdminCategoriesPage = () => {
       categoryId: category.categoryId,
       name: category.name,
       imageUrl:
-        category.image && category.image.startsWith("http")
+        category.image &&
+        category.image.startsWith("http") &&
+        !category.image.includes("amazonaws.com")
           ? category.image
           : "",
     });
-    if (category.image && category.image.startsWith("http")) {
+    if (
+      category.image &&
+      category.image.startsWith("http") &&
+      !category.image.includes("amazonaws.com")
+    ) {
       setImageOption("url");
     } else {
       setImageOption("upload");
@@ -214,10 +221,14 @@ const AdminCategoriesPage = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Quản lý Danh mục Sản phẩm
-        </h1>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <TagsOutlined className="text-purple-600" />
+            <span>Quản Lý Danh Mục Sản Phẩm</span>
+          </h1>
+        </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -233,7 +244,7 @@ const AdminCategoriesPage = () => {
         dataSource={categories}
         rowKey="_id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 6 }}
         className="bg-white shadow-sm rounded-lg overflow-hidden"
       />
 

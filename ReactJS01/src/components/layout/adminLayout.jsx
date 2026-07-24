@@ -2,8 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { Layout, Menu, Avatar, Dropdown } from "antd";
 import {
   UsergroupAddOutlined,
-  AppstoreOutlined,
-  TagOutlined,
+  ShoppingOutlined,
+  TagsOutlined,
   HistoryOutlined,
   LogoutOutlined,
   HomeOutlined,
@@ -74,12 +74,12 @@ const AdminLayout = () => {
     },
     {
       key: "/admin/categories",
-      icon: <AppstoreOutlined />,
+      icon: <TagsOutlined />,
       label: <Link to="/admin/categories">Quản lý Danh mục</Link>,
     },
     {
       key: "/admin/products",
-      icon: <TagOutlined />,
+      icon: <ShoppingOutlined />,
       label: <Link to="/admin/products">Quản lý Sản phẩm</Link>,
     },
   ];

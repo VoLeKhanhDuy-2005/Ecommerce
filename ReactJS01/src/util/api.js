@@ -123,23 +123,15 @@ const handleShopCancelRequestApi = (orderId, action) => {
 };
 
 const updateProfileApi = (formData) => {
-  return axios.put("/v1/api/user/profile", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return axios.put("/v1/api/user/profile", formData);
 };
 
 const createCategoryApi = (data) => {
-  return axios.post("/v1/api/admin/categories", data, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.post("/v1/api/admin/categories", data);
 };
 
 const updateCategoryApi = (id, data) => {
-  return axios.put(`/v1/api/admin/categories/${id}`, data, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.put(`/v1/api/admin/categories/${id}`, data);
 };
 
 const deleteCategoryApi = (id) => {
@@ -151,15 +143,11 @@ const getAdminProductsApi = () => {
 };
 
 const createProductApi = (data) => {
-  return axios.post("/v1/api/admin/products", data, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.post("/v1/api/admin/products", data);
 };
 
 const updateProductApi = (id, data) => {
-  return axios.put(`/v1/api/admin/products/${id}`, data, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return axios.put(`/v1/api/admin/products/${id}`, data);
 };
 
 const deleteProductApi = (id) => {
