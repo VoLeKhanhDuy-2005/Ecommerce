@@ -2,27 +2,21 @@ const Product = require("../models/product");
 const { getImagePresignedUrlByKey } = require("./fileService");
 
 const mapProductImageUrls = async (products) => {
-  if (!Array.isArray(products)) {
-    const pObj = products.toObject ? products.toObject() : products;
-    if (pObj.images && pObj.images.length > 0) {
-      pObj.images = await Promise.all(
-        pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
-      );
-    }
-    return pObj;
-  }
+  const list = Array.isArray(products) ? products : [products];
 
-  return await Promise.all(
-    products.map(async (p) => {
-      const pObj = p.toObject ? p.toObject() : p;
-      if (pObj.images && pObj.images.length > 0) {
+  const result = await Promise.all(
+    list.map(async (product) => {
+      const pObj = product.toObject ? product.toObject() : product;
+      if (pObj.images?.length) {
         pObj.images = await Promise.all(
-          pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
+          pObj.images.map(getImagePresignedUrlByKey)
         );
       }
       return pObj;
     })
   );
+
+  return Array.isArray(products) ? result : result[0];
 };
 
 const getHomePageProducts = async () => {
