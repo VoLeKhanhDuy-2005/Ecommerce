@@ -18,9 +18,11 @@ redisClient.on("reconnecting", () => {
 });
 
 // Start connecting immediately so that rate limiter commands can be queued
-redisClient.connect().catch((error) => {
-  console.error("Không thể kết nối đến Redis lúc khởi động. Hệ thống sẽ tiếp tục chạy bằng MongoDB.", error.message);
-});
+if (process.env.NODE_ENV !== "test") {
+  redisClient.connect().catch((error) => {
+    console.error("Không thể kết nối đến Redis lúc khởi động. Hệ thống sẽ tiếp tục chạy bằng MongoDB.", error.message);
+  });
+}
 
 module.exports = {
   redisClient,

@@ -15,7 +15,7 @@ const createRedisStore = (prefix = "rl:") => {
 };
 
 // General limiter for all API routes
-const apiLimitCount = process.env.NODE_ENV === "production" ? 100 : 10000;
+const apiLimitCount = process.env.NODE_ENV === "development" ? 10000 : 100;
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: apiLimitCount, // Limit each IP per `window`
@@ -30,7 +30,7 @@ const apiLimiter = rateLimit({
 });
 
 // Strict limiter for authentication routes
-const authLimitCount = process.env.NODE_ENV === "production" ? 10 : 1000;
+const authLimitCount = process.env.NODE_ENV === "development" ? 1000 : 10;
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: authLimitCount, // Limit each IP per `window` for auth routes
