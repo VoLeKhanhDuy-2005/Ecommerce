@@ -80,7 +80,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
 
     setSubmitting(true);
     try {
-      const res = await submitReviewApi(productId, rating, comment);
+      const res = await submitReviewApi(productId, { rating, comment });
       if (res && res.EC === 0) {
         notification.success({
           message: "Đánh giá thành công",

@@ -630,15 +630,19 @@ export default function OrdersPage() {
                         className="py-3 flex items-center justify-between gap-3 text-xs"
                       >
                         <div className="flex items-center gap-3">
-                          <img
-                            src={item.image || "https://placehold.co/100"}
-                            alt={item.name}
-                            className="w-12 h-12 rounded-lg object-cover border border-gray-100 bg-white"
-                          />
+                          <Link to={`/product/${item.product}`}>
+                            <img
+                              src={item.image || "https://placehold.co/100"}
+                              alt={item.name}
+                              className="w-12 h-12 rounded-lg object-cover border border-gray-100 bg-white hover:opacity-80 transition-opacity"
+                            />
+                          </Link>
                           <div className="flex-grow">
-                            <p className="font-bold text-gray-800">
-                              {item.name}
-                            </p>
+                            <Link to={`/product/${item.product}`}>
+                              <p className="font-bold text-gray-800 hover:text-orange-500 transition-colors">
+                                {item.name}
+                              </p>
+                            </Link>
                             <p className="text-gray-400 text-[10px] mt-0.5">
                               Số lượng: {item.quantity}
                             </p>

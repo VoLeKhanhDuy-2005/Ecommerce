@@ -1,6 +1,7 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
 const Cart = require("../models/cart");
+const cartService = require("./cartService");
 const crypto = require("crypto");
 const https = require("https");
 
@@ -132,11 +133,7 @@ const createOrder = async (userEmail, payload) => {
     const newOrder = await Order.create(orderData);
 
     if (paymentMethod === "COD") {
-      const cart = await Cart.findOne({ userEmail });
-      if (cart) {
-        cart.items = [];
-        await cart.save();
-      }
+      await cartService.clearCart(userEmail);
       return {
         statusCode: 201,
         success: true,
@@ -274,10 +271,7 @@ const verifyMomoPayment = async (orderIdParams) => {
         { $set: { paymentStatus: "Paid" } },
         { new: true },
       );
-      await Cart.updateOne(
-        { userEmail: order.userEmail },
-        { $set: { items: [] } },
-      );
+      await cartService.clearCart(order.userEmail);
       return {
         statusCode: 200,
         success: true,

@@ -2,10 +2,11 @@ const Review = require("../models/review");
 const Product = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
+const mongoose = require("mongoose");
 
 const updateProductRating = async (productId) => {
   const result = await Review.aggregate([
-    { $match: { product: productId } },
+    { $match: { product: new mongoose.Types.ObjectId(productId) } },
     {
       $group: {
         _id: "$product",

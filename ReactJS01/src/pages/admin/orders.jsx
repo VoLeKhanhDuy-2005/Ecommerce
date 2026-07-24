@@ -170,7 +170,7 @@ export default function AdminOrdersPage() {
           <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             <HistoryOutlined className="text-purple-600" />
-            <span>Quản Lý Đơn Hàng Cửa Hàng</span>
+            <span>Quản Lý Đơn Hàng</span>
           </h1>
         </div>
       </div>
