@@ -88,6 +88,10 @@ const createOrderApi = (orderData) => {
   return axios.post("/v1/api/orders", orderData);
 };
 
+const calculateShippingApi = (lat, lng) => {
+  return axios.post("/v1/api/orders/calculate-shipping", { lat, lng });
+};
+
 const getMyOrdersApi = () => {
   return axios.get("/v1/api/orders");
 };
@@ -175,6 +179,14 @@ const checkReviewEligibilityApi = (productId) => {
   return axios.get(URL_API);
 };
 
+const getSettingsApi = () => {
+  return axios.get("/v1/api/settings");
+};
+
+const updateSettingApi = (key, value) => {
+  return axios.put("/v1/api/admin/settings", { key, value });
+};
+
 export {
   registerApi,
   loginApi,
@@ -189,6 +201,7 @@ export {
   deleteCartItemApi,
   clearCartApi,
   createOrderApi,
+  calculateShippingApi,
   getMyOrdersApi,
   getOrderDetailsApi,
   cancelOrderApi,
@@ -213,4 +226,6 @@ export {
   submitReviewApi,
   deleteReviewApi,
   checkReviewEligibilityApi,
+  getSettingsApi,
+  updateSettingApi,
 };

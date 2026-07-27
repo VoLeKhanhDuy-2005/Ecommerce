@@ -8,6 +8,7 @@ import AdminLayout from "./components/layout/adminLayout.jsx";
 import AdminOrdersPage from "./pages/admin/orders.jsx";
 import AdminCategoriesPage from "./pages/admin/categories.jsx";
 import AdminProductsPage from "./pages/admin/products.jsx";
+import AdminSettingsPage from "./pages/admin/settings.jsx";
 import RegisterPage from "./pages/register.jsx";
 import UserPage from "./pages/admin/users.jsx";
 import HomePage from "./pages/home.jsx";
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "products",
         element: <AdminProductsPage />,
+      },
+      {
+        path: "settings",
+        element: <AdminSettingsPage />,
       },
     ],
   },

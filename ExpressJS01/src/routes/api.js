@@ -44,6 +44,7 @@ const {
   getShopOrders,
   updateShopOrderStatus,
   handleShopCancelRequest,
+  calculateShipping,
 } = require("../controllers/orderController");
 const {
   createCategory,
@@ -63,6 +64,10 @@ const {
   handleDeleteReview,
   handleCheckEligibility,
 } = require("../controllers/reviewController");
+const {
+  getSettings,
+  updateSetting,
+} = require("../controllers/settingController");
 
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
@@ -95,6 +100,7 @@ routerAPI.delete("/cart/:productId", deleteCartItem);
 routerAPI.delete("/cart", clearCart);
 
 routerAPI.post("/orders", createOrder);
+routerAPI.post("/orders/calculate-shipping", calculateShipping);
 routerAPI.get("/orders", getMyOrders);
 routerAPI.get("/orders/:id", getOrderDetails);
 routerAPI.post("/orders/:id/cancel", cancelOrder);
@@ -138,5 +144,8 @@ routerAPI.put(
   updateProduct,
 );
 routerAPI.delete("/admin/products/:id", isAdmin, deleteProduct);
+
+routerAPI.get("/settings", getSettings);
+routerAPI.put("/admin/settings", isAdmin, updateSetting);
 
 module.exports = routerAPI;

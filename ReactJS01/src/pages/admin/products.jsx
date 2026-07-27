@@ -97,7 +97,9 @@ const AdminProductsPage = () => {
     // Xử lý imageUrls nếu có ảnh từ url ngoài
     let imageUrls = "";
     if (product.images && product.images.length > 0) {
-      const urls = product.images.filter((img) => img.startsWith("http") && !img.includes("amazonaws.com"));
+      const urls = product.images.filter(
+        (img) => img.startsWith("http") && !img.includes("amazonaws.com"),
+      );
       if (urls.length > 0) {
         imageUrls = urls.join(", ");
         setImageOption("url");
@@ -194,7 +196,10 @@ const AdminProductsPage = () => {
       console.error("Submit error:", error);
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.EM || error.message || "Có lỗi xảy ra khi submit",
+        description:
+          error.response?.data?.EM ||
+          error.message ||
+          "Có lỗi xảy ra khi submit",
       });
     }
   };
@@ -400,29 +405,34 @@ const AdminProductsPage = () => {
           </Form.Item>
 
           {imageOption === "url" ? (
-            <Form.Item 
-            name="imageUrls" 
-            label="URLs Hình ảnh"
-            rules={[{ required: true, message: "Vui lòng nhập ít nhất 1 link ảnh sản phẩm!" }]}
+            <Form.Item
+              name="imageUrls"
+              label="URLs Hình ảnh"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập ít nhất 1 link ảnh sản phẩm!",
+                },
+              ]}
             >
               <Input placeholder="https://image1.jpg, https://image2.png" />
             </Form.Item>
           ) : (
-            <Form.Item 
-            label="Tải ảnh lên"
-            name="uploadFiles"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => {
-              if (Array.isArray(e)) return e;
-              return e?.fileList;
-            }}
-            rules={[
-              { 
-                required: true, 
-                type: 'array',
-                message: "Vui lòng chọn ít nhất 1 ảnh sản phẩm!" 
-              }
-            ]}
+            <Form.Item
+              label="Tải ảnh lên"
+              name="uploadFiles"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => {
+                if (Array.isArray(e)) return e;
+                return e?.fileList;
+              }}
+              rules={[
+                {
+                  required: true,
+                  type: "array",
+                  message: "Vui lòng chọn ít nhất 1 ảnh sản phẩm!",
+                },
+              ]}
             >
               <Upload
                 beforeUpload={() => false}

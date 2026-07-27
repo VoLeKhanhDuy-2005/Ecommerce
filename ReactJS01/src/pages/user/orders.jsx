@@ -665,13 +665,25 @@ export default function OrdersPage() {
                     ))}
                   </div>
 
-                  <div className="flex justify-between items-center bg-orange-50/20 px-4 py-3 rounded-2xl border border-orange-100/30">
-                    <span className="text-sm font-bold text-gray-700">
-                      Tổng cộng hóa đơn:
-                    </span>
-                    <span className="text-lg font-black text-orange-600">
-                      {formatPrice(selectedOrder.totalAmount)}
-                    </span>
+                  <div className="space-y-2 bg-orange-50/20 px-4 py-3 rounded-2xl border border-orange-100/30">
+                    {selectedOrder.shippingFee > 0 && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-gray-500">
+                          Phí giao hàng ({selectedOrder.distance || 0} km):
+                        </span>
+                        <span className="font-bold text-gray-700">
+                          {formatPrice(selectedOrder.shippingFee)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2 border-t border-orange-100/50">
+                      <span className="text-sm font-bold text-gray-700">
+                        Tổng cộng hóa đơn:
+                      </span>
+                      <span className="text-lg font-black text-orange-600">
+                        {formatPrice(selectedOrder.totalAmount)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

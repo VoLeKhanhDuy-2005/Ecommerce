@@ -58,6 +58,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    location: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
   },
   {
     timestamps: true, // Tự động tạo createdAt và updatedAt

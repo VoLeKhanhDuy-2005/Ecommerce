@@ -109,6 +109,19 @@ const handleShopCancelRequest = async (req, res, next) => {
   }
 };
 
+const calculateShipping = async (req, res, next) => {
+  try {
+    const { lat, lng } = req.body;
+    const { statusCode, ...data } = await orderService.calculateShipping(
+      lat,
+      lng,
+    );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   verifyMomoPayment,
@@ -119,4 +132,5 @@ module.exports = {
   getShopOrders,
   updateShopOrderStatus,
   handleShopCancelRequest,
+  calculateShipping,
 };

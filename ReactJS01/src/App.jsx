@@ -25,6 +25,7 @@ function App() {
               avatar: res.user.avatarURL,
               phone: res.user.phone,
               address: res.user.address,
+              location: res.user.location,
             },
           });
 

@@ -1,9 +1,38 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
-const Cart = require("../models/cart");
 const cartService = require("./cartService");
+const settingService = require("./settingService");
 const crypto = require("crypto");
 const https = require("https");
+
+// Haversine formula to calculate distance in km
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const toRadian = (degree) => (degree * Math.PI) / 180;
+  const R = 6371; // Earth's radius in km
+  const dLat = toRadian(lat2 - lat1);
+  const dLon = toRadian(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadian(lat1)) *
+      Math.cos(toRadian(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const calculateShippingLogic = (distanceKm) => {
+  let fee = 0;
+  if (distanceKm > 0) {
+    // 15k for first 3km, 5k for each additional km
+    if (distanceKm <= 3) {
+      fee = 15000;
+    } else {
+      fee = 15000 + Math.ceil(distanceKm - 3) * 5000;
+    }
+  }
+  return fee;
+};
 
 // Ref Tích hợp MoMo: https://www.youtube.com/watch?v=ZlvwqtfCEUM
 // Test Visa:
@@ -61,8 +90,15 @@ const postHTTPS = (url, data) => {
 
 const createOrder = async (userEmail, payload) => {
   try {
-    const { customerName, phoneNumber, shippingAddress, paymentMethod, items } =
-      payload;
+    const {
+      customerName,
+      phoneNumber,
+      shippingAddress,
+      paymentMethod,
+      items,
+      lat,
+      lng,
+    } = payload;
 
     if (
       !customerName ||
@@ -119,6 +155,27 @@ const createOrder = async (userEmail, payload) => {
       });
     }
 
+    let shippingFee = 0;
+    let distance = 0;
+    let deliveryCoordinates = null;
+
+    if (lat && lng) {
+      // Lấy cấu hình vị trí cửa hàng
+      const settingsRes = await settingService.getSettings();
+      const storeLoc = settingsRes.data.store_location;
+
+      distance = calculateDistance(
+        storeLoc.lat,
+        storeLoc.lng,
+        parseFloat(lat),
+        parseFloat(lng),
+      );
+      shippingFee = calculateShippingLogic(distance);
+      deliveryCoordinates = { lat: parseFloat(lat), lng: parseFloat(lng) };
+    }
+
+    totalAmount += shippingFee;
+
     const orderData = {
       userEmail,
       customerName,
@@ -126,6 +183,9 @@ const createOrder = async (userEmail, payload) => {
       shippingAddress,
       items: verifiedItems,
       totalAmount,
+      shippingFee,
+      distance: Number(distance.toFixed(2)),
+      deliveryCoordinates,
       paymentMethod,
       paymentStatus: "Pending",
       status: "New",
@@ -601,6 +661,31 @@ const handleShopCancelRequest = async (orderIdParams, action) => {
   }
 };
 
+const calculateShipping = async (lat, lng) => {
+  if (!lat || !lng) {
+    return {
+      statusCode: 400,
+      success: false,
+      message: "Thiếu tọa độ GPS",
+    };
+  }
+  const settingsRes = await settingService.getSettings();
+  const storeLoc = settingsRes.data.store_location;
+
+  const distance = calculateDistance(
+    storeLoc.lat,
+    storeLoc.lng,
+    parseFloat(lat),
+    parseFloat(lng),
+  );
+  const fee = calculateShippingLogic(distance);
+  return {
+    statusCode: 200,
+    success: true,
+    data: { distance: Number(distance.toFixed(2)), fee },
+  };
+};
+
 module.exports = {
   createOrder,
   verifyMomoPayment,
@@ -611,4 +696,5 @@ module.exports = {
   getShopOrders,
   updateShopOrderStatus,
   handleShopCancelRequest,
+  calculateShipping,
 };

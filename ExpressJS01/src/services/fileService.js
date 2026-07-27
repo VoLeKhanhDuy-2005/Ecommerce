@@ -33,7 +33,13 @@ const checkValidImageExtensionFile = (file) => {
 };
 
 const getImagePresignedUrlByKey = async (key) => {
-  if (!key || key.length > 255 || key.startsWith("http") || key.startsWith("data:")) return key;
+  if (
+    !key ||
+    key.length > 255 ||
+    key.startsWith("http") ||
+    key.startsWith("data:")
+  )
+    return key;
   try {
     const getObjectParams = { Bucket: bucketName, Key: key };
     return await getSignedUrl(s3, new GetObjectCommand(getObjectParams), {
@@ -51,7 +57,13 @@ const getImagePresignedUrl = async (data) => {
 };
 
 const deleteFileFromS3ByKey = async (key) => {
-  if (!key || key.length > 255 || key.startsWith("http") || key.startsWith("data:")) return;
+  if (
+    !key ||
+    key.length > 255 ||
+    key.startsWith("http") ||
+    key.startsWith("data:")
+  )
+    return;
   try {
     await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
   } catch (error) {

@@ -247,6 +247,9 @@ const updateProfile = async (email, body, file) => {
     user.gender = data.gender !== undefined ? data.gender : user.gender;
     user.birthday = data.birthday !== undefined ? data.birthday : user.birthday;
     if (data.avatarName) user.avatarName = data.avatarName;
+    if (data.lat && data.lng) {
+      user.location = { lat: parseFloat(data.lat), lng: parseFloat(data.lng) };
+    }
 
     user = await user.save();
     user = user.toObject();

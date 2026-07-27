@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { putProfileSchema } from "./user.schemas";
 import { AuthContext } from "../../components/context/auth.context";
 import { getCurrentUserApi, updateProfileApi } from "../../util/api";
-import { EditOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import {
+  EditOutlined,
+  EnvironmentOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import { Spin, Button, notification } from "antd";
+import MapSelector from "../../components/MapSelector";
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -24,7 +29,11 @@ export default function EditProfilePage() {
     gender: "",
     address: "",
     birthday: "",
+    lat: null,
+    lng: null,
   });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -56,6 +65,8 @@ export default function EditProfilePage() {
             gender: profile.gender || "",
             address: profile.address || "",
             birthday: profile.birthday || "",
+            lat: profile.location?.lat || null,
+            lng: profile.location?.lng || null,
           });
 
           setPreview(profile.avatarURL);
@@ -101,6 +112,80 @@ export default function EditProfilePage() {
     }
   };
 
+  const handleGetLocation = () => {
+    // navigator là một object có sẵn trong trình duyệt, chứa thông tin và các API của trình duyệt
+    /*
+      {
+        userAgent: "...",
+        language: "vi-VN",
+        geolocation: Geolocation,
+        clipboard: Clipboard,
+        ...
+      }
+    */
+    if ("geolocation" in navigator) {
+      //Kiểm tra xem trình duyệt có hỗ trợ Geolocation API hay không
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          //Hàm callback sẽ được gọi khi lấy được vị trí
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setFormData((prev) => ({ ...prev, lat, lng }));
+          setIsGettingLocation(false);
+          setSuccess("Đã lấy vị trí hiện tại thành công!");
+          setTimeout(() => setSuccess(""), 3000);
+        },
+        (err) => {
+          setIsGettingLocation(false);
+          setError("Không thể lấy vị trí. Vui lòng cấp quyền GPS.");
+        },
+      );
+    } else {
+      setError("Trình duyệt không hỗ trợ GPS.");
+    }
+  };
+
+  const handleSearchAddress = async () => {
+    const address = formData.address;
+    if (!address?.trim()) {
+      notification.warning({ message: "Vui lòng nhập địa chỉ để tìm kiếm" });
+      return;
+    }
+
+    setIsSearchingAddress(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          address,
+        )}`,
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+
+        setFormData((prev) => ({ ...prev, lat, lng }));
+        notification.success({
+          message: "Tìm thấy địa chỉ",
+          description: "Vị trí trên bản đồ đã được cập nhật.",
+        });
+      } else {
+        notification.warning({
+          message: "Không tìm thấy địa chỉ",
+          description:
+            "Vui lòng ghi rõ tên đường, quận/huyện hoặc tìm thủ công trên bản đồ.",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      notification.error({ message: "Lỗi khi tìm kiếm địa chỉ" });
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -131,6 +216,10 @@ export default function EditProfilePage() {
       form.append("gender", formData.gender);
       form.append("address", formData.address);
       form.append("birthday", formData.birthday);
+      if (formData.lat && formData.lng) {
+        form.append("lat", formData.lat);
+        form.append("lng", formData.lng);
+      }
 
       if (avatar) {
         form.append("avatar", avatar);
@@ -147,6 +236,7 @@ export default function EditProfilePage() {
             name: formData.fullname,
             phone: formData.phone,
             address: formData.address,
+            location: { lat: formData.lat, lng: formData.lng },
             avatar: res.data?.avatarURL || auth.user.avatar,
           },
         });
@@ -282,12 +372,47 @@ export default function EditProfilePage() {
                 </label>
                 <textarea
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
-                  rows="4"
+                  rows="3"
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Địa chỉ nhà"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <EnvironmentOutlined className="mr-1 text-orange-500" /> Vị
+                  trí trên bản đồ (Dùng để tính phí giao hàng)
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Bạn có thể nhấp vào bản đồ để chọn tọa độ chính xác của mình.
+                </p>
+                <MapSelector
+                  defaultLat={formData.lat || 10.850438}
+                  defaultLng={formData.lng || 106.772596}
+                  onChange={({ lat, lng }) => {
+                    setFormData((prev) => ({ ...prev, lat, lng }));
+                  }}
+                />
+                <Button
+                  type="dashed"
+                  icon={<EnvironmentOutlined />}
+                  onClick={handleGetLocation}
+                  loading={isGettingLocation}
+                  className="w-full !text-orange-500 !border-orange-500 hover:!bg-orange-50 hover:!text-orange-500 hover:!border-orange-500 mt-3"
+                >
+                  Lấy vị trí hiện tại của tôi (GPS)
+                </Button>
+                <Button
+                  type="default"
+                  icon={<SearchOutlined />}
+                  onClick={handleSearchAddress}
+                  loading={isSearchingAddress}
+                  className="w-full !text-blue-600 !border-blue-500 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-500 mt-2"
+                >
+                  Tìm vị trí từ địa chỉ bạn đã nhập
+                </Button>
               </div>
             </div>
 

@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   HomeOutlined,
   UserOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -81,6 +82,11 @@ const AdminLayout = () => {
       key: "/admin/products",
       icon: <ShoppingOutlined />,
       label: <Link to="/admin/products">Quản lý Sản phẩm</Link>,
+    },
+    {
+      key: "/admin/settings",
+      icon: <SettingOutlined />,
+      label: <Link to="/admin/settings">Cấu hình Hệ thống</Link>,
     },
   ];
 

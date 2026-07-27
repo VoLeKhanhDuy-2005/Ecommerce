@@ -211,10 +211,16 @@ export default function AdminOrdersPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-1.5">
+                <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-1.5 text-right">
                   {getStatusTag(ord.status)}
+                  {ord.shippingFee > 0 && (
+                    <span className="text-xs text-gray-500 font-medium mt-1">
+                      + Phí ship ({ord.distance}km):{" "}
+                      {formatPrice(ord.shippingFee)}
+                    </span>
+                  )}
                   <span className="text-base font-black text-orange-600">
-                    {formatPrice(ord.totalAmount)}
+                    Tổng: {formatPrice(ord.totalAmount)}
                   </span>
                 </div>
               </div>

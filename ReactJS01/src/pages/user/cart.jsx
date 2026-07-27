@@ -15,16 +15,19 @@ import {
   UserOutlined,
   PhoneOutlined,
   EnvironmentOutlined,
+  SearchOutlined,
   CreditCardOutlined,
   ArrowRightOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
+import MapSelector from "../../components/MapSelector";
 import {
   getCartApi,
   updateCartItemApi,
   deleteCartItemApi,
   createOrderApi,
+  calculateShippingApi,
 } from "../../util/api";
 
 export default function CartPage() {
@@ -44,6 +47,13 @@ export default function CartPage() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' hoặc 'MOMO'
+
+  // Trạng thái GPS
+  const [shippingFee, setShippingFee] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [coordinates, setCoordinates] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
   // Lấy dữ liệu giỏ hàng từ API
   const fetchCart = async () => {
@@ -77,6 +87,29 @@ export default function CartPage() {
       setIsLoading(false);
     }
   }, [auth.isAuthenticated]);
+
+  // Tự động tính phí nếu user đã lưu vị trí trong profile
+  useEffect(() => {
+    const autoCalcShipping = async () => {
+      const loc = auth?.user?.location;
+      if (loc && loc.lat && loc.lng && !coordinates) {
+        setCoordinates(loc);
+        setIsGettingLocation(true);
+        try {
+          const res = await calculateShippingApi(loc.lat, loc.lng);
+          if (res && res.success) {
+            setShippingFee(res.data.fee);
+            setDistance(res.data.distance);
+          }
+        } catch (e) {
+          console.error("Lỗi tự động tính phí:", e);
+        } finally {
+          setIsGettingLocation(false);
+        }
+      }
+    };
+    autoCalcShipping();
+  }, [auth?.user?.location]);
 
   // Thay đổi số lượng sản phẩm
   const handleQuantityChange = async (productId, quantity) => {
@@ -161,6 +194,98 @@ export default function CartPage() {
     }));
   };
 
+  const handleGetLocation = () => {
+    if ("geolocation" in navigator) {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCoordinates({ lat, lng });
+          try {
+            const res = await calculateShippingApi(lat, lng);
+            if (res && res.success) {
+              setShippingFee(res.data.fee);
+              setDistance(res.data.distance);
+              notification.success({
+                message: "Định vị thành công",
+                description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatPrice(res.data.fee)}`,
+              });
+            } else {
+              notification.error({ message: "Lỗi tính phí giao hàng" });
+            }
+          } catch (e) {
+            notification.error({
+              message: "Lỗi kết nối khi tính phí giao hàng",
+            });
+          } finally {
+            setIsGettingLocation(false);
+          }
+        },
+        (error) => {
+          notification.error({
+            message: "Không thể lấy vị trí",
+            description:
+              "Vui lòng cho phép quyền truy cập vị trí trên trình duyệt của bạn.",
+          });
+          setIsGettingLocation(false);
+        },
+      );
+    } else {
+      notification.error({ message: "Trình duyệt không hỗ trợ định vị" });
+    }
+  };
+
+  const handleSearchAddress = async () => {
+    const address = deliveryInfo.shippingAddress;
+    if (!address.trim()) {
+      notification.warning({ message: "Vui lòng nhập địa chỉ để tìm kiếm" });
+      return;
+    }
+
+    setIsSearchingAddress(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          address,
+        )}`,
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+
+        setCoordinates({ lat, lng });
+        notification.success({
+          message: "Tìm thấy địa chỉ",
+          description:
+            "Đã cập nhật vị trí trên bản đồ, đang tính lại phí giao hàng...",
+        });
+
+        // Tính phí giao hàng
+        const resShipping = await calculateShippingApi(lat, lng);
+        if (resShipping && resShipping.success) {
+          setShippingFee(resShipping.data.fee);
+          setDistance(resShipping.data.distance);
+        } else {
+          notification.error({ message: "Lỗi tính phí giao hàng" });
+        }
+      } else {
+        notification.warning({
+          message: "Không tìm thấy địa chỉ",
+          description:
+            "Vui lòng ghi rõ tên đường, phường/xã, quận/huyện, tỉnh/thành phố hoặc chọn trực tiếp trên bản đồ.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error({ message: "Lỗi khi tìm kiếm địa chỉ" });
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
   // Tiến hành thanh toán / đặt đơn hàng
   const handlePlaceOrder = async () => {
     const { customerName, phoneNumber, shippingAddress } = deliveryInfo;
@@ -196,6 +321,8 @@ export default function CartPage() {
             quantity: item.quantity,
           };
         }),
+        lat: coordinates?.lat,
+        lng: coordinates?.lng,
       };
 
       const res = await createOrderApi(orderPayload);
@@ -445,9 +572,70 @@ export default function CartPage() {
                     placeholder="Địa chỉ cụ thể (Số nhà, Tên đường, Phường/Xã, Quận/Huyện...)"
                     value={deliveryInfo.shippingAddress}
                     onChange={handleInputChange}
-                    className="rounded-xl"
-                    rows={3}
+                    className="rounded-xl mb-2"
+                    rows={2}
                   />
+                  <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                    <Button
+                      type="default"
+                      icon={<SearchOutlined />}
+                      onClick={handleSearchAddress}
+                      loading={isSearchingAddress}
+                      className="flex-1 text-yellow-600 border-yellow-500 hover:bg-blue-50"
+                    >
+                      Tìm vị trí trên bản đồ
+                    </Button>
+                    <Button
+                      type="dashed"
+                      icon={<EnvironmentOutlined />}
+                      onClick={handleGetLocation}
+                      loading={isGettingLocation}
+                      className="flex-1 text-orange-500 border-orange-500 hover:bg-orange-50"
+                    >
+                      Dùng GPS của tôi
+                    </Button>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="text-xs font-semibold text-gray-500 block mb-2">
+                      Hoặc chọn vị trí trực tiếp trên bản đồ:
+                    </label>
+                    <MapSelector
+                      defaultLat={coordinates?.lat || 10.850438}
+                      defaultLng={coordinates?.lng || 106.772596}
+                      onChange={async ({ lat, lng }) => {
+                        setCoordinates({ lat, lng });
+                        setIsGettingLocation(true);
+                        try {
+                          const res = await calculateShippingApi(lat, lng);
+                          if (res && res.success) {
+                            setShippingFee(res.data.fee);
+                            setDistance(res.data.distance);
+                            notification.success({
+                              message: "Đã cập nhật phí giao hàng",
+                              description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatPrice(res.data.fee)}`,
+                            });
+                          } else {
+                            notification.error({
+                              message: "Lỗi tính phí giao hàng",
+                            });
+                          }
+                        } catch (e) {
+                          notification.error({
+                            message: "Lỗi kết nối khi tính phí giao hàng",
+                          });
+                        } finally {
+                          setIsGettingLocation(false);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {distance > 0 && (
+                    <div className="mt-2 text-xs text-green-600 font-medium">
+                      Khoảng cách ước tính: {distance} km
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -552,13 +740,31 @@ export default function CartPage() {
                 })}
               </div>
 
-              <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
-                <span className="text-sm font-semibold text-gray-500">
-                  Thành tiền:
-                </span>
-                <span className="text-lg font-black text-orange-600">
-                  {formatPrice(calculateTotal())}
-                </span>
+              <div className="border-t border-gray-100 pt-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-500">
+                    Tiền hàng:
+                  </span>
+                  <span className="text-sm font-black text-gray-700">
+                    {formatPrice(calculateTotal())}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-500">
+                    Phí giao hàng:
+                  </span>
+                  <span className="text-sm font-black text-gray-700">
+                    {formatPrice(shippingFee)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-t border-gray-50 pt-2">
+                  <span className="text-sm font-semibold text-gray-800">
+                    Tổng thanh toán:
+                  </span>
+                  <span className="text-lg font-black text-orange-600">
+                    {formatPrice(calculateTotal() + shippingFee)}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-2 pt-2">

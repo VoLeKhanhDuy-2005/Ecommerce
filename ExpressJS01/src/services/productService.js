@@ -6,7 +6,7 @@ const mapProductImageUrls = async (products) => {
     const pObj = products.toObject ? products.toObject() : products;
     if (pObj.images && pObj.images.length > 0) {
       pObj.images = await Promise.all(
-        pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
+        pObj.images.map(async (img) => await getImagePresignedUrlByKey(img)),
       );
     }
     return pObj;
@@ -17,11 +17,11 @@ const mapProductImageUrls = async (products) => {
       const pObj = p.toObject ? p.toObject() : p;
       if (pObj.images && pObj.images.length > 0) {
         pObj.images = await Promise.all(
-          pObj.images.map(async (img) => await getImagePresignedUrlByKey(img))
+          pObj.images.map(async (img) => await getImagePresignedUrlByKey(img)),
         );
       }
       return pObj;
-    })
+    }),
   );
 };
 
