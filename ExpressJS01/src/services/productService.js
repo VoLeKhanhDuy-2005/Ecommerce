@@ -9,7 +9,7 @@ const mapProductImageUrls = async (products) => {
       const pObj = product.toObject ? product.toObject() : product;
       if (pObj.images?.length) {
         pObj.images = await Promise.all(
-          pObj.images.map(getImagePresignedUrlByKey)
+          pObj.images.map(getImagePresignedUrlByKey),
         );
       }
       return pObj;

@@ -2,7 +2,11 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { putProfileSchema } from "./user.schemas";
 import { AuthContext } from "../../components/context/auth.context";
-import { getCurrentUserApi, updateProfileApi } from "../../util/api";
+import {
+  getCurrentUserApi,
+  updateProfileApi,
+  resolveMapLinkApi,
+} from "../../util/api";
 import {
   EditOutlined,
   EnvironmentOutlined,
@@ -149,38 +153,63 @@ export default function EditProfilePage() {
   const handleSearchAddress = async () => {
     const address = formData.address;
     if (!address?.trim()) {
-      notification.warning({ message: "Vui lòng nhập địa chỉ để tìm kiếm" });
+      notification.warning({
+        message: "Vui lòng nhập địa chỉ hoặc dán link Google Maps",
+      });
       return;
     }
 
     setIsSearchingAddress(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          address,
-        )}`,
-      );
-      const data = await response.json();
+      let lat, lng;
+      const isUrl = address.includes("http://") || address.includes("https://");
 
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
+      if (isUrl) {
+        const response = await resolveMapLinkApi(address);
+        if (response && response.success && response.data) {
+          lat = response.data.lat;
+          lng = response.data.lng;
+        } else {
+          notification.warning({
+            message: "Không tìm thấy tọa độ",
+            description:
+              response.message || "Vui lòng kiểm tra lại link Google Maps.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      } else {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            address,
+          )}`,
+        );
+        const data = await response.json();
 
+        if (data && data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lng = parseFloat(data[0].lon);
+        } else {
+          notification.warning({
+            message: "Không tìm thấy địa chỉ",
+            description:
+              "Vui lòng ghi rõ tên đường, quận/huyện hoặc tìm thủ công trên bản đồ.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      }
+
+      if (lat && lng) {
         setFormData((prev) => ({ ...prev, lat, lng }));
         notification.success({
-          message: "Tìm thấy địa chỉ",
+          message: "Tìm thấy vị trí",
           description: "Vị trí trên bản đồ đã được cập nhật.",
-        });
-      } else {
-        notification.warning({
-          message: "Không tìm thấy địa chỉ",
-          description:
-            "Vui lòng ghi rõ tên đường, quận/huyện hoặc tìm thủ công trên bản đồ.",
         });
       }
     } catch (err) {
       console.error(err);
-      notification.error({ message: "Lỗi khi tìm kiếm địa chỉ" });
+      notification.error({ message: "Lỗi kết nối khi tìm kiếm vị trí" });
     } finally {
       setIsSearchingAddress(false);
     }
@@ -368,7 +397,7 @@ export default function EditProfilePage() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Địa chỉ
+                  Địa chỉ (Hoặc dán Link Google Maps)
                 </label>
                 <textarea
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
@@ -376,7 +405,7 @@ export default function EditProfilePage() {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Địa chỉ nhà"
+                  placeholder="Địa chỉ nhà hoặc link Google Maps..."
                 />
               </div>
 
@@ -411,7 +440,7 @@ export default function EditProfilePage() {
                   loading={isSearchingAddress}
                   className="w-full !text-blue-600 !border-blue-500 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-500 mt-2"
                 >
-                  Tìm vị trí từ địa chỉ bạn đã nhập
+                  Tìm từ Link / Địa chỉ
                 </Button>
               </div>
             </div>

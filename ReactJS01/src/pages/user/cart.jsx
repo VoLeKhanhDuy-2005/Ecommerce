@@ -28,6 +28,7 @@ import {
   deleteCartItemApi,
   createOrderApi,
   calculateShippingApi,
+  resolveMapLinkApi,
 } from "../../util/api";
 
 export default function CartPage() {
@@ -239,26 +240,59 @@ export default function CartPage() {
   const handleSearchAddress = async () => {
     const address = deliveryInfo.shippingAddress;
     if (!address.trim()) {
-      notification.warning({ message: "Vui lòng nhập địa chỉ để tìm kiếm" });
+      notification.warning({
+        message: "Vui lòng nhập địa chỉ hoặc dán link Google Maps",
+      });
       return;
     }
 
     setIsSearchingAddress(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          address,
-        )}`,
-      );
-      const data = await response.json();
+      let lat, lng;
+      const isUrl = address.includes("http://") || address.includes("https://");
 
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
+      if (isUrl) {
+        // Xử lý link Google Maps (dài hoặc ngắn)
+        const response = await resolveMapLinkApi(address);
+        if (response && response.success && response.data) {
+          lat = response.data.lat;
+          lng = response.data.lng;
+        } else {
+          notification.warning({
+            message: "Không tìm thấy tọa độ",
+            description:
+              response.message || "Vui lòng kiểm tra lại link Google Maps.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      } else {
+        // Xử lý địa chỉ chữ (Geocoding)
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            address,
+          )}`,
+        );
+        const data = await response.json();
 
+        if (data && data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lng = parseFloat(data[0].lon);
+        } else {
+          notification.warning({
+            message: "Không tìm thấy địa chỉ",
+            description:
+              "Vui lòng ghi rõ tên đường, phường/xã, quận/huyện hoặc nhập link Google Maps.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      }
+
+      if (lat && lng) {
         setCoordinates({ lat, lng });
         notification.success({
-          message: "Tìm thấy địa chỉ",
+          message: "Tìm thấy vị trí",
           description:
             "Đã cập nhật vị trí trên bản đồ, đang tính lại phí giao hàng...",
         });
@@ -271,16 +305,10 @@ export default function CartPage() {
         } else {
           notification.error({ message: "Lỗi tính phí giao hàng" });
         }
-      } else {
-        notification.warning({
-          message: "Không tìm thấy địa chỉ",
-          description:
-            "Vui lòng ghi rõ tên đường, phường/xã, quận/huyện, tỉnh/thành phố hoặc chọn trực tiếp trên bản đồ.",
-        });
       }
     } catch (error) {
       console.error(error);
-      notification.error({ message: "Lỗi khi tìm kiếm địa chỉ" });
+      notification.error({ message: "Lỗi kết nối khi tìm kiếm vị trí" });
     } finally {
       setIsSearchingAddress(false);
     }
@@ -565,11 +593,11 @@ export default function CartPage() {
 
                 <div>
                   <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Địa chỉ nhận hàng
+                    Địa chỉ nhận hàng (Hoặc dán Link Google Maps)
                   </label>
                   <Input.TextArea
                     name="shippingAddress"
-                    placeholder="Địa chỉ cụ thể (Số nhà, Tên đường, Phường/Xã, Quận/Huyện...)"
+                    placeholder="Địa chỉ cụ thể hoặc dán link Google Maps (ngắn/dài đều được)..."
                     value={deliveryInfo.shippingAddress}
                     onChange={handleInputChange}
                     className="rounded-xl mb-2"
@@ -581,9 +609,9 @@ export default function CartPage() {
                       icon={<SearchOutlined />}
                       onClick={handleSearchAddress}
                       loading={isSearchingAddress}
-                      className="flex-1 text-yellow-600 border-yellow-500 hover:bg-blue-50"
+                      className="flex-1 !text-blue-600 !border-blue-500 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-500"
                     >
-                      Tìm vị trí trên bản đồ
+                      Tìm từ Link / Địa chỉ
                     </Button>
                     <Button
                       type="dashed"

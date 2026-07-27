@@ -6,7 +6,11 @@ import {
   SettingOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { getSettingsApi, updateSettingApi } from "../../util/api";
+import {
+  getSettingsApi,
+  updateSettingApi,
+  resolveMapLinkApi,
+} from "../../util/api";
 import { AuthContext } from "../../components/context/auth.context";
 import MapSelector from "../../components/MapSelector";
 
@@ -97,39 +101,65 @@ export default function AdminSettingsPage() {
 
   const handleSearchAddress = async () => {
     if (!searchAddress.trim()) {
-      notification.warning({ message: "Vui lòng nhập địa chỉ để tìm kiếm" });
+      notification.warning({
+        message: "Vui lòng nhập địa chỉ hoặc link Google Maps",
+      });
       return;
     }
 
     setIsSearchingAddress(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          searchAddress,
-        )}`,
-      );
-      const data = await response.json();
+      let newLat, newLng;
+      const isUrl =
+        searchAddress.includes("http://") || searchAddress.includes("https://");
 
-      if (data && data.length > 0) {
-        const newLat = parseFloat(data[0].lat);
-        const newLng = parseFloat(data[0].lon);
+      if (isUrl) {
+        const response = await resolveMapLinkApi(searchAddress);
+        if (response && response.success && response.data) {
+          newLat = response.data.lat;
+          newLng = response.data.lng;
+        } else {
+          notification.warning({
+            message: "Không tìm thấy tọa độ",
+            description:
+              response.message || "Vui lòng kiểm tra lại link Google Maps.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      } else {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            searchAddress,
+          )}`,
+        );
+        const data = await response.json();
 
+        if (data && data.length > 0) {
+          newLat = parseFloat(data[0].lat);
+          newLng = parseFloat(data[0].lon);
+        } else {
+          notification.warning({
+            message: "Không tìm thấy địa chỉ",
+            description:
+              "Vui lòng ghi rõ tên đường, quận/huyện hoặc nhập link Google Maps.",
+          });
+          setIsSearchingAddress(false);
+          return;
+        }
+      }
+
+      if (newLat && newLng) {
         setLat(newLat);
         setLng(newLng);
         notification.success({
-          message: "Tìm thấy địa chỉ",
+          message: "Tìm thấy vị trí",
           description: "Vị trí trên bản đồ đã được cập nhật.",
-        });
-      } else {
-        notification.warning({
-          message: "Không tìm thấy địa chỉ",
-          description:
-            "Vui lòng ghi rõ tên đường, quận/huyện hoặc tìm thủ công trên bản đồ.",
         });
       }
     } catch (error) {
       console.error(error);
-      notification.error({ message: "Lỗi khi tìm kiếm địa chỉ" });
+      notification.error({ message: "Lỗi kết nối khi tìm kiếm vị trí" });
     } finally {
       setIsSearchingAddress(false);
     }
@@ -160,9 +190,7 @@ export default function AdminSettingsPage() {
             title="📍 Vị trí cửa hàng (GPS)"
           >
             <p className="text-sm text-gray-500 mb-4">
-              Cấu hình này dùng để tính khoảng cách và phí giao hàng cho khách
-              hàng. Bạn có thể di chuyển bản đồ và bấm chọn vị trí hoặc nhấn nút
-              "Lấy vị trí hiện tại".
+              Dùng để tính khoảng cách và phí giao hàng cho khách.
             </p>
             <div className="space-y-4">
               <MapSelector
@@ -176,11 +204,11 @@ export default function AdminSettingsPage() {
 
               <div className="mt-4">
                 <label className="text-xs font-semibold text-gray-500 block mb-1">
-                  Tìm vị trí theo địa chỉ
+                  Tìm vị trí theo địa chỉ / Link Google Maps
                 </label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Nhập tên đường, phường/xã, quận/huyện..."
+                    placeholder="Nhập tên đường, quận/huyện hoặc dán link Google Maps..."
                     value={searchAddress}
                     onChange={(e) => setSearchAddress(e.target.value)}
                     className="rounded-xl h-10 flex-1"
@@ -195,29 +223,6 @@ export default function AdminSettingsPage() {
                   >
                     Tìm
                   </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Vĩ độ (Latitude)
-                  </label>
-                  <Input
-                    value={lat}
-                    readOnly
-                    className="rounded-xl h-10 bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Kinh độ (Longitude)
-                  </label>
-                  <Input
-                    value={lng}
-                    readOnly
-                    className="rounded-xl h-10 bg-gray-50"
-                  />
                 </div>
               </div>
 

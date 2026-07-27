@@ -68,6 +68,7 @@ const {
   getSettings,
   updateSetting,
 } = require("../controllers/settingController");
+const { handleResolveMapLink } = require("../controllers/utilController");
 
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
@@ -147,5 +148,7 @@ routerAPI.delete("/admin/products/:id", isAdmin, deleteProduct);
 
 routerAPI.get("/settings", getSettings);
 routerAPI.put("/admin/settings", isAdmin, updateSetting);
+
+routerAPI.post("/utils/resolve-map-link", handleResolveMapLink);
 
 module.exports = routerAPI;

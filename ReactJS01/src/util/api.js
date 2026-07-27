@@ -187,6 +187,10 @@ const updateSettingApi = (key, value) => {
   return axios.put("/v1/api/admin/settings", { key, value });
 };
 
+const resolveMapLinkApi = (url) => {
+  return axios.post("/v1/api/utils/resolve-map-link", { url });
+};
+
 export {
   registerApi,
   loginApi,
@@ -228,4 +232,5 @@ export {
   checkReviewEligibilityApi,
   getSettingsApi,
   updateSettingApi,
+  resolveMapLinkApi,
 };
