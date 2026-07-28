@@ -191,6 +191,43 @@ const resolveMapLinkApi = (url) => {
   return axios.post("/v1/api/utils/resolve-map-link", { url });
 };
 
+const searchNominatim = async (address) => {
+  let nomRes = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      address,
+    )}`,
+  );
+  let nomData = await nomRes.json();
+
+  if (nomData && nomData.length > 0) return nomData;
+
+  // Fallback 1: Cắt bỏ phần trước dấu "-" (thường là tên riêng doanh nghiệp)
+  if (address.includes("-")) {
+    const shortName = address.substring(address.indexOf("-") + 1).trim();
+    nomRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        shortName,
+      )}`,
+    );
+    nomData = await nomRes.json();
+    if (nomData && nomData.length > 0) return nomData;
+  }
+
+  // Fallback 2: Cắt bỏ phần trước dấu "," (lấy cấp địa lý rộng hơn)
+  if (address.includes(",")) {
+    const shorterName = address.substring(address.indexOf(",") + 1).trim();
+    nomRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        shorterName,
+      )}`,
+    );
+    nomData = await nomRes.json();
+    if (nomData && nomData.length > 0) return nomData;
+  }
+
+  return [];
+};
+
 export {
   registerApi,
   loginApi,
@@ -233,4 +270,5 @@ export {
   getSettingsApi,
   updateSettingApi,
   resolveMapLinkApi,
+  searchNominatim,
 };

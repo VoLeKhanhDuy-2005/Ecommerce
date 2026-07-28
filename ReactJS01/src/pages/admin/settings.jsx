@@ -10,6 +10,7 @@ import {
   getSettingsApi,
   updateSettingApi,
   resolveMapLinkApi,
+  searchNominatim,
 } from "../../util/api";
 import { AuthContext } from "../../components/context/auth.context";
 import MapSelector from "../../components/MapSelector";
@@ -118,11 +119,25 @@ export default function AdminSettingsPage() {
         if (response && response.success && response.data) {
           newLat = response.data.lat;
           newLng = response.data.lng;
+        } else if (response && response.isPlaceName && response.placeName) {
+          // Fallback: Nếu backend trích xuất được tên địa điểm nhưng không có tọa độ
+          const nomData = await searchNominatim(response.placeName);
+          if (nomData && nomData.length > 0) {
+            newLat = parseFloat(nomData[0].lat);
+            newLng = parseFloat(nomData[0].lon);
+          } else {
+            notification.warning({
+              message: "Không tìm thấy tọa độ",
+              description: `Không thể định vị được địa điểm: ${response.placeName}.`,
+            });
+            setIsSearchingAddress(false);
+            return;
+          }
         } else {
           notification.warning({
             message: "Không tìm thấy tọa độ",
             description:
-              response.message || "Vui lòng kiểm tra lại link Google Maps.",
+              response?.message || "Vui lòng kiểm tra lại link Google Maps.",
           });
           setIsSearchingAddress(false);
           return;

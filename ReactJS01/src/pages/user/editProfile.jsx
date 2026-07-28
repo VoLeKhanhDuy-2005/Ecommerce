@@ -6,6 +6,7 @@ import {
   getCurrentUserApi,
   updateProfileApi,
   resolveMapLinkApi,
+  searchNominatim,
 } from "../../util/api";
 import {
   EditOutlined,
@@ -169,11 +170,25 @@ export default function EditProfilePage() {
         if (response && response.success && response.data) {
           lat = response.data.lat;
           lng = response.data.lng;
+        } else if (response && response.isPlaceName && response.placeName) {
+          // Fallback: Nếu backend trích xuất được tên địa điểm nhưng không có tọa độ
+          const nomData = await searchNominatim(response.placeName);
+          if (nomData && nomData.length > 0) {
+            lat = parseFloat(nomData[0].lat);
+            lng = parseFloat(nomData[0].lon);
+          } else {
+            notification.warning({
+              message: "Không tìm thấy tọa độ",
+              description: `Không thể định vị được địa điểm: ${response.placeName}.`,
+            });
+            setIsSearchingAddress(false);
+            return;
+          }
         } else {
           notification.warning({
             message: "Không tìm thấy tọa độ",
             description:
-              response.message || "Vui lòng kiểm tra lại link Google Maps.",
+              response?.message || "Vui lòng kiểm tra lại link Google Maps.",
           });
           setIsSearchingAddress(false);
           return;

@@ -9,9 +9,9 @@ const handleResolveMapLink = async (req, res) => {
     let match = urlString.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
-    // 2. Dạng /search/10.711076,+106.672011 hoặc /place/10.711076,106.672011
+    // 2. Dạng /search/10.71,+106.67 hoặc /place/... hoặc /dir/...
     match = urlString.match(
-      /\/(?:search|place)\/(-?\d+\.\d+)(?:%2C|,|\+)+(-?\d+\.\d+)/,
+      /\/(?:search|place|dir)\/.*?(-?\d+\.\d+)(?:%2C|,|\+)+(-?\d+\.\d+)/,
     );
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
@@ -53,6 +53,33 @@ const handleResolveMapLink = async (req, res) => {
 
     if (coords) {
       return res.status(200).json({ success: true, data: coords });
+    }
+
+    // Nếu vẫn không có tọa độ, thử lấy tên địa điểm từ URL
+    const placeNameMatch = finalUrl.match(/\/place\/([^/]+)/);
+    /*
+      ([^/]+)
+      - []: Character class (tập ký tự)
+      - dấu ^ có nghĩa là không phải -> [^/]: ất kỳ ký tự nào ngoại trừ dấu /
+      - +: ít nhất một ký tự (khác "")
+      - (...): Dấu ngoặc tròn tạo capturing group -> Phần khớp bên trong sẽ được lưu vào match[1]
+    */
+    if (placeNameMatch) {
+      const placeName = decodeURIComponent(placeNameMatch[1]).replace(
+        /\+/g,
+        " ",
+      );
+      /*
+        .replace(/\+/g, " ") là lệnh JavaScript dùng để thay thế 'tất cả' dấu + trong chuỗi thành dấu cách
+        - ko có g: chỉ thay dấu + đầu tiên
+      */
+      return res.status(200).json({
+        success: false,
+        isPlaceName: true,
+        placeName: placeName,
+        message:
+          "Đây là link một địa điểm cụ thể, hệ thống sẽ tự động tìm kiếm theo tên.",
+      });
     }
 
     // Nếu vẫn không có, tìm trong HTML body (fallback)
