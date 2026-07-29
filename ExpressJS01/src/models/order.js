@@ -100,6 +100,19 @@ const orderSchema = new mongoose.Schema(
     momoRequestId: {
       type: String,
     },
+    voucherApplied: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "voucher",
+      default: null,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+    coinsEarned: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

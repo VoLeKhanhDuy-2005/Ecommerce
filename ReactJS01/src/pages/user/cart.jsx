@@ -30,6 +30,7 @@ import {
   calculateShippingApi,
   resolveMapLinkApi,
   searchNominatim,
+  getMyVouchersApi,
 } from "../../util/api";
 
 export default function CartPage() {
@@ -50,12 +51,16 @@ export default function CartPage() {
 
   const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' hoặc 'MOMO'
 
-  // Trạng thái GPS
+  // GPS state
   const [shippingFee, setShippingFee] = useState(0);
   const [distance, setDistance] = useState(0);
   const [coordinates, setCoordinates] = useState(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+
+  // Voucher state
+  const [myVouchers, setMyVouchers] = useState([]);
+  const [selectedVoucherId, setSelectedVoucherId] = useState(null);
 
   // Lấy dữ liệu giỏ hàng từ API
   const fetchCart = async () => {
@@ -83,8 +88,20 @@ export default function CartPage() {
   };
 
   useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const res = await getMyVouchersApi();
+        if (res && res.success) {
+          setMyVouchers(res.data);
+        }
+      } catch (error) {
+        console.error("Lỗi tải voucher:", error);
+      }
+    };
+
     if (auth.isAuthenticated) {
       fetchCart();
+      fetchVouchers();
     } else {
       setIsLoading(false);
     }
@@ -174,6 +191,30 @@ export default function CartPage() {
           : item.product.price;
       return sum + productPrice * item.quantity;
     }, 0);
+  };
+
+  const calculateDiscount = () => {
+    if (!selectedVoucherId) return 0;
+    const uv = myVouchers.find(
+      (v) => v.voucher && v.voucher._id === selectedVoucherId,
+    );
+    if (!uv || !uv.voucher) return 0;
+    const v = uv.voucher;
+    const total = calculateTotal();
+
+    if (total < v.minOrderValue) return 0;
+
+    if (v.type === "DISCOUNT_AMOUNT") {
+      return v.value;
+    } else if (v.type === "DISCOUNT_PERCENT") {
+      const calcDiscount = (total * v.value) / 100;
+      return v.maxDiscountAmount
+        ? Math.min(calcDiscount, v.maxDiscountAmount)
+        : calcDiscount;
+    } else if (v.type === "FREE_SHIP") {
+      return Math.min(shippingFee, v.value);
+    }
+    return 0; // FREE_ITEM logic
   };
 
   const formatPrice = (price) =>
@@ -366,6 +407,7 @@ export default function CartPage() {
         }),
         lat: coordinates?.lat,
         lng: coordinates?.lng,
+        voucherId: selectedVoucherId,
       };
 
       const res = await createOrderApi(orderPayload);
@@ -800,12 +842,74 @@ export default function CartPage() {
                     {formatPrice(shippingFee)}
                   </span>
                 </div>
+
+                {/* Voucher Selection UI */}
+                {myVouchers.length > 0 && (
+                  <div className="pt-2">
+                    <label className="text-xs font-semibold text-gray-500 block mb-1">
+                      Áp dụng Voucher
+                    </label>
+                    <select
+                      className="w-full text-xs p-2 border border-gray-200 rounded-lg outline-none focus:border-orange-500"
+                      value={selectedVoucherId || ""}
+                      onChange={(e) =>
+                        setSelectedVoucherId(e.target.value || null)
+                      }
+                    >
+                      <option value="">-- Không sử dụng voucher --</option>
+                      {(() => {
+                        const seen = new Set();
+                        const uniqueVouchers = [];
+                        for (const uv of myVouchers) {
+                          if (uv.voucher && !seen.has(uv.voucher._id)) {
+                            seen.add(uv.voucher._id);
+                            uniqueVouchers.push(uv.voucher);
+                          }
+                        }
+
+                        return uniqueVouchers.map((v) => {
+                          const isEligible =
+                            calculateTotal() >= v.minOrderValue;
+                          return (
+                            <option
+                              key={v._id}
+                              value={v._id}
+                              disabled={!isEligible}
+                            >
+                              {v.title}{" "}
+                              {isEligible
+                                ? ""
+                                : `(Cần tối thiểu ${formatPrice(v.minOrderValue)})`}
+                            </option>
+                          );
+                        });
+                      })()}
+                    </select>
+                  </div>
+                )}
+
+                {calculateDiscount() > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-orange-500">
+                      Khuyến mãi:
+                    </span>
+                    <span className="text-sm font-black text-orange-500">
+                      - {formatPrice(calculateDiscount())}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center border-t border-gray-50 pt-2">
                   <span className="text-sm font-semibold text-gray-800">
                     Tổng thanh toán:
                   </span>
                   <span className="text-lg font-black text-orange-600">
-                    {formatPrice(calculateTotal() + shippingFee)}
+                    {formatPrice(
+                      Math.max(
+                        0,
+                        calculateTotal() + shippingFee - calculateDiscount(),
+                      ),
+                    )}
                   </span>
                 </div>
               </div>

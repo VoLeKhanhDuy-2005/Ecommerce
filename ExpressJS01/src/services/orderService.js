@@ -1,5 +1,7 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
+const User = require("../models/user");
+const UserVoucher = require("../models/userVoucher");
 const cartService = require("./cartService");
 const settingService = require("./settingService");
 const crypto = require("crypto");
@@ -98,6 +100,7 @@ const createOrder = async (userEmail, payload) => {
       items,
       lat,
       lng,
+      voucherId,
     } = payload;
 
     if (
@@ -174,7 +177,60 @@ const createOrder = async (userEmail, payload) => {
       deliveryCoordinates = { lat: parseFloat(lat), lng: parseFloat(lng) };
     }
 
-    totalAmount += shippingFee;
+    let discountAmount = 0;
+    let appliedVoucherId = null;
+    let userVoucherRecord = null;
+
+    if (voucherId) {
+      userVoucherRecord = await UserVoucher.findOne({
+        voucher: voucherId,
+        userEmail,
+        isUsed: false,
+      }).populate("voucher");
+
+      if (userVoucherRecord && userVoucherRecord.voucher) {
+        const voucher = userVoucherRecord.voucher;
+        if (voucher.isActive && new Date(voucher.expirationDate) > new Date()) {
+          if (totalAmount >= voucher.minOrderValue) {
+            appliedVoucherId = voucher._id;
+
+            if (voucher.type === "DISCOUNT_AMOUNT") {
+              discountAmount = voucher.value;
+            } else if (voucher.type === "DISCOUNT_PERCENT") {
+              const calcDiscount = (totalAmount * voucher.value) / 100;
+              discountAmount = voucher.maxDiscountAmount
+                ? Math.min(calcDiscount, voucher.maxDiscountAmount)
+                : calcDiscount;
+            } else if (voucher.type === "FREE_SHIP") {
+              discountAmount = Math.min(shippingFee, voucher.value);
+            } else if (voucher.type === "FREE_ITEM" && voucher.freeItemId) {
+              const freeProduct = await Product.findById(voucher.freeItemId);
+              const giftQty = voucher.value || 1;
+              if (freeProduct && freeProduct.stock >= giftQty) {
+                verifiedItems.push({
+                  product: freeProduct._id,
+                  name: freeProduct.name + " (Quà tặng)",
+                  price: 0,
+                  quantity: giftQty,
+                  image:
+                    freeProduct.images && freeProduct.images[0]
+                      ? freeProduct.images[0]
+                      : "",
+                });
+                await Product.findByIdAndUpdate(freeProduct._id, {
+                  $inc: { stock: -giftQty, sold: giftQty },
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (discountAmount > totalAmount + shippingFee) {
+      discountAmount = totalAmount + shippingFee;
+    }
+    const finalTotalAmount = totalAmount + shippingFee - discountAmount;
 
     const orderData = {
       userEmail,
@@ -182,15 +238,23 @@ const createOrder = async (userEmail, payload) => {
       phoneNumber,
       shippingAddress,
       items: verifiedItems,
-      totalAmount,
+      totalAmount: finalTotalAmount,
       shippingFee,
       distance: Number(distance.toFixed(2)),
       deliveryCoordinates,
       paymentMethod,
       paymentStatus: "Pending",
       status: "New",
+      voucherApplied: appliedVoucherId,
+      discountAmount,
     };
     const newOrder = await Order.create(orderData);
+
+    if (userVoucherRecord) {
+      userVoucherRecord.isUsed = true;
+      userVoucherRecord.usedAt = new Date();
+      await userVoucherRecord.save();
+    }
 
     if (paymentMethod === "COD") {
       await cartService.clearCart(userEmail);
@@ -210,7 +274,7 @@ const createOrder = async (userEmail, payload) => {
       const ipnUrl = "https://example-ipn.vn/ipn";
       const extraData = "";
 
-      const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${totalAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=payWithMethod`;
+      const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${finalTotalAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=payWithMethod`;
       const signature = crypto
         .createHmac("sha256", MOMO_SECRET_KEY)
         .update(rawSignature)
@@ -221,7 +285,7 @@ const createOrder = async (userEmail, payload) => {
         partnerName: "Food Shop",
         storeId: "MomoTestStore",
         requestId,
-        amount: totalAmount,
+        amount: finalTotalAmount,
         orderId,
         orderInfo,
         redirectUrl,
@@ -345,6 +409,19 @@ const verifyMomoPayment = async (orderIdParams) => {
         { $set: { paymentStatus: "Failed" } },
         { new: true },
       );
+
+      // Hoàn lại voucher nếu có
+      if (failedOrder && failedOrder.voucherApplied) {
+        await UserVoucher.findOneAndUpdate(
+          {
+            userEmail: failedOrder.userEmail,
+            voucher: failedOrder.voucherApplied,
+            isUsed: true,
+          },
+          { $set: { isUsed: false, usedAt: null } },
+        );
+      }
+
       return {
         statusCode: 400,
         success: false,
@@ -436,6 +513,14 @@ const cancelOrder = async (orderIdParams, userEmail, reason) => {
           $inc: { stock: item.quantity, sold: -item.quantity },
         });
       }
+
+      if (order.voucherApplied) {
+        await UserVoucher.findOneAndUpdate(
+          { userEmail, voucher: order.voucherApplied, isUsed: true },
+          { $set: { isUsed: false, usedAt: null } },
+        );
+      }
+
       return {
         statusCode: 200,
         success: true,
@@ -499,9 +584,18 @@ const markOrderAsReceived = async (orderIdParams, userEmail) => {
       };
     }
 
+    const coinsEarned = Math.floor(order.totalAmount / 10000);
+    order.coinsEarned = coinsEarned;
     order.status = "Delivered";
     order.paymentStatus = "Paid"; // Đánh dấu đã thanh toán khi nhận hàng thành công
     await order.save();
+
+    if (coinsEarned > 0) {
+      await User.findOneAndUpdate(
+        { email: userEmail },
+        { $inc: { coins: coinsEarned } },
+      );
+    }
 
     return {
       statusCode: 200,
@@ -585,6 +679,18 @@ const updateShopOrderStatus = async (orderIdParams, status) => {
           $inc: { stock: item.quantity, sold: -item.quantity },
         });
       }
+
+      // Hoàn lại voucher nếu có
+      if (order.voucherApplied) {
+        await UserVoucher.findOneAndUpdate(
+          {
+            userEmail: order.userEmail,
+            voucher: order.voucherApplied,
+            isUsed: true,
+          },
+          { $set: { isUsed: false, usedAt: null } },
+        );
+      }
     }
     await order.save();
     return {
@@ -629,6 +735,18 @@ const handleShopCancelRequest = async (orderIdParams, action) => {
           $inc: { stock: item.quantity, sold: -item.quantity },
         });
       }
+
+      if (order.voucherApplied) {
+        await UserVoucher.findOneAndUpdate(
+          {
+            userEmail: order.userEmail,
+            voucher: order.voucherApplied,
+            isUsed: true,
+          },
+          { $set: { isUsed: false, usedAt: null } },
+        );
+      }
+
       return {
         statusCode: 200,
         success: true,

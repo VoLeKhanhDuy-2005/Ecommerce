@@ -228,6 +228,34 @@ const searchNominatim = async (address) => {
   return [];
 };
 
+const getActiveVouchersApi = () => {
+  return axios.get("/v1/api/vouchers/active");
+};
+
+const redeemVoucherApi = (voucherId) => {
+  return axios.post("/v1/api/vouchers/redeem", { voucherId });
+};
+
+const getMyVouchersApi = () => {
+  return axios.get("/v1/api/vouchers/my");
+};
+
+const createVoucherApi = (data) => {
+  return axios.post("/v1/api/admin/vouchers", data);
+};
+
+const getAllAdminVouchersApi = () => {
+  return axios.get("/v1/api/admin/vouchers");
+};
+
+const updateVoucherApi = (id, data) => {
+  return axios.put(`/v1/api/admin/vouchers/${id}`, data);
+};
+
+const deleteVoucherApi = (id) => {
+  return axios.delete(`/v1/api/admin/vouchers/${id}`);
+};
+
 export {
   registerApi,
   loginApi,
@@ -271,4 +299,11 @@ export {
   updateSettingApi,
   resolveMapLinkApi,
   searchNominatim,
+  getActiveVouchersApi,
+  redeemVoucherApi,
+  getMyVouchersApi,
+  createVoucherApi,
+  getAllAdminVouchersApi,
+  updateVoucherApi,
+  deleteVoucherApi,
 };

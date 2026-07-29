@@ -58,15 +58,15 @@ const getProductsWithFilters = async (query) => {
     filter.category = category;
   }
   if (minPrice || maxPrice) {
-    filter.price = {};
-    if (minPrice) filter.price.$gte = Number(minPrice);
-    if (maxPrice) filter.price.$lte = Number(maxPrice);
+    filter.discountPrice = {};
+    if (minPrice) filter.discountPrice.$gte = Number(minPrice);
+    if (maxPrice) filter.discountPrice.$lte = Number(maxPrice);
   }
 
   let sortObj = { createdAt: -1 };
   if (sort) {
-    if (sort === "price-asc") sortObj = { price: 1 };
-    if (sort === "price-desc") sortObj = { price: -1 };
+    if (sort === "price-asc") sortObj = { discountPrice: 1 };
+    if (sort === "price-desc") sortObj = { discountPrice: -1 };
     if (sort === "newest") sortObj = { createdAt: -1 };
     if (sort === "bestselling") sortObj = { sold: -1 };
   }

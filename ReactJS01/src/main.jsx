@@ -9,6 +9,7 @@ import AdminOrdersPage from "./pages/admin/orders.jsx";
 import AdminCategoriesPage from "./pages/admin/categories.jsx";
 import AdminProductsPage from "./pages/admin/products.jsx";
 import AdminSettingsPage from "./pages/admin/settings.jsx";
+import AdminVouchersPage from "./pages/admin/vouchers.jsx";
 import RegisterPage from "./pages/register.jsx";
 import UserPage from "./pages/admin/users.jsx";
 import HomePage from "./pages/home.jsx";
@@ -19,6 +20,7 @@ import CartPage from "./pages/user/cart.jsx";
 import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import OrdersPage from "./pages/user/orders.jsx";
 import EditProfilePage from "./pages/user/editProfile.jsx";
+import RewardsPage from "./pages/user/rewards.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 
 const router = createBrowserRouter([
@@ -50,6 +52,10 @@ const router = createBrowserRouter([
         path: "profile",
         element: <EditProfilePage />,
       },
+      {
+        path: "rewards",
+        element: <RewardsPage />,
+      },
     ],
   },
   {
@@ -75,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <AdminSettingsPage />,
+      },
+      {
+        path: "vouchers",
+        element: <AdminVouchersPage />,
       },
     ],
   },

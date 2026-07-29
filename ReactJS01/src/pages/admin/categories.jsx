@@ -16,7 +16,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   UploadOutlined,
-  TagsOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 import {
   getCategoriesApi,
@@ -225,7 +225,7 @@ const AdminCategoriesPage = () => {
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <TagsOutlined className="text-purple-600" />
+            <UnorderedListOutlined className="text-purple-600" />
             <span>Quản Lý Danh Mục Sản Phẩm</span>
           </h1>
         </div>

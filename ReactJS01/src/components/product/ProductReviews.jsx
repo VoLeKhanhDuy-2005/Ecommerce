@@ -200,12 +200,8 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
             >
               <Avatar
                 size={48}
-                icon={!review.user?.avatarName ? <UserOutlined /> : null}
-                src={
-                  review.user?.avatarName
-                    ? `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${review.user.avatarName}`
-                    : null
-                }
+                icon={!review.user?.avatarURL ? <UserOutlined /> : null}
+                src={review.user?.avatarURL ? review.user.avatarURL : null}
                 className="bg-gray-200 border-2 border-white shadow-sm flex-shrink-0"
               />
               <div className="flex-1">

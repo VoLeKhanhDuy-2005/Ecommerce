@@ -70,6 +70,16 @@ const {
 } = require("../controllers/settingController");
 const { handleResolveMapLink } = require("../controllers/utilController");
 
+const {
+  createVoucher,
+  getActiveVouchers,
+  redeemVoucher,
+  getMyVouchers,
+  getAllAdminVouchers,
+  updateVoucher,
+  deleteVoucher,
+} = require("../controllers/voucherController");
+
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
 
@@ -150,5 +160,14 @@ routerAPI.get("/settings", getSettings);
 routerAPI.put("/admin/settings", isAdmin, updateSetting);
 
 routerAPI.post("/utils/resolve-map-link", handleResolveMapLink);
+
+routerAPI.get("/admin/vouchers", isAdmin, getAllAdminVouchers);
+routerAPI.post("/admin/vouchers", isAdmin, createVoucher);
+routerAPI.put("/admin/vouchers/:id", isAdmin, updateVoucher);
+routerAPI.delete("/admin/vouchers/:id", isAdmin, deleteVoucher);
+
+routerAPI.get("/vouchers/active", getActiveVouchers);
+routerAPI.post("/vouchers/redeem", redeemVoucher);
+routerAPI.get("/vouchers/my", getMyVouchers);
 
 module.exports = routerAPI;

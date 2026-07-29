@@ -9,6 +9,7 @@ import {
   HomeOutlined,
   UserOutlined,
   SettingOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -75,13 +76,18 @@ const AdminLayout = () => {
     },
     {
       key: "/admin/categories",
-      icon: <TagsOutlined />,
+      icon: <UnorderedListOutlined />,
       label: <Link to="/admin/categories">Quản lý Danh mục</Link>,
     },
     {
       key: "/admin/products",
       icon: <ShoppingOutlined />,
       label: <Link to="/admin/products">Quản lý Sản phẩm</Link>,
+    },
+    {
+      key: "/admin/vouchers",
+      icon: <TagsOutlined />,
+      label: <Link to="/admin/vouchers">Quản lý Voucher</Link>,
     },
     {
       key: "/admin/settings",

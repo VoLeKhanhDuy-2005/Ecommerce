@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
     },
+    coins: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true, // Tự động tạo createdAt và updatedAt

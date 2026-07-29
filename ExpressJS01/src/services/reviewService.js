@@ -3,6 +3,7 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
 const mongoose = require("mongoose");
+const { getImagePresignedUrlByKey } = require("./fileService");
 
 const updateProductRating = async (productId) => {
   const result = await Review.aggregate([
@@ -34,14 +35,26 @@ const updateProductRating = async (productId) => {
 const getProductReviews = async (productId, page = 1, limit = 5) => {
   const skip = (page - 1) * limit;
 
-  const [reviews, total] = await Promise.all([
+  const [reviewsRaw, total] = await Promise.all([
     Review.find({ product: productId })
       .populate("user", "name avatarName email")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Review.countDocuments({ product: productId }),
   ]);
+
+  const reviews = await Promise.all(
+    reviewsRaw.map(async (review) => {
+      if (review.user && review.user.avatarName) {
+        review.user.avatarURL = await getImagePresignedUrlByKey(
+          review.user.avatarName,
+        );
+      }
+      return review;
+    }),
+  );
 
   return {
     EC: 0,

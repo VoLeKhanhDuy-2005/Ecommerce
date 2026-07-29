@@ -66,6 +66,7 @@ const Header = () => {
                 icon: <ShoppingCartOutlined />,
               },
               { to: "/orders", label: "Đơn hàng", icon: <HistoryOutlined /> },
+              { to: "/rewards", label: "Kho Voucher", icon: <TagOutlined /> },
             ]
           : []),
       ];
