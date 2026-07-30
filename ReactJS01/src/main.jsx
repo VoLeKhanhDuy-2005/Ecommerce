@@ -21,6 +21,7 @@ import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import OrdersPage from "./pages/user/orders.jsx";
 import EditProfilePage from "./pages/user/editProfile.jsx";
 import RewardsPage from "./pages/user/rewards.jsx";
+import GamePage from "./pages/user/game.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 
 const router = createBrowserRouter([
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "rewards",
         element: <RewardsPage />,
+      },
+      {
+        path: "game",
+        element: <GamePage />,
       },
     ],
   },

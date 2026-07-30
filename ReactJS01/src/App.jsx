@@ -26,6 +26,7 @@ function App() {
               phone: res.user.phone,
               address: res.user.address,
               location: res.user.location,
+              coins: res.user.coins || 0,
             },
           });
 

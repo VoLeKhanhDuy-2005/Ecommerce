@@ -80,6 +80,11 @@ const {
   deleteVoucher,
 } = require("../controllers/voucherController");
 
+const {
+  getFoodQuestion,
+  submitGameAnswer,
+} = require("../controllers/gameController");
+
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
 
@@ -169,5 +174,8 @@ routerAPI.delete("/admin/vouchers/:id", isAdmin, deleteVoucher);
 routerAPI.get("/vouchers/active", getActiveVouchers);
 routerAPI.post("/vouchers/redeem", redeemVoucher);
 routerAPI.get("/vouchers/my", getMyVouchers);
+
+routerAPI.get("/game/question", getFoodQuestion);
+routerAPI.post("/game/submit", submitGameAnswer);
 
 module.exports = routerAPI;

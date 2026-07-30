@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   AppstoreOutlined,
   TagOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -66,7 +67,19 @@ const Header = () => {
                 icon: <ShoppingCartOutlined />,
               },
               { to: "/orders", label: "Đơn hàng", icon: <HistoryOutlined /> },
-              { to: "/rewards", label: "Kho Voucher", icon: <TagOutlined /> },
+              { to: "/game", label: "Chơi Game", icon: <GiftOutlined /> },
+              {
+                to: "/rewards",
+                label: (
+                  <div className="flex items-center gap-1.5">
+                    <span>Kho Voucher</span>
+                    <span className="font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full border border-orange-200 flex items-center shadow-sm text-xs leading-none">
+                      🪙 {auth?.user?.coins || 0}
+                    </span>
+                  </div>
+                ),
+                icon: <TagOutlined />,
+              },
             ]
           : []),
       ];

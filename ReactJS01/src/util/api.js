@@ -256,6 +256,14 @@ const deleteVoucherApi = (id) => {
   return axios.delete(`/v1/api/admin/vouchers/${id}`);
 };
 
+const getGameQuestionApi = () => {
+  return axios.get("/v1/api/game/question");
+};
+
+const submitGameAnswerApi = (token, answer) => {
+  return axios.post("/v1/api/game/submit", { token, answer });
+};
+
 export {
   registerApi,
   loginApi,
@@ -306,4 +314,6 @@ export {
   getAllAdminVouchersApi,
   updateVoucherApi,
   deleteVoucherApi,
+  getGameQuestionApi,
+  submitGameAnswerApi,
 };
