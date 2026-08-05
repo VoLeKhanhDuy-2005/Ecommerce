@@ -85,6 +85,9 @@ const {
   submitGameAnswer,
 } = require("../controllers/gameController");
 
+const { generateToken } = require("../controllers/livestreamController");
+
+
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
 
@@ -177,5 +180,7 @@ routerAPI.get("/vouchers/my", getMyVouchers);
 
 routerAPI.get("/game/question", getFoodQuestion);
 routerAPI.post("/game/submit", submitGameAnswer);
+
+routerAPI.get("/livestream/token", generateToken);
 
 module.exports = routerAPI;

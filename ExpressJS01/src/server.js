@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/errorHandler");
 const { apiLimiter } = require("./middleware/rateLimiter");
 const Order = require("./models/order");
+const http = require("http");
+const { Server } = require("socket.io");
 const app = express(); //cấu hình app là express
 app.set("trust proxy", 1); // Trust first proxy (Render) for rate limiting behind load balancers
 const port = process.env.PORT || 8888;
@@ -51,7 +53,23 @@ app.use(errorHandler);
       }
     }, 60000); // Quét mỗi 60 giây tự động xác nhận đơn hàng quá 30 phút
 
-    app.listen(port, () => {
+    const server = http.createServer(app);
+    const io = new Server(server, {
+      cors: {
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        methods: ["GET", "POST"]
+      }
+    });
+
+    io.on("connection", (socket) => {
+      console.log("Client connected via Socket.io:", socket.id);
+      
+      socket.on("disconnect", () => {
+        console.log("Client disconnected:", socket.id);
+      });
+    });
+
+    server.listen(port, () => {
       console.log(`Backend Nodejs App listening on port ${port}`);
     });
   } catch (error) {

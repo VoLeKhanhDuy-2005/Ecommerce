@@ -14,6 +14,7 @@ import {
   AppstoreOutlined,
   TagOutlined,
   GiftOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -40,16 +41,11 @@ const Header = () => {
   const isAdmin = auth.isAuthenticated && auth.user.role === "admin";
 
   const navLinks = isAdmin
-    ? [
-        {
-          to: "/admin/orders",
-          label: "Trang Quản Trị",
-          icon: <AppstoreOutlined />,
-        },
-      ]
+    ? []
     : [
         { to: "/", label: "Trang chủ", icon: <HomeOutlined /> },
         { to: "/search", label: "Tìm kiếm", icon: <SearchOutlined /> },
+        { to: "/livestream", label: "Live stream", icon: <VideoCameraOutlined /> },
         ...(auth.isAuthenticated
           ? [
               {

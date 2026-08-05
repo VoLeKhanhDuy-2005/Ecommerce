@@ -10,6 +10,7 @@ import {
   UserOutlined,
   SettingOutlined,
   UnorderedListOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
@@ -94,6 +95,11 @@ const AdminLayout = () => {
       icon: <SettingOutlined />,
       label: <Link to="/admin/settings">Cấu hình Hệ thống</Link>,
     },
+    {
+      key: "/livestream",
+      label: <Link to="/livestream">Livestream</Link>,
+      icon: <VideoCameraOutlined />,
+    }
   ];
 
   const userMenuItems = {

@@ -47,11 +47,13 @@ const auth = (req, res, next) => {
         next();
       } catch (error) {
         return res.status(401).json({
+          success: false,
           message: "Token bị hết hạn/hoặc không hợp lệ",
         });
       }
     } else {
       return res.status(401).json({
+        success: false,
         message: "Bạn chưa truyền Access Token ở header/Hoặc token bị hết hạn",
       });
     }
