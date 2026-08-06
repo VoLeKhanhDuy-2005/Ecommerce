@@ -203,7 +203,7 @@ const LivestreamPage = () => {
 
   if (!token) {
     return (
-      <div className="bc-root w-screen h-screen flex items-center justify-center" style={{ background: 'var(--bc-void)' }}>
+      <div className="bc-root w-screen h-[100dvh] flex items-center justify-center" style={{ background: 'var(--bc-void)' }}>
         <style>{FONT_IMPORTS}</style>
         <div className="flex flex-col items-center gap-4">
           <div className="w-3 h-3 rounded-full bc-live-dot" style={{ background: 'var(--bc-live)' }} />
@@ -216,7 +216,7 @@ const LivestreamPage = () => {
   }
 
   return (
-    <div className="bc-root w-screen h-screen flex flex-col" style={{ background: 'var(--bc-void)' }}>
+    <div className="bc-root w-screen h-[100dvh] flex flex-col" style={{ background: 'var(--bc-void)' }}>
       <style>{FONT_IMPORTS}</style>
 
       {/* Chassis header */}
@@ -299,7 +299,7 @@ const LivestreamPage = () => {
           </div>
 
           {isAdmin && (
-            <div className="mt-4 flex justify-center bc-controlbar">
+            <div className="mt-4 pb-6 md:pb-0 flex justify-center bc-controlbar shrink-0">
               <ControlBar />
             </div>
           )}
