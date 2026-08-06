@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/context/auth.context';
-import { PhoneOutlined, EyeOutlined } from '@ant-design/icons';
+import { PhoneOutlined, EyeOutlined, MessageOutlined, CloseOutlined } from '@ant-design/icons';
 import {
   LiveKitRoom,
   VideoTrack,
@@ -173,6 +173,7 @@ const LivestreamPage = () => {
   const { auth } = useContext(AuthContext);
 
   const [token, setToken] = useState("");
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -219,26 +220,26 @@ const LivestreamPage = () => {
 
       {/* Chassis header */}
       <div
-        className="px-5 py-3 flex items-center justify-between shadow-md z-10"
+        className="px-3 md:px-5 py-2 md:py-3 flex items-center justify-between shadow-md z-10"
         style={{ background: 'var(--bc-panel)', borderBottom: '1px solid var(--bc-line)' }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <div
-            className="w-9 h-9 rounded-md flex items-center justify-center font-bold bc-display text-sm"
+            className="w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center font-bold bc-display text-sm"
             style={{ background: 'var(--bc-panel-raised)', color: 'var(--bc-text)', border: '1px solid var(--bc-line)' }}
           >
             {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : 'V'}
           </div>
           <div>
-            <h2 className="bc-display text-base font-semibold leading-tight" style={{ color: 'var(--bc-text)' }}>
+            <h2 className="bc-display text-sm md:text-base font-semibold leading-tight" style={{ color: 'var(--bc-text)' }}>
               Phòng Livestream
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <span
-            className="bc-mono text-[11px] px-2.5 py-1 rounded uppercase tracking-wider"
+            className="bc-mono text-[9px] md:text-[11px] px-2 py-1 rounded uppercase tracking-wider hidden sm:inline-block"
             style={{
               color: isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)',
               border: `1px solid ${isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)'}`,
@@ -249,12 +250,12 @@ const LivestreamPage = () => {
           </span>
           <button
             onClick={() => navigate('/')}
-            className="px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-2 bc-display text-sm"
+            className="px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium transition-colors flex items-center gap-1 md:gap-2 bc-display text-xs md:text-sm"
             style={{ background: 'var(--bc-live)', color: '#fff' }}
             onMouseEnter={(e) => (e.currentTarget.style.background = '#e32e24')}
             onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--bc-live)')}
           >
-            <PhoneOutlined className="rotate-[135deg]" /> Rời livestream
+            <PhoneOutlined className="rotate-[135deg]" /> <span className="hidden sm:inline">Rời livestream</span>
           </button>
         </div>
       </div>
@@ -269,18 +270,31 @@ const LivestreamPage = () => {
         className="flex-1 flex flex-col md:flex-row overflow-hidden"
       >
         {/* Video / console area */}
-        <div className="flex-1 p-4 flex flex-col relative h-full min-w-0">
+        <div className="flex-1 p-0 md:p-4 flex flex-col relative min-w-0 w-full bg-black md:bg-transparent">
           <div
-            className="flex-1 rounded-2xl overflow-hidden shadow-lg relative"
-            style={{ background: '#000', border: '1px solid var(--bc-line)' }}
+            className="flex-1 md:rounded-2xl overflow-hidden md:shadow-lg relative border-0 md:border md:border-[#262b31] bg-black"
           >
             {/* viewfinder corner brackets — the signature detail */}
-            <Corner style={{ top: 12, left: 12, borderRight: 'none', borderBottom: 'none' }} />
-            <Corner style={{ top: 12, right: 12, borderLeft: 'none', borderBottom: 'none' }} />
-            <Corner style={{ bottom: 12, left: 12, borderRight: 'none', borderTop: 'none' }} />
-            <Corner style={{ bottom: 12, right: 12, borderLeft: 'none', borderTop: 'none' }} />
+            <div className="hidden md:block">
+              <Corner style={{ top: 12, left: 12, borderRight: 'none', borderBottom: 'none' }} />
+              <Corner style={{ top: 12, right: 12, borderLeft: 'none', borderBottom: 'none' }} />
+              <Corner style={{ bottom: 12, left: 12, borderRight: 'none', borderTop: 'none' }} />
+              <Corner style={{ bottom: 12, right: 12, borderLeft: 'none', borderTop: 'none' }} />
+            </div>
 
             <LivestreamVideo />
+
+            {/* Floating Chat Button for Mobile */}
+            <button
+              className={`
+                md:hidden absolute bottom-6 right-4 z-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300
+                ${isMobileChatOpen ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}
+              `}
+              style={{ background: 'var(--bc-live)', color: 'white', boxShadow: '0 4px 12px rgba(255,59,48,0.4)' }}
+              onClick={() => setIsMobileChatOpen(true)}
+            >
+              <MessageOutlined className="text-xl" />
+            </button>
           </div>
 
           {isAdmin && (
@@ -290,20 +304,38 @@ const LivestreamPage = () => {
           )}
         </div>
 
-        {/* Chat / feed area */}
+        {/* Chat / feed area (Bottom Sheet on Mobile) */}
         <div
-          className="w-full md:w-80 lg:w-96 flex flex-col h-full"
+          className={`
+            fixed inset-x-0 bottom-0 top-[35vh] z-50 flex flex-col transition-transform duration-300 ease-out
+            rounded-t-3xl md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none
+            ${isMobileChatOpen ? 'translate-y-0' : 'translate-y-full'}
+            md:static md:translate-y-0 md:w-80 lg:w-96 md:flex-1 md:min-h-0
+          `}
           style={{ background: 'var(--bc-panel)', borderLeft: '1px solid var(--bc-line)' }}
         >
           <div
-            className="px-4 py-3 flex items-center justify-between bc-display font-semibold text-sm"
+            className="px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none"
             style={{ background: 'var(--bc-void)', borderBottom: '1px solid var(--bc-line)', color: 'var(--bc-text)' }}
           >
-            <div className="flex items-center gap-2">
-              <span>Live Feed</span>
-              <span className="w-1.5 h-1.5 rounded-full bc-live-dot" style={{ background: 'var(--bc-live)' }} />
+            {/* Drag handle for mobile */}
+            <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-3 md:hidden opacity-70" />
+            
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <span>Live Feed</span>
+                <span className="w-1.5 h-1.5 rounded-full bc-live-dot" style={{ background: 'var(--bc-live)' }} />
+              </div>
+              <div className="flex items-center gap-3">
+                <ViewerCountBadge />
+                <button 
+                  className="md:hidden w-7 h-7 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+                  onClick={() => setIsMobileChatOpen(false)}
+                >
+                  <CloseOutlined className="text-xs" />
+                </button>
+              </div>
             </div>
-            <ViewerCountBadge />
           </div>
           <div className="flex-1 overflow-hidden bc-chat-theme">
             <Chat />
@@ -370,10 +402,10 @@ const LivestreamVideo = () => {
   }
 
   return (
-    <div className="relative h-full w-full">
-      <VideoTrack trackRef={activeTrack} className="h-full w-full object-cover" />
+    <div className="relative h-full w-full bg-black">
+      <VideoTrack trackRef={activeTrack} className="h-full w-full object-contain md:object-cover" />
       <div
-        className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md flex items-center gap-2"
+        className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md"
         style={{ background: 'rgba(10,11,13,0.7)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
       >
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--bc-live)' }} />
