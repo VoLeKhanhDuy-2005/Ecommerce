@@ -8,9 +8,10 @@ import {
   RoomAudioRenderer,
   ControlBar,
   useTracks,
-  Chat,
+  useChat,
   useConnectionState,
-  useParticipants
+  useParticipants,
+  useLocalParticipant
 } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track, ConnectionState } from 'livekit-client';
@@ -341,7 +342,7 @@ const LivestreamPage = () => {
             </button>
           </div>
           <div className="flex-1 overflow-hidden bc-chat-theme">
-            <Chat />
+            <CustomLivestreamChat />
           </div>
         </div>
 
@@ -443,6 +444,59 @@ const ViewerCountBadge = ({ className, style }) => {
       <span className="bc-mono text-[11px]" style={{ color: 'var(--bc-text)' }}>
         {viewerCount}
       </span>
+    </div>
+  );
+};
+
+const CustomLivestreamChat = () => {
+  const { chatMessages, send, isSending } = useChat();
+  const { localParticipant } = useLocalParticipant();
+  const [message, setMessage] = useState('');
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (message.trim()) {
+      await send(message);
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full w-full">
+      <ul className="lk-list">
+        {chatMessages.map((msg, idx) => {
+          const isLocal = msg.from?.identity === localParticipant?.identity;
+          return (
+            <li key={idx} className="lk-chat-entry" data-lk-message-origin={isLocal ? "local" : "remote"}>
+              <div className="lk-meta-data">
+                <span className="lk-participant-name">{msg.from?.name || msg.from?.identity}</span>
+                <span className="lk-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="lk-message-body">{msg.message}</div>
+            </li>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </ul>
+      <form onSubmit={handleSend} className="lk-chat-form">
+        <input 
+          className="lk-form-control lk-chat-form-input"
+          value={message} 
+          onChange={e => setMessage(e.target.value)} 
+          placeholder="Nhập tin nhắn..." 
+          disabled={isSending}
+        />
+        <button type="submit" className="lk-button lk-chat-form-button" disabled={!message.trim() || isSending}>
+          Gửi
+        </button>
+      </form>
     </div>
   );
 };
