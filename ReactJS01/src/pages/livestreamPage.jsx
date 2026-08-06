@@ -66,7 +66,7 @@ const FONT_IMPORTS = `
     flex-direction: column;
   }
   .bc-chat-theme .lk-chat { height: 100%; width: 100%; display: flex; flex-direction: column; }
-  .bc-chat-theme .lk-chat-header { color: #ffffff; }
+  .bc-chat-theme .lk-chat-header { display: none; }
   .bc-chat-theme .lk-list { flex: 1; width: 100%; overflow-y: auto; overflow-x: hidden; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
   .bc-chat-theme .lk-list::-webkit-scrollbar { width: 6px; }
   .bc-chat-theme .lk-list::-webkit-scrollbar-thumb { background: #262b31; border-radius: 999px; }
@@ -315,27 +315,30 @@ const LivestreamPage = () => {
           style={{ background: 'var(--bc-panel)', borderLeft: '1px solid var(--bc-line)' }}
         >
           <div
-            className="px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none"
+            className="px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none relative"
             style={{ background: 'var(--bc-void)', borderBottom: '1px solid var(--bc-line)', color: 'var(--bc-text)' }}
           >
             {/* Drag handle for mobile */}
             <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-3 md:hidden opacity-70" />
             
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <span>Live Feed</span>
-                <span className="w-1.5 h-1.5 rounded-full bc-live-dot" style={{ background: 'var(--bc-live)' }} />
+            <div className="flex items-center justify-between w-full min-w-0 pr-10">
+              <div className="flex items-center gap-2 truncate">
+                <span className="truncate">Live Feed</span>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0 bc-live-dot" style={{ background: 'var(--bc-live)' }} />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
                 <ViewerCountBadge />
-                <button 
-                  className="md:hidden w-7 h-7 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
-                  onClick={() => setIsMobileChatOpen(false)}
-                >
-                  <CloseOutlined className="text-xs" />
-                </button>
               </div>
             </div>
+
+            {/* Absolute Close Button to guarantee visibility */}
+            <button 
+              className="md:hidden absolute top-3 right-3 shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors z-10"
+              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              onClick={() => setIsMobileChatOpen(false)}
+            >
+              <CloseOutlined style={{ fontSize: '14px' }} />
+            </button>
           </div>
           <div className="flex-1 overflow-hidden bc-chat-theme">
             <Chat />
@@ -405,7 +408,7 @@ const LivestreamVideo = () => {
     <div className="relative h-full w-full bg-black">
       <VideoTrack trackRef={activeTrack} className="h-full w-full object-contain md:object-cover" />
       <div
-        className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md"
+        className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md z-30"
         style={{ background: 'rgba(10,11,13,0.7)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
       >
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--bc-live)' }} />
@@ -413,18 +416,29 @@ const LivestreamVideo = () => {
           {activeTrack.participant?.name || activeTrack.participant?.identity || 'Broadcaster'}
         </span>
       </div>
+
+      {/* Mobile Viewer Count Overlay */}
+      <div className="absolute top-4 right-4 md:hidden z-30">
+        <ViewerCountBadge 
+          className="px-3 py-1.5 rounded-lg shadow-md"
+          style={{ background: 'rgba(10,11,13,0.7)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }} 
+        />
+      </div>
     </div>
   );
 };
 
-const ViewerCountBadge = () => {
+const ViewerCountBadge = ({ className, style }) => {
   const participants = useParticipants();
   
   // Đếm những người KHÔNG có quyền publish (tức là những người xem bình thường)
   const viewerCount = participants.filter(p => p.permissions && !p.permissions.canPublish).length;
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bc-line)' }}>
+    <div 
+      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${className || ''}`} 
+      style={style || { background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bc-line)' }}
+    >
       <span style={{ fontSize: '11px', color: 'var(--bc-viewer)' }}><EyeOutlined style={{color: 'white'}}/></span>
       <span className="bc-mono text-[11px]" style={{ color: 'var(--bc-text)' }}>
         {viewerCount}
