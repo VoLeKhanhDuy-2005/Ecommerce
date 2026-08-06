@@ -60,12 +60,11 @@ const handleLogin = async (req, res, next) => {
     const data = await loginService(email, password);
 
     if (data && data.refresh_token) {
+      const isProduction = process.env.NODE_ENV === "production";
       res.cookie("refresh_token", data.refresh_token, {
         httpOnly: true,
-        secure: false, // Set là true nếu chạy trên HTTPS
-        sameSite: "strict",
-        // Trình duyệt chỉ gửi cookie nếu bạn đang ở trang A (nganhang.com)
-        // và thực hiện hành động (nhấp link, gửi biểu mẫu, gọi API) dẫn đến trang A
+        secure: isProduction, // Bắt buộc là true trên HTTPS khi deploy
+        sameSite: isProduction ? "none" : "strict", // Bắt buộc là "none" nếu FE và BE khác domain
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       // Xóa refresh_token khỏi response body để bảo mật
@@ -115,7 +114,12 @@ const handleRefreshToken = async (req, res, next) => {
 };
 
 const handleLogout = (req, res) => {
-  res.clearCookie("refresh_token");
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("refresh_token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "strict",
+  });
   return res.status(200).json({ EC: 0, EM: "Đăng xuất thành công" });
 };
 
