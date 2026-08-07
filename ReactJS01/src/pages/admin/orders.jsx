@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, Tag, notification, Empty, Spin, Card, Pagination } from "antd";
+import { Button, Tag, notification, Empty, Spin, Card, Pagination, Modal } from "antd";
 import {
   HistoryOutlined,
   CheckOutlined,
@@ -10,6 +10,7 @@ import {
   ShoppingOutlined,
   UserOutlined,
   ReloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
 import {
@@ -22,6 +23,8 @@ export default function AdminOrdersPage() {
   const { auth } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -163,6 +166,11 @@ export default function AdminOrdersPage() {
       currency: "VND",
     }).format(price);
 
+  const openDetailModal = (order) => {
+    setSelectedOrder(order);
+    setIsDetailModalOpen(true);
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 pb-20">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
@@ -199,6 +207,12 @@ export default function AdminOrdersPage() {
                     <span className="text-xs text-gray-400 font-mono">
                       ({ord._id})
                     </span>
+                    <a 
+                      className="text-blue-600 hover:text-blue-700 text-xs font-semibold cursor-pointer flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md transition-colors"
+                      onClick={() => openDetailModal(ord)}
+                    >
+                      <EyeOutlined /> Chi tiết
+                    </a>
                   </div>
                   <div className="text-xs text-gray-500 flex items-center gap-3">
                     <span className="flex items-center gap-1">
@@ -348,6 +362,69 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-lg">
+            <EyeOutlined className="text-blue-600" />
+            <span>Chi Tiết Đơn Hàng #{selectedOrder?._id.slice(-6).toUpperCase()}</span>
+          </div>
+        }
+        open={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={[
+          <Button key="close" className="rounded-xl font-semibold" onClick={() => setIsDetailModalOpen(false)}>
+            Đóng
+          </Button>
+        ]}
+        width={800}
+        centered
+      >
+        {selectedOrder && (
+          <div className="space-y-6 pt-4 pb-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <div className="space-y-2">
+                <p className="font-bold text-gray-800 text-base mb-3 border-b pb-2">Thông tin khách hàng</p>
+                <p className="flex justify-between"><span className="text-gray-500">Tên:</span> <span className="font-medium">{selectedOrder.customerName || "N/A"}</span></p>
+                <p className="flex justify-between"><span className="text-gray-500">SĐT:</span> <span className="font-medium">{selectedOrder.phoneNumber || "N/A"}</span></p>
+                <p className="flex justify-between"><span className="text-gray-500">Email:</span> <span className="font-medium">{selectedOrder.userEmail}</span></p>
+              </div>
+              <div className="space-y-2">
+                <p className="font-bold text-gray-800 text-base mb-3 border-b pb-2">Giao hàng & Thanh toán</p>
+                <p className="flex flex-col"><span className="text-gray-500">Địa chỉ:</span> <span className="font-medium line-clamp-2">{selectedOrder.shippingAddress || "N/A"}</span></p>
+                <p className="flex justify-between mt-1"><span className="text-gray-500">Phương thức:</span> <span className="font-medium">{selectedOrder.paymentMethod === "MOMO" ? "Ví MoMo" : "Thanh toán khi nhận hàng"}</span></p>
+                <p className="flex justify-between"><span className="text-gray-500">Trạng thái:</span> <span className="font-medium">{selectedOrder.paymentStatus === "Paid" ? <span className="text-green-600 font-bold">Đã thanh toán</span> : <span className="text-orange-500 font-bold">Chưa thanh toán</span>}</span></p>
+              </div>
+            </div>
+
+            <div>
+              <p className="font-bold text-gray-800 text-base mb-3 flex items-center gap-2">
+                <ShoppingOutlined className="text-orange-500" /> Sản phẩm đã đặt
+              </p>
+              <div className="space-y-3 bg-white p-4 rounded-2xl border border-gray-100">
+                {selectedOrder.items?.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-50 pb-3 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                       <img src={item.image || "https://placehold.co/100"} alt={item.name} className="w-12 h-12 object-cover rounded-xl border border-gray-100" />
+                       <div>
+                         <p className="font-bold text-gray-800">{item.name}</p>
+                         <p className="text-xs text-gray-500">Số lượng: {item.quantity}</p>
+                       </div>
+                    </div>
+                    <span className="font-bold text-gray-700">{formatPrice(item.price)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-4 bg-orange-50 rounded-2xl border border-orange-100/50 space-y-2 text-right">
+                <p className="text-sm text-gray-600">Phí giao hàng: {formatPrice(selectedOrder.shippingFee || 0)}</p>
+                <p className="text-lg font-black text-orange-600 flex justify-end items-center gap-2">
+                  <span className="text-sm text-gray-700 font-semibold">Tổng cộng:</span> {formatPrice(selectedOrder.totalAmount)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
