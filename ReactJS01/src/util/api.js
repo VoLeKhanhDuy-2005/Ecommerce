@@ -112,8 +112,12 @@ const verifyMomoPaymentApi = (orderId) => {
   return axios.post(`/v1/api/orders/${orderId}/verify-momo`);
 };
 
-const getShopOrdersApi = (page = 1, limit = 10) => {
-  return axios.get(`/v1/api/admin/orders?page=${page}&limit=${limit}`);
+const getShopOrdersApi = (page = 1, limit = 10, status = "All") => {
+  let url = `/v1/api/admin/orders?page=${page}&limit=${limit}`;
+  if (status && status !== "All") {
+    url += `&status=${status}`;
+  }
+  return axios.get(url);
 };
 
 const updateShopOrderStatusApi = (orderId, status) => {

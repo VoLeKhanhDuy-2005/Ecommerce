@@ -612,7 +612,7 @@ const markOrderAsReceived = async (orderIdParams, userEmail) => {
   }
 };
 
-const getShopOrders = async (page = 1, limit = 10) => {
+const getShopOrders = async (page = 1, limit = 10, status = "All") => {
   try {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     await Order.updateMany(
@@ -621,8 +621,14 @@ const getShopOrders = async (page = 1, limit = 10) => {
     );
 
     const skip = (page - 1) * limit;
-    const total = await Order.countDocuments();
-    const orders = await Order.find({})
+    
+    let query = {};
+    if (status && status !== "All") {
+      query.status = status;
+    }
+
+    const total = await Order.countDocuments(query);
+    const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

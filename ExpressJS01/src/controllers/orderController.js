@@ -75,9 +75,11 @@ const getShopOrders = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status || "All";
     const { statusCode, ...data } = await orderService.getShopOrders(
       page,
       limit,
+      status
     );
     return res.status(statusCode).json(data);
   } catch (error) {

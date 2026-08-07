@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, Tag, notification, Empty, Spin, Card, Pagination, Modal } from "antd";
+import { Button, Tag, notification, Empty, Spin, Card, Pagination, Modal, Select } from "antd";
 import {
   HistoryOutlined,
   CheckOutlined,
@@ -25,6 +25,7 @@ export default function AdminOrdersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("All");
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -43,10 +44,11 @@ export default function AdminOrdersPage() {
     isAutoRefresh = false,
     page = pagination.current,
     limit = pagination.pageSize,
+    status = statusFilter
   ) => {
     if (!isAutoRefresh) setIsLoading(true);
     try {
-      const res = await getShopOrdersApi(page, limit);
+      const res = await getShopOrdersApi(page, limit, status);
       if (res && res.success) {
         setOrders(res.data);
         if (res.meta) {
@@ -76,19 +78,19 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    fetchShopOrders();
-  }, []);
+    fetchShopOrders(false, 1, pagination.pageSize, statusFilter);
+  }, [statusFilter]);
 
   // TỰ ĐỘNG TẢI LẠI TRANG CHẠY NGẦM MỖI 10 GIÂY
   useEffect(() => {
     if (!auth.isAuthenticated) return;
 
     const autoRefreshTimer = setInterval(() => {
-      fetchShopOrders(true, pagination.current, pagination.pageSize);
+      fetchShopOrders(true, pagination.current, pagination.pageSize, statusFilter);
     }, 10 * 1000);
 
     return () => clearInterval(autoRefreshTimer);
-  }, [auth.isAuthenticated, pagination.current, pagination.pageSize]);
+  }, [auth.isAuthenticated, pagination.current, pagination.pageSize, statusFilter]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -180,6 +182,23 @@ export default function AdminOrdersPage() {
             <HistoryOutlined className="text-purple-600" />
             <span>Quản Lý Đơn Hàng</span>
           </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-600 font-semibold text-sm">Trạng thái:</span>
+          <Select
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            className="w-44"
+            options={[
+              { value: "All", label: "Tất cả đơn hàng" },
+              { value: "New", label: "Đơn hàng mới" },
+              { value: "Confirmed", label: "Đã xác nhận" },
+              { value: "Preparing", label: "Đang chuẩn bị" },
+              { value: "Shipping", label: "Đang giao hàng" },
+              { value: "Delivered", label: "Đã giao thành công" },
+              { value: "Cancelled", label: "Đã hủy đơn" },
+            ]}
+          />
         </div>
       </div>
 
