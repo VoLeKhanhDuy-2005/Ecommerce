@@ -268,6 +268,10 @@ const submitGameAnswerApi = (token, answer) => {
   return axios.post("/v1/api/game/submit", { token, answer });
 };
 
+const getDashboardStatsApi = (year = new Date().getFullYear()) => {
+  return axios.get(`/v1/api/admin/dashboard/stats?year=${year}`);
+};
+
 export {
   registerApi,
   loginApi,
@@ -320,4 +324,5 @@ export {
   deleteVoucherApi,
   getGameQuestionApi,
   submitGameAnswerApi,
+  getDashboardStatsApi,
 };

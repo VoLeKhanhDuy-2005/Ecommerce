@@ -66,6 +66,11 @@ const AdminLayout = () => {
 
   const menuItems = [
     {
+      key: "/admin",
+      icon: <HomeOutlined />,
+      label: <Link to="/admin">Tổng quan</Link>,
+    },
+    {
       key: "/admin/orders",
       icon: <HistoryOutlined />,
       label: <Link to="/admin/orders">Quản lý Đơn hàng</Link>,
@@ -142,7 +147,7 @@ const AdminLayout = () => {
         <div className="flex flex-col h-full">
           <div className="p-5 flex items-center justify-center border-b border-gray-100 flex-shrink-0">
             <Link
-              to="/admin/orders"
+              to="/admin"
               className="flex items-center gap-2 flex-shrink-0 group"
             >
               <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center shadow-md">

@@ -5,6 +5,7 @@ import "./index.css";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AdminLayout from "./components/layout/adminLayout.jsx";
+import AdminDashboardPage from "./pages/admin/dashboard.jsx";
 import AdminOrdersPage from "./pages/admin/orders.jsx";
 import AdminCategoriesPage from "./pages/admin/categories.jsx";
 import AdminProductsPage from "./pages/admin/products.jsx";
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
     path: "/admin",
     element: <AdminLayout />,
     children: [
+      {
+        index: true,// Default child rout
+        element: <AdminDashboardPage />,
+      },
       {
         path: "users",
         element: <UserPage />,

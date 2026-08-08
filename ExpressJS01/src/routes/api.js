@@ -69,7 +69,6 @@ const {
   updateSetting,
 } = require("../controllers/settingController");
 const { handleResolveMapLink } = require("../controllers/utilController");
-
 const {
   createVoucher,
   getActiveVouchers,
@@ -79,14 +78,12 @@ const {
   updateVoucher,
   deleteVoucher,
 } = require("../controllers/voucherController");
-
 const {
   getFoodQuestion,
   submitGameAnswer,
 } = require("../controllers/gameController");
-
 const { generateToken } = require("../controllers/livestreamController");
-
+const { getDashboardStats } = require("../controllers/dashboardController");
 
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
@@ -182,5 +179,7 @@ routerAPI.get("/game/question", getFoodQuestion);
 routerAPI.post("/game/submit", submitGameAnswer);
 
 routerAPI.get("/livestream/token", generateToken);
+
+routerAPI.get("/admin/dashboard/stats", isAdmin, getDashboardStats);
 
 module.exports = routerAPI;
