@@ -19,6 +19,7 @@ import {
   LoadingOutlined,
   StopOutlined,
   ExclamationCircleOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
 import {
@@ -29,6 +30,7 @@ import {
   getCartApi,
   markOrderAsReceivedApi,
   submitReviewApi,
+  exportInvoiceApi,
 } from "../../util/api";
 
 export default function OrdersPage() {
@@ -281,6 +283,26 @@ export default function OrdersPage() {
     setIsReviewModalOpen(true);
   };
 
+  const handleExportInvoice = async () => {
+    if (!selectedOrder) return;
+    try {
+      const res = await exportInvoiceApi(selectedOrder._id);
+      const url = window.URL.createObjectURL(new Blob([res]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${selectedOrder._id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      notification.success({ message: "Xuất hóa đơn thành công" });
+    } catch (error) {
+      notification.error({
+        message: "Lỗi xuất hóa đơn",
+        description: "Không thể tải hóa đơn. Vui lòng thử lại sau.",
+      });
+    }
+  };
+
   const handleReviewSubmit = async () => {
     if (!reviewRating) {
       notification.warning({ message: "Vui lòng chọn số sao" });
@@ -502,7 +524,15 @@ export default function OrdersPage() {
                       )}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
+                    {selectedOrder.status !== "Cancelled" && (
+                      <button
+                        onClick={handleExportInvoice}
+                        className="px-3 py-1.5 bg-green-50 text-green-600 font-semibold text-xs rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1.5 border border-green-200"
+                      >
+                        <PrinterOutlined /> Xuất Hóa Đơn
+                      </button>
+                    )}
                     {getPaymentStatusTag(selectedOrder.paymentStatus)}
                     {getOrderStatusTag(selectedOrder.status)}
                   </div>

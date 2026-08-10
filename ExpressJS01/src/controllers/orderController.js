@@ -1,4 +1,6 @@
 const orderService = require("../services/orderService");
+const invoiceService = require("../services/invoiceService");
+const Order = require("../models/order");
 
 const createOrder = async (req, res, next) => {
   try {
@@ -124,6 +126,39 @@ const calculateShipping = async (req, res, next) => {
   }
 };
 
+const exportInvoice = async (req, res, next) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId).lean();
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy đơn hàng" });
+    }
+
+    if (order.userEmail !== req.user.email && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Bạn không có quyền truy cập hóa đơn này",
+        });
+    }
+
+    const pdfBuffer = await invoiceService.generateInvoicePDF(order);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice-${orderId}.pdf`,
+    );
+    return res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   verifyMomoPayment,
@@ -135,4 +170,5 @@ module.exports = {
   updateShopOrderStatus,
   handleShopCancelRequest,
   calculateShipping,
+  exportInvoice,
 };

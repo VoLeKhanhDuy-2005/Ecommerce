@@ -278,6 +278,12 @@ const exportDashboardStatsApi = (years) => {
   });
 };
 
+const exportInvoiceApi = (orderId) => {
+  return axios.get(`/v1/api/orders/${orderId}/invoice`, {
+    responseType: "blob",
+  });
+};
+
 export {
   registerApi,
   loginApi,
@@ -332,4 +338,5 @@ export {
   submitGameAnswerApi,
   getDashboardStatsApi,
   exportDashboardStatsApi,
+  exportInvoiceApi,
 };

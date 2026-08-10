@@ -21,12 +21,14 @@ import {
   UserOutlined,
   ReloadOutlined,
   EyeOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
 import {
   getShopOrdersApi,
   updateShopOrderStatusApi,
   handleShopCancelRequestApi,
+  exportInvoiceApi,
 } from "../../util/api";
 
 export default function AdminOrdersPage() {
@@ -193,6 +195,28 @@ export default function AdminOrdersPage() {
     setIsDetailModalOpen(true);
   };
 
+  const handleExportInvoice = async (orderId) => {
+    try {
+      const res = await exportInvoiceApi(orderId);
+      const url = window.URL.createObjectURL(new Blob([res]));
+      //Blob là một object đại diện cho dữ liệu file dạng nhị phân
+      //-> new Blob([res]) chứa dữ liệu PDF
+      //Trình duyệt tạo ra một URL tạm thời, dạng: blob:http://localhost:5173/8b7c...-xxxx
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      notification.success({ message: "Xuất hóa đơn thành công" });
+    } catch (error) {
+      notification.error({
+        message: "Lỗi xuất hóa đơn",
+        description: "Không thể tải hóa đơn. Vui lòng thử lại sau.",
+      });
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 pb-20">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
@@ -254,6 +278,14 @@ export default function AdminOrdersPage() {
                     >
                       <EyeOutlined /> Chi tiết
                     </a>
+                    {ord.status !== "Cancelled" && (
+                      <a
+                        className="text-green-600 hover:text-green-700 text-xs font-semibold cursor-pointer flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md transition-colors ml-1"
+                        onClick={() => handleExportInvoice(ord._id)}
+                      >
+                        <PrinterOutlined /> Xuất hóa đơn
+                      </a>
+                    )}
                   </div>
                   <div className="text-xs text-gray-500 flex items-center gap-3">
                     <span className="flex items-center gap-1">
@@ -416,6 +448,16 @@ export default function AdminOrdersPage() {
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={[
+          selectedOrder.status !== "Cancelled" && (
+            <Button
+              key="export"
+              icon={<PrinterOutlined />}
+              className="text-green-600 hover:text-green-700 text-xs font-semibold flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md transition-colors ml-1"
+              onClick={() => handleExportInvoice(selectedOrder._id)}
+            >
+              Xuất hóa đơn
+            </Button>
+          ),
           <Button
             key="close"
             className="rounded-xl font-semibold"

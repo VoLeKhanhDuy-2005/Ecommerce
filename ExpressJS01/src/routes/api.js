@@ -45,6 +45,7 @@ const {
   updateShopOrderStatus,
   handleShopCancelRequest,
   calculateShipping,
+  exportInvoice,
 } = require("../controllers/orderController");
 const {
   createCategory,
@@ -125,6 +126,7 @@ routerAPI.get("/orders/:id", getOrderDetails);
 routerAPI.post("/orders/:id/cancel", cancelOrder);
 routerAPI.post("/orders/:id/received", markOrderAsReceived);
 routerAPI.post("/orders/:id/verify-momo", verifyMomoPayment);
+routerAPI.get("/orders/:id/invoice", exportInvoice);
 
 routerAPI.get("/admin/orders", isAdmin, getShopOrders);
 routerAPI.patch("/admin/orders/:id", isAdmin, updateShopOrderStatus);
