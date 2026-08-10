@@ -47,7 +47,11 @@ const Header = () => {
         { to: "/search", label: "Tìm kiếm", icon: <SearchOutlined /> },
         ...(auth.isAuthenticated
           ? [
-              { to: "/livestream", label: "Live stream", icon: <VideoCameraOutlined /> },
+              {
+                to: "/livestream",
+                label: "Live stream",
+                icon: <VideoCameraOutlined />,
+              },
               {
                 to: "/cart",
                 label: (

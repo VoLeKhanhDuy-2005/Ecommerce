@@ -70,7 +70,7 @@ const router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       {
-        index: true,// Default child rout
+        index: true, // Default child rout
         element: <AdminDashboardPage />,
       },
       {
@@ -113,8 +113,8 @@ const router = createBrowserRouter([
   },
   {
     path: "/livestream/:roomID?",
-    element: <LivestreamPage />
-  }
+    element: <LivestreamPage />,
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -272,6 +272,12 @@ const getDashboardStatsApi = (year = new Date().getFullYear()) => {
   return axios.get(`/v1/api/admin/dashboard/stats?year=${year}`);
 };
 
+const exportDashboardStatsApi = (years) => {
+  return axios.get(`/v1/api/admin/dashboard/export?years=${years.join(",")}`, {
+    responseType: "blob", // Quan trọng để tải file nhị phân
+  });
+};
+
 export {
   registerApi,
   loginApi,
@@ -325,4 +331,5 @@ export {
   getGameQuestionApi,
   submitGameAnswerApi,
   getDashboardStatsApi,
+  exportDashboardStatsApi,
 };

@@ -1,4 +1,4 @@
-const { AccessToken } = require('livekit-server-sdk');
+const { AccessToken } = require("livekit-server-sdk");
 
 const generateToken = async (req, res) => {
   try {
@@ -14,10 +14,14 @@ const generateToken = async (req, res) => {
 
     const roomName = room;
     const participantName = user.name || user.email;
-    
+
     if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET) {
-       console.error("Missing LIVEKIT_API_KEY or LIVEKIT_API_SECRET in environment variables.");
-       return res.status(500).json({ EC: -1, EM: "Server LiveKit Configuration Error" });
+      console.error(
+        "Missing LIVEKIT_API_KEY or LIVEKIT_API_SECRET in environment variables.",
+      );
+      return res
+        .status(500)
+        .json({ EC: -1, EM: "Server LiveKit Configuration Error" });
     }
 
     // Khởi tạo access token
@@ -27,11 +31,11 @@ const generateToken = async (req, res) => {
       {
         identity: user.email,
         name: participantName,
-      }
+      },
     );
 
     // Phân quyền theo role
-    const isAdmin = user.role === 'admin';
+    const isAdmin = user.role === "admin";
     at.addGrant({
       roomJoin: true,
       room: roomName,

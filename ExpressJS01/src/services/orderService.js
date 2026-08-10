@@ -621,7 +621,7 @@ const getShopOrders = async (page = 1, limit = 10, status = "All") => {
     );
 
     const skip = (page - 1) * limit;
-    
+
     let query = {};
     if (status && status !== "All") {
       query.status = status;

@@ -104,7 +104,7 @@ const AdminLayout = () => {
       key: "/livestream",
       label: <Link to="/livestream">Livestream</Link>,
       icon: <VideoCameraOutlined />,
-    }
+    },
   ];
 
   const userMenuItems = {

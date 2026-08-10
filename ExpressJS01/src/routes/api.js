@@ -83,7 +83,10 @@ const {
   submitGameAnswer,
 } = require("../controllers/gameController");
 const { generateToken } = require("../controllers/livestreamController");
-const { getDashboardStats } = require("../controllers/dashboardController");
+const {
+  getDashboardStats,
+  exportDashboardStats,
+} = require("../controllers/dashboardController");
 
 const routerAPI = express.Router();
 routerAPI.all(/(.*)/, auth); // (.*) phiên bản mới -> Kiểm tra đăng nhập cho tất cả các route bên dưới
@@ -181,5 +184,6 @@ routerAPI.post("/game/submit", submitGameAnswer);
 routerAPI.get("/livestream/token", generateToken);
 
 routerAPI.get("/admin/dashboard/stats", isAdmin, getDashboardStats);
+routerAPI.get("/admin/dashboard/export", isAdmin, exportDashboardStats);
 
 module.exports = routerAPI;

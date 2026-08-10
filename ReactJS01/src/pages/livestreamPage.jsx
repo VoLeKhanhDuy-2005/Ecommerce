@@ -1,7 +1,12 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../components/context/auth.context';
-import { PhoneOutlined, EyeOutlined, MessageOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/context/auth.context";
+import {
+  PhoneOutlined,
+  EyeOutlined,
+  MessageOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import {
   LiveKitRoom,
   VideoTrack,
@@ -11,11 +16,11 @@ import {
   useChat,
   useConnectionState,
   useParticipants,
-  useLocalParticipant
-} from '@livekit/components-react';
-import '@livekit/components-styles';
-import { Track, ConnectionState } from 'livekit-client';
-import axios from 'axios';
+  useLocalParticipant,
+} from "@livekit/components-react";
+import "@livekit/components-styles";
+import { Track, ConnectionState } from "livekit-client";
+import axios from "axios";
 
 const serverUrl = import.meta.env.VITE_LIVEKIT_URL;
 const backendApiUrl = import.meta.env.VITE_BACKEND_URL;
@@ -179,11 +184,14 @@ const LivestreamPage = () => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const response = await axios.get(`${backendApiUrl}/v1/api/livestream/token?room=${roomID}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
+        const response = await axios.get(
+          `${backendApiUrl}/v1/api/livestream/token?room=${roomID}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          },
+        );
 
         if (response.data && response.data.EC === 0) {
           setToken(response.data.data.token);
@@ -199,15 +207,24 @@ const LivestreamPage = () => {
     }
   }, [auth.isAuthenticated, roomID]);
 
-  const isAdmin = auth?.user?.role === 'admin';
+  const isAdmin = auth?.user?.role === "admin";
 
   if (!token) {
     return (
-      <div className="bc-root w-screen h-[100dvh] flex items-center justify-center" style={{ background: 'var(--bc-void)' }}>
+      <div
+        className="bc-root w-screen h-[100dvh] flex items-center justify-center"
+        style={{ background: "var(--bc-void)" }}
+      >
         <style>{FONT_IMPORTS}</style>
         <div className="flex flex-col items-center gap-4">
-          <div className="w-3 h-3 rounded-full bc-live-dot" style={{ background: 'var(--bc-live)' }} />
-          <p className="bc-mono text-sm tracking-widest uppercase" style={{ color: 'var(--bc-muted)' }}>
+          <div
+            className="w-3 h-3 rounded-full bc-live-dot"
+            style={{ background: "var(--bc-live)" }}
+          />
+          <p
+            className="bc-mono text-sm tracking-widest uppercase"
+            style={{ color: "var(--bc-muted)" }}
+          >
             Đang chuẩn bị kết nối Livestream...
           </p>
         </div>
@@ -216,23 +233,36 @@ const LivestreamPage = () => {
   }
 
   return (
-    <div className="bc-root w-screen h-[100dvh] flex flex-col" style={{ background: 'var(--bc-void)' }}>
+    <div
+      className="bc-root w-screen h-[100dvh] flex flex-col"
+      style={{ background: "var(--bc-void)" }}
+    >
       <style>{FONT_IMPORTS}</style>
 
       {/* Chassis header */}
       <div
         className="px-3 md:px-5 py-2 md:py-3 flex items-center justify-between shadow-md z-10"
-        style={{ background: 'var(--bc-panel)', borderBottom: '1px solid var(--bc-line)' }}
+        style={{
+          background: "var(--bc-panel)",
+          borderBottom: "1px solid var(--bc-line)",
+        }}
       >
         <div className="flex items-center gap-2 md:gap-3">
           <div
             className="w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center font-bold bc-display text-sm"
-            style={{ background: 'var(--bc-panel-raised)', color: 'var(--bc-text)', border: '1px solid var(--bc-line)' }}
+            style={{
+              background: "var(--bc-panel-raised)",
+              color: "var(--bc-text)",
+              border: "1px solid var(--bc-line)",
+            }}
           >
-            {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : 'V'}
+            {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : "V"}
           </div>
           <div>
-            <h2 className="bc-display text-sm md:text-base font-semibold leading-tight" style={{ color: 'var(--bc-text)' }}>
+            <h2
+              className="bc-display text-sm md:text-base font-semibold leading-tight"
+              style={{ color: "var(--bc-text)" }}
+            >
               Phòng Livestream
             </h2>
           </div>
@@ -242,21 +272,24 @@ const LivestreamPage = () => {
           <span
             className="bc-mono text-[9px] md:text-[11px] px-2 py-1 rounded uppercase tracking-wider hidden sm:inline-block"
             style={{
-              color: isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)',
-              border: `1px solid ${isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)'}`,
-              background: 'rgba(255,255,255,0.02)'
+              color: isAdmin ? "var(--bc-signal)" : "var(--bc-viewer)",
+              border: `1px solid ${isAdmin ? "var(--bc-signal)" : "var(--bc-viewer)"}`,
+              background: "rgba(255,255,255,0.02)",
             }}
           >
-            {isAdmin ? 'Admin' : 'Viewer'}
+            {isAdmin ? "Admin" : "Viewer"}
           </span>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium transition-colors flex items-center gap-1 md:gap-2 bc-display text-xs md:text-sm"
-            style={{ background: 'var(--bc-live)', color: '#fff' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#e32e24')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--bc-live)')}
+            style={{ background: "var(--bc-live)", color: "#fff" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#e32e24")}
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "var(--bc-live)")
+            }
           >
-            <PhoneOutlined className="rotate-[135deg]" /> <span className="hidden sm:inline">Rời livestream</span>
+            <PhoneOutlined className="rotate-[135deg]" />{" "}
+            <span className="hidden sm:inline">Rời livestream</span>
           </button>
         </div>
       </div>
@@ -272,15 +305,41 @@ const LivestreamPage = () => {
       >
         {/* Video / console area */}
         <div className="flex-1 p-0 md:p-4 flex flex-col relative min-w-0 w-full bg-black md:bg-transparent">
-          <div
-            className="flex-1 md:rounded-2xl overflow-hidden md:shadow-lg relative border-0 md:border md:border-[#262b31] bg-black"
-          >
+          <div className="flex-1 md:rounded-2xl overflow-hidden md:shadow-lg relative border-0 md:border md:border-[#262b31] bg-black">
             {/* viewfinder corner brackets — the signature detail */}
             <div className="hidden md:block">
-              <Corner style={{ top: 12, left: 12, borderRight: 'none', borderBottom: 'none' }} />
-              <Corner style={{ top: 12, right: 12, borderLeft: 'none', borderBottom: 'none' }} />
-              <Corner style={{ bottom: 12, left: 12, borderRight: 'none', borderTop: 'none' }} />
-              <Corner style={{ bottom: 12, right: 12, borderLeft: 'none', borderTop: 'none' }} />
+              <Corner
+                style={{
+                  top: 12,
+                  left: 12,
+                  borderRight: "none",
+                  borderBottom: "none",
+                }}
+              />
+              <Corner
+                style={{
+                  top: 12,
+                  right: 12,
+                  borderLeft: "none",
+                  borderBottom: "none",
+                }}
+              />
+              <Corner
+                style={{
+                  bottom: 12,
+                  left: 12,
+                  borderRight: "none",
+                  borderTop: "none",
+                }}
+              />
+              <Corner
+                style={{
+                  bottom: 12,
+                  right: 12,
+                  borderLeft: "none",
+                  borderTop: "none",
+                }}
+              />
             </div>
 
             <LivestreamVideo />
@@ -289,9 +348,13 @@ const LivestreamPage = () => {
             <button
               className={`
                 md:hidden absolute bottom-6 right-4 z-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300
-                ${isMobileChatOpen ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}
+                ${isMobileChatOpen ? "opacity-0 pointer-events-none scale-75" : "opacity-100 scale-100"}
               `}
-              style={{ background: 'var(--bc-live)', color: 'white', boxShadow: '0 4px 12px rgba(255,59,48,0.4)' }}
+              style={{
+                background: "var(--bc-live)",
+                color: "white",
+                boxShadow: "0 4px 12px rgba(255,59,48,0.4)",
+              }}
               onClick={() => setIsMobileChatOpen(true)}
             >
               <MessageOutlined className="text-xl" />
@@ -310,22 +373,32 @@ const LivestreamPage = () => {
           className={`
             fixed inset-x-0 bottom-0 top-[35vh] z-50 flex flex-col transition-transform duration-300 ease-out
             rounded-t-3xl md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none
-            ${isMobileChatOpen ? 'translate-y-0' : 'translate-y-full'}
+            ${isMobileChatOpen ? "translate-y-0" : "translate-y-full"}
             md:static md:translate-y-0 md:w-80 lg:w-96 md:flex-1 md:min-h-0
           `}
-          style={{ background: 'var(--bc-panel)', borderLeft: '1px solid var(--bc-line)' }}
+          style={{
+            background: "var(--bc-panel)",
+            borderLeft: "1px solid var(--bc-line)",
+          }}
         >
           <div
             className="px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none relative"
-            style={{ background: 'var(--bc-void)', borderBottom: '1px solid var(--bc-line)', color: 'var(--bc-text)' }}
+            style={{
+              background: "var(--bc-void)",
+              borderBottom: "1px solid var(--bc-line)",
+              color: "var(--bc-text)",
+            }}
           >
             {/* Drag handle for mobile */}
             <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-3 md:hidden opacity-70" />
-            
+
             <div className="flex items-center justify-between w-full min-w-0 pr-10">
               <div className="flex items-center gap-2 truncate">
                 <span className="truncate">Live Feed</span>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0 bc-live-dot" style={{ background: 'var(--bc-live)' }} />
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0 bc-live-dot"
+                  style={{ background: "var(--bc-live)" }}
+                />
               </div>
               <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
                 <ViewerCountBadge />
@@ -333,12 +406,16 @@ const LivestreamPage = () => {
             </div>
 
             {/* Absolute Close Button to guarantee visibility */}
-            <button 
+            <button
               className="md:hidden absolute top-3 right-3 shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors z-10"
-              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
               onClick={() => setIsMobileChatOpen(false)}
             >
-              <CloseOutlined style={{ fontSize: '14px' }} />
+              <CloseOutlined style={{ fontSize: "14px" }} />
             </button>
           </div>
           <div className="flex-1 overflow-hidden bc-chat-theme">
@@ -356,11 +433,9 @@ const LivestreamPage = () => {
 const Corner = ({ style }) => (
   <div
     className="absolute w-6 h-6 pointer-events-none z-10"
-    style={{ border: '2px solid rgba(255,255,255,0.35)', ...style }}
+    style={{ border: "2px solid rgba(255,255,255,0.35)", ...style }}
   />
 );
-
-
 
 const LivestreamVideo = () => {
   // withPlaceholder: false — viewers never publish, so this only ever
@@ -378,7 +453,10 @@ const LivestreamVideo = () => {
 
   if (connectionState !== ConnectionState.Connected) {
     return (
-      <div className="flex items-center justify-center h-full w-full bc-mono text-sm" style={{ color: 'var(--bc-muted)' }}>
+      <div
+        className="flex items-center justify-center h-full w-full bc-mono text-sm"
+        style={{ color: "var(--bc-muted)" }}
+      >
         Đang kết nối đến máy chủ Livestream...
       </div>
     );
@@ -396,9 +474,12 @@ const LivestreamVideo = () => {
       <div className="flex flex-col items-center justify-center h-full w-full">
         <div
           className="w-16 h-16 rounded-full mb-4"
-          style={{ background: 'var(--bc-panel-raised)', border: '1px solid var(--bc-line)' }}
+          style={{
+            background: "var(--bc-panel-raised)",
+            border: "1px solid var(--bc-line)",
+          }}
         />
-        <p className="bc-mono text-sm" style={{ color: 'var(--bc-muted)' }}>
+        <p className="bc-mono text-sm" style={{ color: "var(--bc-muted)" }}>
           Chưa có phiên livestream...
         </p>
       </div>
@@ -407,22 +488,41 @@ const LivestreamVideo = () => {
 
   return (
     <div className="relative h-full w-full bg-black">
-      <VideoTrack trackRef={activeTrack} className="h-full w-full object-contain md:object-cover" />
+      <VideoTrack
+        trackRef={activeTrack}
+        className="h-full w-full object-contain md:object-cover"
+      />
       <div
         className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md z-30"
-        style={{ background: 'rgba(10,11,13,0.7)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
+        style={{
+          background: "rgba(10,11,13,0.7)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(4px)",
+        }}
       >
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--bc-live)' }} />
-        <span className="bc-mono text-[11px] uppercase tracking-wide" style={{ color: 'var(--bc-text)' }}>
-          {activeTrack.participant?.name || activeTrack.participant?.identity || 'Broadcaster'}
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: "var(--bc-live)" }}
+        />
+        <span
+          className="bc-mono text-[11px] uppercase tracking-wide"
+          style={{ color: "var(--bc-text)" }}
+        >
+          {activeTrack.participant?.name ||
+            activeTrack.participant?.identity ||
+            "Broadcaster"}
         </span>
       </div>
 
       {/* Mobile Viewer Count Overlay */}
       <div className="absolute top-4 right-4 md:hidden z-30">
-        <ViewerCountBadge 
+        <ViewerCountBadge
           className="px-3 py-1.5 rounded-lg shadow-md"
-          style={{ background: 'rgba(10,11,13,0.7)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }} 
+          style={{
+            background: "rgba(10,11,13,0.7)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            backdropFilter: "blur(4px)",
+          }}
         />
       </div>
     </div>
@@ -431,17 +531,26 @@ const LivestreamVideo = () => {
 
 const ViewerCountBadge = ({ className, style }) => {
   const participants = useParticipants();
-  
+
   // Đếm những người KHÔNG có quyền publish (tức là những người xem bình thường)
-  const viewerCount = participants.filter(p => p.permissions && !p.permissions.canPublish).length;
+  const viewerCount = participants.filter(
+    (p) => p.permissions && !p.permissions.canPublish,
+  ).length;
 
   return (
-    <div 
-      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${className || ''}`} 
-      style={style || { background: 'rgba(255,255,255,0.05)', border: '1px solid var(--bc-line)' }}
+    <div
+      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${className || ""}`}
+      style={
+        style || {
+          background: "rgba(255,255,255,0.05)",
+          border: "1px solid var(--bc-line)",
+        }
+      }
     >
-      <span style={{ fontSize: '11px', color: 'var(--bc-viewer)' }}><EyeOutlined style={{color: 'white'}}/></span>
-      <span className="bc-mono text-[11px]" style={{ color: 'var(--bc-text)' }}>
+      <span style={{ fontSize: "11px", color: "var(--bc-viewer)" }}>
+        <EyeOutlined style={{ color: "white" }} />
+      </span>
+      <span className="bc-mono text-[11px]" style={{ color: "var(--bc-text)" }}>
         {viewerCount}
       </span>
     </div>
@@ -451,12 +560,12 @@ const ViewerCountBadge = ({ className, style }) => {
 const CustomLivestreamChat = () => {
   const { chatMessages, send, isSending } = useChat();
   const { localParticipant } = useLocalParticipant();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
 
@@ -464,7 +573,7 @@ const CustomLivestreamChat = () => {
     e.preventDefault();
     if (message.trim()) {
       await send(message);
-      setMessage('');
+      setMessage("");
     }
   };
 
@@ -474,10 +583,21 @@ const CustomLivestreamChat = () => {
         {chatMessages.map((msg, idx) => {
           const isLocal = msg.from?.identity === localParticipant?.identity;
           return (
-            <li key={idx} className="lk-chat-entry" data-lk-message-origin={isLocal ? "local" : "remote"}>
+            <li
+              key={idx}
+              className="lk-chat-entry"
+              data-lk-message-origin={isLocal ? "local" : "remote"}
+            >
               <div className="lk-meta-data">
-                <span className="lk-participant-name">{msg.from?.name || msg.from?.identity}</span>
-                <span className="lk-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="lk-participant-name">
+                  {msg.from?.name || msg.from?.identity}
+                </span>
+                <span className="lk-timestamp">
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
               </div>
               <div className="lk-message-body">{msg.message}</div>
             </li>
@@ -486,14 +606,18 @@ const CustomLivestreamChat = () => {
         <div ref={messagesEndRef} />
       </ul>
       <form onSubmit={handleSend} className="lk-chat-form">
-        <input 
+        <input
           className="lk-form-control lk-chat-form-input"
-          value={message} 
-          onChange={e => setMessage(e.target.value)} 
-          placeholder="Nhập tin nhắn..." 
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Nhập tin nhắn..."
           disabled={isSending}
         />
-        <button type="submit" className="lk-button lk-chat-form-button" disabled={!message.trim() || isSending}>
+        <button
+          type="submit"
+          className="lk-button lk-chat-form-button"
+          disabled={!message.trim() || isSending}
+        >
           Gửi
         </button>
       </form>

@@ -79,7 +79,7 @@ const getShopOrders = async (req, res, next) => {
     const { statusCode, ...data } = await orderService.getShopOrders(
       page,
       limit,
-      status
+      status,
     );
     return res.status(statusCode).json(data);
   } catch (error) {

@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Table, Tag, Typography, Spin, Select } from "antd";
+import {
+  Card,
+  Col,
+  Row,
+  Statistic,
+  Table,
+  Tag,
+  Typography,
+  Spin,
+  Select,
+  Button,
+  Modal,
+  message,
+} from "antd";
 import ProductSection from "../../components/product/ProductSection";
 import {
   UserOutlined,
   ShoppingOutlined,
   DollarOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import {
   AreaChart,
@@ -19,12 +33,24 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { getDashboardStatsApi, getProductsApi, getCategoriesApi } from "../../util/api";
+import {
+  getDashboardStatsApi,
+  getProductsApi,
+  getCategoriesApi,
+  exportDashboardStatsApi,
+} from "../../util/api";
 import moment from "moment";
 
 const { Title } = Typography;
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#f26c6d"];
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884d8",
+  "#f26c6d",
+];
 
 const AdminDashboardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -40,6 +66,11 @@ const AdminDashboardPage = () => {
     bestSelling: [],
     mostViewed: [],
   });
+  const [isExportModalVisible, setIsExportModalVisible] = useState(false);
+  const [selectedExportYears, setSelectedExportYears] = useState([
+    new Date().getFullYear(),
+  ]);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -69,7 +100,7 @@ const AdminDashboardPage = () => {
               fetchedCategories.find((c) => c.categoryId === p.category)
                 ?.name || p.category,
           }));
-        
+
         setProducts({
           newest: mapCategoryName(prodRes.data.newest || []),
           bestSelling: mapCategoryName(prodRes.data.bestSelling || []),
@@ -94,6 +125,35 @@ const AdminDashboardPage = () => {
     setLoading(false);
   };
 
+  const handleExport = async () => {
+    if (selectedExportYears.length === 0) {
+      message.warning("Vui lòng chọn ít nhất 1 năm để xuất báo cáo");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const res = await exportDashboardStatsApi(selectedExportYears);
+
+      // Axios interceptor returns response.data directly, so res is already the Blob
+      const url = window.URL.createObjectURL(res); // tạo một URL tạm thời trỏ tới Blob (file Excel) trong bộ nhớ trình duyệt.
+      const link = document.createElement("a"); // Tạo thẻ a ẩn
+      link.href = url;
+      link.setAttribute("download", "Bao_Cao_Thong_Ke.xlsx");
+      document.body.appendChild(link);
+      link.click(); // Kích hoạt click để tải file
+      document.body.removeChild(link);
+
+      message.success("Xuất báo cáo Excel thành công!");
+      setIsExportModalVisible(false);
+    } catch (error) {
+      console.error("Lỗi xuất Excel:", error);
+      message.error("Có lỗi xảy ra khi xuất báo cáo");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -106,20 +166,28 @@ const AdminDashboardPage = () => {
       title: "Mã Đơn",
       dataIndex: "_id",
       key: "_id",
-      render: (text) => <span className="text-gray-500 font-mono">{text.substring(0, 8)}...</span>,
+      render: (text) => (
+        <span className="text-gray-500 font-mono">
+          {text.substring(0, 8)}...
+        </span>
+      ),
     },
     {
       title: "Khách Hàng",
       dataIndex: "customerName",
       key: "customerName",
-      render: (text) => <span className="font-semibold text-gray-700">{text}</span>,
+      render: (text) => (
+        <span className="font-semibold text-gray-700">{text}</span>
+      ),
     },
     {
       title: "Tổng Tiền",
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amount) => (
-        <span className="text-orange-500 font-bold">{formatCurrency(amount)}</span>
+        <span className="text-orange-500 font-bold">
+          {formatCurrency(amount)}
+        </span>
       ),
     },
     {
@@ -146,7 +214,11 @@ const AdminDashboardPage = () => {
       title: "Ngày Đặt",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => <span className="text-gray-500">{moment(date).format("DD/MM/YYYY HH:mm")}</span>,
+      render: (date) => (
+        <span className="text-gray-500">
+          {moment(date).format("DD/MM/YYYY HH:mm")}
+        </span>
+      ),
     },
   ];
 
@@ -160,54 +232,98 @@ const AdminDashboardPage = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <Title level={2} className="!mb-1 !text-gray-800">
-          Tổng quan
-        </Title>
-        <p className="text-gray-500">Các chỉ số quan trọng của FoodShop</p>
+      <div className="mb-8 flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4">
+        <div>
+          <Title level={2} className="!mb-1 !text-gray-800">
+            Tổng quan
+          </Title>
+          <p className="text-gray-500">Các chỉ số quan trọng của FoodShop</p>
+        </div>
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          size="large"
+          className="bg-green-600 hover:bg-green-700"
+          onClick={() => setIsExportModalVisible(true)}
+        >
+          Xuất Excel
+        </Button>
       </div>
 
       {/* Summary Cards */}
       <Row gutter={[24, 24]} className="mb-8">
         <Col xs={24} sm={8}>
-          <Card bordered={false} className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+          <Card
+            bordered={false}
+            className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-2xl">
                 <UserOutlined />
               </div>
               <Statistic
-                title={<span className="text-gray-500 font-medium">Tổng Người Dùng</span>}
+                title={
+                  <span className="text-gray-500 font-medium">
+                    Tổng Người Dùng
+                  </span>
+                }
                 value={stats.summary.totalUsers}
-                valueStyle={{ color: "#1f2937", fontWeight: 700, fontSize: "28px" }}
+                valueStyle={{
+                  color: "#1f2937",
+                  fontWeight: 700,
+                  fontSize: "28px",
+                }}
               />
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card bordered={false} className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+          <Card
+            bordered={false}
+            className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 text-2xl">
                 <ShoppingOutlined />
               </div>
               <Statistic
-                title={<span className="text-gray-500 font-medium">Tổng Đơn Hàng</span>}
+                title={
+                  <span className="text-gray-500 font-medium">
+                    Tổng Đơn Hàng
+                  </span>
+                }
                 value={stats.summary.totalOrders}
-                valueStyle={{ color: "#1f2937", fontWeight: 700, fontSize: "28px" }}
+                valueStyle={{
+                  color: "#1f2937",
+                  fontWeight: 700,
+                  fontSize: "28px",
+                }}
               />
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card bordered={false} className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+          <Card
+            bordered={false}
+            className="shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center text-green-500 text-2xl">
                 <DollarOutlined />
               </div>
               <Statistic
-                title={<span className="text-gray-500 font-medium">Tổng Doanh Thu</span>}
+                title={
+                  <span className="text-gray-500 font-medium">
+                    Tổng Doanh Thu
+                  </span>
+                }
                 value={stats.summary.totalRevenue}
                 formatter={(value) => formatCurrency(value)}
-                valueStyle={{ color: "#1f2937", fontWeight: 700, fontSize: "24px" }}
+                valueStyle={{
+                  color: "#1f2937",
+                  fontWeight: 700,
+                  fontSize: "24px",
+                }}
               />
             </div>
           </Card>
@@ -227,25 +343,59 @@ const AdminDashboardPage = () => {
                 onChange={(value) => setYear(value)}
                 style={{ width: 130 }}
                 options={[
-                  { value: new Date().getFullYear(), label: `Năm ${new Date().getFullYear()}` },
-                  { value: new Date().getFullYear() - 1, label: `Năm ${new Date().getFullYear() - 1}` },
-                  { value: new Date().getFullYear() - 2, label: `Năm ${new Date().getFullYear() - 2}` },
-                  { value: new Date().getFullYear() - 3, label: `Năm ${new Date().getFullYear() - 3}` },
-                  { value: new Date().getFullYear() - 4, label: `Năm ${new Date().getFullYear() - 4}` },
+                  {
+                    value: new Date().getFullYear(),
+                    label: `Năm ${new Date().getFullYear()}`,
+                  },
+                  {
+                    value: new Date().getFullYear() - 1,
+                    label: `Năm ${new Date().getFullYear() - 1}`,
+                  },
+                  {
+                    value: new Date().getFullYear() - 2,
+                    label: `Năm ${new Date().getFullYear() - 2}`,
+                  },
+                  {
+                    value: new Date().getFullYear() - 3,
+                    label: `Năm ${new Date().getFullYear() - 3}`,
+                  },
+                  {
+                    value: new Date().getFullYear() - 4,
+                    label: `Năm ${new Date().getFullYear() - 4}`,
+                  },
                 ]}
               />
             </div>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.monthlyRevenue} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart
+                  data={stats.monthlyRevenue}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
                       <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#6b7280" }} dy={10} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#6b7280" }}
+                    dy={10}
+                  />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
@@ -255,9 +405,20 @@ const AdminDashboardPage = () => {
                   />
                   <RechartsTooltip
                     formatter={(value) => formatCurrency(value)}
-                    contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
                   />
-                  <Area type="monotone" dataKey="Revenue" stroke="#ea580c" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                  <Area
+                    type="monotone"
+                    dataKey="Revenue"
+                    stroke="#ea580c"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -282,11 +443,24 @@ const AdminDashboardPage = () => {
                       dataKey="value"
                     >
                       {stats.orderStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                    <RechartsTooltip
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "none",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={36}
+                      iconType="circle"
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -336,6 +510,49 @@ const AdminDashboardPage = () => {
           badge={"Trending"}
         />
       </div>
+
+      {/* Export Modal */}
+      <Modal
+        title={
+          <span className="text-xl font-bold text-gray-800">
+            Xuất Báo Cáo Excel
+          </span>
+        }
+        open={isExportModalVisible}
+        onOk={handleExport}
+        onCancel={() => setIsExportModalVisible(false)}
+        confirmLoading={isExporting}
+        okText="Tải xuống"
+        cancelText="Hủy"
+        okButtonProps={{
+          className: "bg-green-600 hover:bg-green-700 border-none",
+        }}
+        centered
+      >
+        <div className="py-4">
+          <p className="mb-2 text-gray-600 font-medium">
+            Chọn các năm cần xuất dữ liệu:
+          </p>
+          <Select
+            mode="multiple"
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Chọn năm"
+            value={selectedExportYears}
+            onChange={(values) => setSelectedExportYears(values)}
+            options={Array.from(
+              { length: Number(import.meta.env.VITE_MAX_EXPORT_YEARS) || 10 },
+              (_, index) => {
+                const year = new Date().getFullYear() - index;
+                return {
+                  value: year,
+                  label: `Năm ${year}`,
+                };
+              },
+            )}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };
