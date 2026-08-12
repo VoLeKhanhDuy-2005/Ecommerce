@@ -11,14 +11,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendOTPEmail = async (email, otp, type) => {
+const sendMail = async ({ to, subject, text, html, type, otp }) => {
   try {
-    let subject = "";
-    let htmlContent = "";
+    let finalSubject = subject;
+    let finalHtml = html;
 
     if (type === "register") {
-      subject = "Mã xác thực đăng ký tài khoản";
-      htmlContent = `
+      finalSubject = "Mã xác thực đăng ký tài khoản";
+      finalHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <h2 style="color: #333;">Xác thực địa chỉ email</h2>
           <p>Chào bạn,</p>
@@ -29,8 +29,8 @@ const sendOTPEmail = async (email, otp, type) => {
         </div>
       `;
     } else if (type === "forgot") {
-      subject = "Mã xác thực lấy lại mật khẩu";
-      htmlContent = `
+      finalSubject = "Mã xác thực lấy lại mật khẩu";
+      finalHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <h2 style="color: #333;">Yêu cầu lấy lại mật khẩu</h2>
           <p>Chào bạn,</p>
@@ -40,13 +40,20 @@ const sendOTPEmail = async (email, otp, type) => {
           <p>Nếu bạn không yêu cầu thay đổi mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.</p>
         </div>
       `;
+    } else if (text && !html) {
+      finalHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color: #333;">${finalSubject}</h2>
+          <p>${text}</p>
+        </div>
+      `;
     }
 
     const mailOptions = {
-      from: `"Hệ Thống" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: subject,
-      html: htmlContent,
+      from: `Hệ Thống Food Shop`,
+      to,
+      subject: finalSubject,
+      html: finalHtml,
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -59,5 +66,5 @@ const sendOTPEmail = async (email, otp, type) => {
 };
 
 module.exports = {
-  sendOTPEmail,
+  sendMail,
 };

@@ -284,6 +284,26 @@ const exportInvoiceApi = (orderId) => {
   });
 };
 
+const requestReturnApi = (orderId, formData) => {
+  return axios.post(`/v1/api/orders/${orderId}/return`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+const adminApproveReturnApi = (orderId) => {
+  return axios.put(`/v1/api/admin/orders/${orderId}/return-approve`);
+};
+
+const adminRejectReturnApi = (orderId, rejectReason) => {
+  return axios.put(`/v1/api/admin/orders/${orderId}/return-reject`, {
+    rejectReason,
+  });
+};
+
+const adminCompleteReturnApi = (orderId) => {
+  return axios.put(`/v1/api/admin/orders/${orderId}/return-complete`);
+};
+
 export {
   registerApi,
   loginApi,
@@ -339,4 +359,8 @@ export {
   getDashboardStatsApi,
   exportDashboardStatsApi,
   exportInvoiceApi,
+  requestReturnApi,
+  adminApproveReturnApi,
+  adminRejectReturnApi,
+  adminCompleteReturnApi,
 };

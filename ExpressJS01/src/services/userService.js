@@ -8,7 +8,7 @@ const {
   getImagePresignedUrl,
 } = require("../services/fileService");
 const { generateOTP, verifyOTP } = require("./otpService");
-const { sendOTPEmail } = require("./emailService");
+const { sendMail } = require("./emailService");
 
 const registerService = async (name, email, password, otp) => {
   try {
@@ -50,7 +50,7 @@ const sendRegisterOTPService = async (email) => {
     const otp = await generateOTP(email, "register");
 
     // Gửi email ở background (không dùng await) để frontend phản hồi ngay lập tức
-    sendOTPEmail(email, otp, "register").catch((err) => {
+    sendMail({ to: email, otp, type: "register" }).catch((err) => {
       console.error("Lỗi gửi email ở background:", err);
     });
 
@@ -69,7 +69,7 @@ const sendForgotPasswordOTPService = async (email) => {
     const otp = await generateOTP(email, "forgot");
 
     // Gửi email ở background
-    sendOTPEmail(email, otp, "forgot").catch((err) => {
+    sendMail({ to: email, otp, type: "forgot" }).catch((err) => {
       console.error("Lỗi gửi email quên mật khẩu ở background:", err);
     });
 

@@ -18,7 +18,17 @@ const verifyMomoPayment = async (req, res, next) => {
   try {
     const { statusCode, ...data } = await orderService.verifyMomoPayment(
       req.params.id,
+      req.user.email, // Tránh trường hợp người dùng lấy ID đơn hàng của người khác
     );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const handleMomoIPN = async (req, res, next) => {
+  try {
+    const { statusCode, ...data } = await orderService.handleMomoIPN(req.body);
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -138,12 +148,10 @@ const exportInvoice = async (req, res, next) => {
     }
 
     if (order.userEmail !== req.user.email && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Bạn không có quyền truy cập hóa đơn này",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền truy cập hóa đơn này",
+      });
     }
 
     const pdfBuffer = await invoiceService.generateInvoicePDF(order);
@@ -159,9 +167,61 @@ const exportInvoice = async (req, res, next) => {
   }
 };
 
+const requestReturn = async (req, res, next) => {
+  try {
+    const { statusCode, ...data } = await orderService.requestReturn(
+      req.params.id,
+      req.user.email,
+      req.body,
+      req.files,
+    );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const adminApproveReturn = async (req, res, next) => {
+  try {
+    const { statusCode, ...data } = await orderService.handleReturnAction(
+      req.params.id,
+      "Approve",
+    );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const adminRejectReturn = async (req, res, next) => {
+  try {
+    const { rejectReason } = req.body;
+    const { statusCode, ...data } = await orderService.handleReturnAction(
+      req.params.id,
+      "Reject",
+      rejectReason,
+    );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const adminCompleteReturn = async (req, res, next) => {
+  try {
+    const { statusCode, ...data } = await orderService.completeReturn(
+      req.params.id,
+    );
+    return res.status(statusCode).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   verifyMomoPayment,
+  handleMomoIPN,
   getMyOrders,
   getOrderDetails,
   cancelOrder,
@@ -171,4 +231,8 @@ module.exports = {
   handleShopCancelRequest,
   calculateShipping,
   exportInvoice,
+  requestReturn,
+  adminApproveReturn,
+  adminRejectReturn,
+  adminCompleteReturn,
 };

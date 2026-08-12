@@ -9,6 +9,8 @@ import {
   Pagination,
   Modal,
   Select,
+  Image,
+  Input,
 } from "antd";
 import {
   HistoryOutlined,
@@ -29,6 +31,9 @@ import {
   updateShopOrderStatusApi,
   handleShopCancelRequestApi,
   exportInvoiceApi,
+  adminApproveReturnApi,
+  adminRejectReturnApi,
+  adminCompleteReturnApi,
 } from "../../util/api";
 
 export default function AdminOrdersPage() {
@@ -43,6 +48,9 @@ export default function AdminOrdersPage() {
     pageSize: 5,
     total: 0,
   });
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectOrderId, setRejectOrderId] = useState(null);
 
   if (!auth.isAuthenticated) {
     return (
@@ -165,6 +173,93 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const [returnLoading, setReturnLoading] = useState(false);
+
+  const handleApproveReturn = async (orderId) => {
+    setReturnLoading(true);
+    try {
+      const res = await adminApproveReturnApi(orderId);
+      if (res && res.success) {
+        notification.success({
+          message: "Thành công",
+          description: "Đã chấp nhận yêu cầu khiếu nại & hoàn tiền.",
+        });
+        fetchShopOrders(true);
+        setIsDetailModalOpen(false);
+      } else {
+        notification.error({ message: "Lỗi", description: res.message });
+      }
+    } catch (err) {
+      notification.error({ message: "Lỗi", description: "Đã xảy ra sự cố." });
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
+  const handleRejectReturn = (orderId) => {
+    setRejectOrderId(orderId);
+    setRejectReason("");
+    setIsRejectModalOpen(true);
+  };
+
+  const submitRejectReturn = async () => {
+    if (!rejectReason.trim()) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng nhập lý do từ chối hoàn tiền.",
+      });
+      return;
+    }
+
+    setReturnLoading(true);
+    try {
+      const res = await adminRejectReturnApi(rejectOrderId, rejectReason);
+      if (res && res.success) {
+        notification.success({
+          message: "Thành công",
+          description: "Đã từ chối yêu cầu hoàn tiền.",
+        });
+        fetchShopOrders(true);
+        setIsDetailModalOpen(false);
+        setIsRejectModalOpen(false);
+      } else {
+        notification.error({ message: "Lỗi", description: res.message });
+      }
+    } catch (err) {
+      notification.error({ message: "Lỗi", description: "Đã xảy ra sự cố." });
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
+  const handleCompleteReturn = async (orderId) => {
+    if (
+      !window.confirm(
+        "Xác nhận đã nhận được hàng trả về và hoàn tiền cho khách?",
+      )
+    )
+      return;
+
+    setReturnLoading(true);
+    try {
+      const res = await adminCompleteReturnApi(orderId);
+      if (res && res.success) {
+        notification.success({
+          message: "Thành công",
+          description: "Đã hoàn tất quá trình trả hàng và hoàn tiền.",
+        });
+        fetchShopOrders(true);
+        setIsDetailModalOpen(false);
+      } else {
+        notification.error({ message: "Lỗi", description: res.message });
+      }
+    } catch (err) {
+      notification.error({ message: "Lỗi", description: "Đã xảy ra sự cố." });
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
   const getStatusTag = (status) => {
     switch (status) {
       case "New":
@@ -178,9 +273,13 @@ export default function AdminOrdersPage() {
       case "Delivered":
         return <Tag color="success">Đã giao thành công</Tag>;
       case "Cancelled":
-        return <Tag color="error">Đã hủy đơn</Tag>;
+        return <Tag color="error">Đã hủy</Tag>;
+      case "Return Requested":
+        return <Tag color="orange">Yêu cầu hoàn tiền</Tag>;
+      case "Returned":
+        return <Tag color="default">Đã hoàn tiền</Tag>;
       default:
-        return <Tag>{status}</Tag>;
+        return <Tag color="default">{status}</Tag>;
     }
   };
 
@@ -242,7 +341,9 @@ export default function AdminOrdersPage() {
               { value: "Preparing", label: "Đang chuẩn bị" },
               { value: "Shipping", label: "Đang giao hàng" },
               { value: "Delivered", label: "Đã giao thành công" },
-              { value: "Cancelled", label: "Đã hủy đơn" },
+              { value: "Cancelled", label: "Đã hủy" },
+              { value: "Return Requested", label: "Yêu cầu hoàn tiền" },
+              { value: "Returned", label: "Đã hoàn tiền" },
             ]}
           />
         </div>
@@ -278,7 +379,8 @@ export default function AdminOrdersPage() {
                     >
                       <EyeOutlined /> Chi tiết
                     </a>
-                    {ord.status !== "Cancelled" && (
+                    {(ord.status == "Shipping" ||
+                      ord.status === "Delivered") && (
                       <a
                         className="text-green-600 hover:text-green-700 text-xs font-semibold cursor-pointer flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md transition-colors ml-1"
                         onClick={() => handleExportInvoice(ord._id)}
@@ -351,7 +453,9 @@ export default function AdminOrdersPage() {
 
               {ord.status !== "Cancelled" &&
                 ord.status !== "Delivered" &&
-                ord.status !== "Shipping" && (
+                ord.status !== "Shipping" &&
+                ord.status !== "Return Requested" &&
+                ord.status !== "Returned" && (
                   <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/70 space-y-2">
                     <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                       <ShoppingOutlined /> Thao tác xử lý quy trình vận đơn
@@ -448,7 +552,7 @@ export default function AdminOrdersPage() {
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={[
-          selectedOrder.status !== "Cancelled" && (
+          selectedOrder?.status !== "Cancelled" && (
             <Button
               key="export"
               icon={<PrinterOutlined />}
@@ -569,8 +673,110 @@ export default function AdminOrdersPage() {
                 </p>
               </div>
             </div>
+
+            {selectedOrder.returnRequests &&
+              selectedOrder.returnRequests.length > 0 && (
+                <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mt-6">
+                  <h3 className="font-bold text-orange-800 mb-3 text-lg">
+                    Yêu Cầu Hoàn Tiền
+                  </h3>
+                  <div className="space-y-4">
+                    {selectedOrder.returnRequests.map((req, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white p-3 rounded-lg border border-orange-100 flex flex-col gap-2"
+                      >
+                        <div className="flex justify-between font-semibold text-sm text-gray-700">
+                          <span>Sản phẩm:</span>
+                          <span className="text-right">
+                            {
+                              selectedOrder.items.find(
+                                (i) => i.product === req.item,
+                              )?.name
+                            }{" "}
+                            x {req.quantity}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Lý do:</span>
+                          <span className="text-right italic">
+                            {req.reason}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Trạng thái:</span>
+                          <span className="font-bold">
+                            {req.status === "Pending"
+                              ? "Chưa giải quyết"
+                              : "Đã giải quyết"}
+                          </span>
+                        </div>
+                        {req.images && req.images.length > 0 && (
+                          <div className="mt-2 flex gap-2 overflow-x-auto">
+                            <Image.PreviewGroup>
+                              {req.images.map((img, i) => (
+                                <Image
+                                  key={i}
+                                  src={`${img}`}
+                                  alt="proof"
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              ))}
+                            </Image.PreviewGroup>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {selectedOrder.status === "Return Requested" && (
+                    <div className="mt-4 flex gap-3">
+                      <Button
+                        type="primary"
+                        className="bg-orange-500 hover:bg-orange-600"
+                        loading={returnLoading}
+                        onClick={() => handleApproveReturn(selectedOrder._id)}
+                      >
+                        Chấp Nhận Hoàn Tiền
+                      </Button>
+                      <Button
+                        danger
+                        loading={returnLoading}
+                        onClick={() => handleRejectReturn(selectedOrder._id)}
+                      >
+                        Từ Chối
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
         )}
+      </Modal>
+
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-red-600">
+            <CloseOutlined />
+            <span>Từ chối yêu cầu hoàn tiền</span>
+          </div>
+        }
+        open={isRejectModalOpen}
+        onCancel={() => setIsRejectModalOpen(false)}
+        onOk={submitRejectReturn}
+        okText="Từ chối hoàn tiền"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true, loading: returnLoading }}
+      >
+        <div className="mb-2 text-gray-700">
+          Vui lòng nhập lý do từ chối yêu cầu hoàn trả này:
+        </div>
+        <Input.TextArea
+          rows={4}
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          placeholder="Ví dụ: Sản phẩm không đạt yêu cầu hoàn trả..."
+          className="rounded-xl"
+        />
       </Modal>
     </div>
   );

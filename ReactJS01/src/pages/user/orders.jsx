@@ -9,6 +9,10 @@ import {
   Modal,
   Input,
   Rate,
+  Checkbox,
+  Upload,
+  Button,
+  Image,
 } from "antd";
 import {
   ClockCircleOutlined,
@@ -20,6 +24,8 @@ import {
   StopOutlined,
   ExclamationCircleOutlined,
   PrinterOutlined,
+  UploadOutlined,
+  UndoOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
 import {
@@ -31,6 +37,7 @@ import {
   markOrderAsReceivedApi,
   submitReviewApi,
   exportInvoiceApi,
+  requestReturnApi,
 } from "../../util/api";
 
 export default function OrdersPage() {
@@ -51,6 +58,14 @@ export default function OrdersPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
+
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [returnItemsState, setReturnItemsState] = useState({});
+  const [returnReason, setReturnReason] = useState("");
+  const [returnFileList, setReturnFileList] = useState([]);
+  const [returnLoading, setReturnLoading] = useState(false);
+  const [returnPreviewOpen, setReturnPreviewOpen] = useState(false);
+  const [returnPreviewImage, setReturnPreviewImage] = useState("");
 
   // State phục vụ đếm ngược thời gian hủy đơn (30 phút)
   const [timeLeftStr, setTimeLeftStr] = useState("");
@@ -248,6 +263,108 @@ export default function OrdersPage() {
     }
   };
 
+  const openReturnModal = () => {
+    setIsReturnModalOpen(true);
+    setReturnReason("");
+    const initialItems = {};
+    if (selectedOrder && selectedOrder.items) {
+      selectedOrder.items.forEach((i) => {
+        const existingReq = selectedOrder.returnRequests?.find(
+          (r) => r.item === i.product,
+        );
+        if (!existingReq) {
+          initialItems[i.product] = { checked: false, quantity: 1, reason: "" };
+        }
+      });
+    }
+    setReturnItemsState(initialItems);
+    setReturnFileList([]);
+  };
+
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handleReturnPreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setReturnPreviewImage(file.url || file.preview);
+    setReturnPreviewOpen(true);
+  };
+
+  const handleReturnItemChange = (productId, key, value) => {
+    //ex: handleReturnItemChange("p001", "quantity", 3);
+    //-> cập nhật một thuộc tính của một sản phẩm trong returnItemsState
+    setReturnItemsState((prev) => ({
+      ...prev,
+      [productId]: { ...prev[productId], [key]: value },
+    }));
+  };
+
+  const handleReturnSubmit = async () => {
+    const selectedProducts = Object.keys(returnItemsState).filter(
+      (id) => returnItemsState[id].checked,
+    );
+    if (selectedProducts.length === 0) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng chọn ít nhất 1 sản phẩm để hoàn trả",
+      });
+      return;
+    }
+
+    if (!returnReason.trim()) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng nhập lý do hoàn trả",
+      });
+      return;
+    }
+
+    const items = selectedProducts.map((id) => ({
+      itemId: id,
+      quantity: returnItemsState[id].quantity,
+      reason: returnItemsState[id].reason || returnReason,
+    }));
+
+    const formData = new FormData();
+    formData.append("items", JSON.stringify(items));
+    formData.append("reason", returnReason);
+    returnFileList.forEach((file) => {
+      formData.append("images", file.originFileObj);
+    });
+
+    setReturnLoading(true);
+    try {
+      const res = await requestReturnApi(selectedOrder._id, formData);
+      if (res && res.success) {
+        notification.success({
+          message: "Thành công",
+          description: res.message,
+        });
+        setIsReturnModalOpen(false);
+        fetchOrders(selectedOrder._id);
+      } else {
+        notification.error({
+          message: "Lỗi",
+          description: res.message || "Yêu cầu hoàn trả thất bại",
+        });
+      }
+    } catch (err) {
+      notification.error({
+        message: "Lỗi",
+        description: "Hệ thống đang gặp sự cố",
+      });
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
   // Xác nhận đã nhận hàng qua API
   const handleMarkAsReceived = async () => {
     setReceiveLoading(true);
@@ -370,6 +487,10 @@ export default function OrdersPage() {
         return <Tag color="success">Đã giao thành công</Tag>;
       case "Cancelled":
         return <Tag color="error">Đã hủy đơn</Tag>;
+      case "Return Requested":
+        return <Tag color="orange">Yêu cầu hoàn tiền</Tag>;
+      case "Returned":
+        return <Tag color="red">Đã hoàn tiền</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -525,7 +646,8 @@ export default function OrdersPage() {
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
-                    {selectedOrder.status !== "Cancelled" && (
+                    {(selectedOrder.status === "Shipping" ||
+                      selectedOrder.status === "Delivered") && (
                       <button
                         onClick={handleExportInvoice}
                         className="px-3 py-1.5 bg-green-50 text-green-600 font-semibold text-xs rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1.5 border border-green-200"
@@ -571,9 +693,116 @@ export default function OrdersPage() {
                   </div>
                 )}
 
+                {/* Phần Trả Hàng */}
+                {selectedOrder.status === "Delivered" && (
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                    <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <p className="font-bold text-gray-800 text-sm">
+                          Bạn không hài lòng với sản phẩm?
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Báo cáo sự cố trong vòng 1 giờ kể từ khi nhận hàng.
+                        </p>
+                      </div>
+                      <button
+                        onClick={openReturnModal}
+                        className="px-5 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 transition-all shadow-sm flex items-center gap-1.5"
+                      >
+                        <UndoOutlined /> Báo Cáo Sự Cố & Hoàn Tiền
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Danh Sách Yêu Cầu Hoàn Trả */}
+                {selectedOrder.returnRequests &&
+                  selectedOrder.returnRequests.length > 0 && (
+                    <div className="bg-red-50/50 p-5 rounded-2xl border border-red-100 mb-4">
+                      <h4 className="font-bold text-red-600 text-sm mb-3">
+                        Lịch sử hoàn tiền
+                      </h4>
+                      <div className="space-y-3">
+                        {selectedOrder.returnRequests.map((req, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-white p-3 rounded-xl border border-red-100/50 text-xs shadow-sm"
+                          >
+                            <div className="flex justify-between items-start font-bold mb-1.5">
+                              <span className="text-gray-800 text-sm">
+                                {selectedOrder.items.find(
+                                  (i) => i.product === req.item,
+                                )?.name || "Đơn hàng"}
+                              </span>
+                              <Tag
+                                color={
+                                  req.status === "Approved" ||
+                                  req.status === "Completed"
+                                    ? "success"
+                                    : req.status === "Rejected"
+                                      ? "error"
+                                      : "processing"
+                                }
+                                className="m-0 border-0 font-bold"
+                              >
+                                {req.status === "Pending"
+                                  ? "Đang xử lý"
+                                  : req.status === "Approved"
+                                    ? "Chấp nhận"
+                                    : req.status === "Rejected"
+                                      ? "Từ chối"
+                                      : req.status === "Completed"
+                                        ? "Đã hoàn tiền"
+                                        : req.status}
+                              </Tag>
+                            </div>
+                            <p className="text-gray-600 mb-2 leading-relaxed">
+                              <span className="text-gray-400">Lý do:</span>{" "}
+                              <span className="font-medium text-gray-800">
+                                {req.reason}
+                              </span>
+                            </p>
+                            {req.rejectReason && (
+                              <p className="text-red-600 mb-2 leading-relaxed bg-red-50 p-2 rounded-lg">
+                                <span className="font-bold text-red-500">
+                                  Shop phản hồi:
+                                </span>{" "}
+                                <span className="font-medium">
+                                  {req.rejectReason}
+                                </span>
+                              </p>
+                            )}
+                            {req.images && req.images.length > 0 && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">
+                                  Ảnh minh chứng
+                                </p>
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                  <Image.PreviewGroup>
+                                    {req.images.map((img, imgIdx) => (
+                                      <Image
+                                        key={imgIdx}
+                                        src={img}
+                                        width={56}
+                                        height={56}
+                                        className="object-cover rounded-lg border border-gray-100 cursor-pointer hover:opacity-80 transition-opacity"
+                                      />
+                                    ))}
+                                  </Image.PreviewGroup>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                 {/* Phần Đếm Ngược & Hủy Đơn / Xác nhận nhận hàng */}
                 {selectedOrder.status !== "Cancelled" &&
-                  selectedOrder.status !== "Delivered" && (
+                  selectedOrder.status !== "Delivered" &&
+                  selectedOrder.status !== "Return Requested" &&
+                  selectedOrder.status !== "Returned" && (
                     <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                       {selectedOrder.status === "Shipping" ? (
                         <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
@@ -703,6 +932,16 @@ export default function OrdersPage() {
                         </span>
                         <span className="font-bold text-gray-700">
                           {formatPrice(selectedOrder.shippingFee)}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.discountAmount > 0 && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-gray-500">
+                          Giảm giá:
+                        </span>
+                        <span className="font-bold text-gray-700">
+                          {formatPrice(selectedOrder.discountAmount)}
                         </span>
                       </div>
                     )}
@@ -856,6 +1095,160 @@ export default function OrdersPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Modal Yêu Cầu Hoàn Tiền */}
+      <Modal
+        title={
+          <div className="flex flex-col gap-1 border-b pb-3">
+            <span className="font-bold text-lg">Báo Cáo Sự Cố & Hoàn Tiền</span>
+            <span className="text-sm font-normal text-gray-500">
+              Vui lòng cung cấp chi tiết sự cố và hình ảnh minh chứng.
+            </span>
+          </div>
+        }
+        open={isReturnModalOpen}
+        onCancel={() => setIsReturnModalOpen(false)}
+        footer={null}
+        destroyOnClose
+        centered
+        width={600}
+      >
+        <div className="py-4">
+          <div className="font-semibold text-gray-700 mb-2">
+            Vui lòng chọn các sản phẩm bị lỗi:
+          </div>
+          <div className="max-h-60 overflow-y-auto mb-4 border rounded-lg p-3">
+            {selectedOrder?.items?.map((item) => {
+              const state = returnItemsState[item.product];
+              if (!state) return null; // Đã yêu cầu trước đó
+              return (
+                <div
+                  key={item.product}
+                  className="flex gap-3 mb-4 border-b pb-4 last:border-0 last:pb-0 last:mb-0"
+                >
+                  <Checkbox
+                    checked={state.checked}
+                    onChange={(e) =>
+                      handleReturnItemChange(
+                        item.product,
+                        "checked",
+                        e.target.checked,
+                      )
+                    }
+                  />
+                  <img
+                    src={item.image || "/images/placeholder.jpg"}
+                    alt={item.name}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm line-clamp-2">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Giá: {item.price?.toLocaleString()}đ x {item.quantity}
+                    </p>
+                    {state.checked && (
+                      <div className="mt-2 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">Số lượng:</span>
+                          <Input
+                            type="number"
+                            size="small"
+                            className="w-20"
+                            min={1}
+                            max={item.quantity}
+                            value={state.quantity}
+                            onChange={(e) =>
+                              handleReturnItemChange(
+                                item.product,
+                                "quantity",
+                                parseInt(e.target.value) || 1,
+                              )
+                            }
+                          />
+                        </div>
+                        <Input
+                          placeholder="Chi tiết lỗi (tùy chọn)"
+                          size="small"
+                          value={state.reason}
+                          onChange={(e) =>
+                            handleReturnItemChange(
+                              item.product,
+                              "reason",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mb-4">
+            <div className="font-semibold text-gray-700 mb-2">
+              Mô tả sự cố chung: <span className="text-red-500">*</span>
+            </div>
+            <Input.TextArea
+              rows={3}
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}
+              placeholder="Nhập mô tả chi tiết sự cố (Bắt buộc)..."
+              className="rounded-lg"
+            />
+          </div>
+
+          <div className="mb-6">
+            <p className="text-sm font-semibold mb-2">
+              Hình ảnh chứng minh (Tối đa 5 ảnh)
+            </p>
+            <Upload
+              listType="picture-card"
+              fileList={returnFileList}
+              onChange={({ fileList }) => setReturnFileList(fileList)}
+              onPreview={handleReturnPreview}
+              beforeUpload={() => false}
+              maxCount={5}
+              accept="image/*"
+            >
+              {returnFileList.length < 5 && (
+                <div>
+                  <div style={{ marginTop: 8 }}>+ Tải ảnh lên</div>
+                </div>
+              )}
+            </Upload>
+
+            {returnPreviewImage && (
+              <Image
+                wrapperStyle={{ display: "none" }}
+                preview={{
+                  visible: returnPreviewOpen,
+                  onVisibleChange: (visible) => setReturnPreviewOpen(visible),
+                  afterOpenChange: (visible) =>
+                    !visible && setReturnPreviewImage(""),
+                }}
+                src={returnPreviewImage}
+              />
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button onClick={() => setIsReturnModalOpen(false)}>Hủy</Button>
+            <Button
+              type="primary"
+              danger
+              onClick={handleReturnSubmit}
+              loading={returnLoading}
+              icon={<UndoOutlined />}
+            >
+              Gửi Yêu Cầu
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

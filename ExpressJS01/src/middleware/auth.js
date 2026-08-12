@@ -11,6 +11,7 @@ const auth = (req, res, next) => {
     "/logout",
     "/forgot-password",
     "/categories",
+    "/orders/momo-ipn", //MoMo có thể gọi IPN mà không cần tới Access Token (JWT)
   ];
 
   // Cho phép các route bắt đầu bằng danh sách whitelist đi qua mà không cần check token

@@ -62,7 +62,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Pending", "Paid", "Failed"],
+      enum: ["Pending", "Paid", "Failed", "Refunded", "Partially Refunded"],
       default: "Pending",
     },
     status: {
@@ -74,6 +74,8 @@ const orderSchema = new mongoose.Schema(
         "Shipping",
         "Delivered",
         "Cancelled",
+        "Return Requested",
+        "Returned",
       ],
       default: "New",
     },
@@ -100,6 +102,43 @@ const orderSchema = new mongoose.Schema(
     momoRequestId: {
       type: String,
     },
+    momoTransId: {
+      type: Number,
+    },
+    returnRequests: [
+      {
+        item: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        reason: {
+          type: String,
+          required: true,
+        },
+        images: [String],
+        status: {
+          type: String,
+          enum: ["Pending", "Approved", "Rejected", "Completed"],
+          // Completed: Đã hoàn trả tiền thành công, không tính tiền lại nữa
+          default: "Pending",
+        },
+        rejectReason: String,
+        requestedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        refundAmount: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
     voucherApplied: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "voucher",

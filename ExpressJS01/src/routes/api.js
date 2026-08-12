@@ -37,6 +37,7 @@ const {
 const {
   createOrder,
   verifyMomoPayment,
+  handleMomoIPN,
   getMyOrders,
   getOrderDetails,
   cancelOrder,
@@ -46,6 +47,10 @@ const {
   handleShopCancelRequest,
   calculateShipping,
   exportInvoice,
+  requestReturn,
+  adminApproveReturn,
+  adminRejectReturn,
+  adminCompleteReturn,
 } = require("../controllers/orderController");
 const {
   createCategory,
@@ -123,9 +128,11 @@ routerAPI.post("/orders", createOrder);
 routerAPI.post("/orders/calculate-shipping", calculateShipping);
 routerAPI.get("/orders", getMyOrders);
 routerAPI.get("/orders/:id", getOrderDetails);
+routerAPI.post("/orders/momo-ipn", handleMomoIPN);
 routerAPI.post("/orders/:id/cancel", cancelOrder);
 routerAPI.post("/orders/:id/received", markOrderAsReceived);
 routerAPI.post("/orders/:id/verify-momo", verifyMomoPayment);
+routerAPI.post("/orders/:id/return", validateProductImages, requestReturn);
 routerAPI.get("/orders/:id/invoice", exportInvoice);
 
 routerAPI.get("/admin/orders", isAdmin, getShopOrders);
@@ -134,6 +141,13 @@ routerAPI.post(
   "/admin/orders/:id/cancel-request",
   isAdmin,
   handleShopCancelRequest,
+);
+routerAPI.put("/admin/orders/:id/return-approve", isAdmin, adminApproveReturn);
+routerAPI.put("/admin/orders/:id/return-reject", isAdmin, adminRejectReturn);
+routerAPI.put(
+  "/admin/orders/:id/return-complete",
+  isAdmin,
+  adminCompleteReturn,
 );
 
 routerAPI.get("/categories", getAllCategories);
