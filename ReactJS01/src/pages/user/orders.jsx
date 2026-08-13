@@ -981,6 +981,14 @@ export default function OrdersPage() {
                         {selectedOrder.shippingAddress}
                       </span>
                     </p>
+                    {selectedOrder.note && (
+                      <div className="mt-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span className="text-gray-400 font-medium mb-1 block">Ghi chú đơn hàng:</span>
+                        <span className="font-semibold text-gray-800 italic">
+                          "{selectedOrder.note}"
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Thanh toán */}

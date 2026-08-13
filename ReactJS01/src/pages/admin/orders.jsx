@@ -596,6 +596,12 @@ export default function AdminOrdersPage() {
                   <span className="text-gray-500">Email:</span>{" "}
                   <span className="font-medium">{selectedOrder.userEmail}</span>
                 </p>
+                {selectedOrder.note && (
+                  <div className="mt-4 pt-3 border-t">
+                    <p className="text-gray-500 mb-1">Ghi chú:</p>
+                    <p className="font-medium text-orange-600 bg-orange-50 p-2 rounded-lg text-sm">{selectedOrder.note}</p>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <p className="font-bold text-gray-800 text-base mb-3 border-b pb-2">

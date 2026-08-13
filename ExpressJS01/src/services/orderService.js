@@ -115,6 +115,7 @@ const createOrder = async (userEmail, payload) => {
       lat,
       lng,
       voucherId,
+      note,
     } = payload;
 
     if (
@@ -261,6 +262,7 @@ const createOrder = async (userEmail, payload) => {
       status: "New",
       voucherApplied: appliedVoucherId,
       discountAmount,
+      note,
     };
     const newOrder = await Order.create(orderData);
 

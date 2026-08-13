@@ -47,6 +47,7 @@ export default function CartPage() {
     customerName: auth?.user?.name || "",
     phoneNumber: auth?.user?.phone || "",
     shippingAddress: auth?.user?.address || "",
+    note: "",
   });
 
   const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' hoặc 'MOMO'
@@ -372,7 +373,7 @@ export default function CartPage() {
 
   // Tiến hành thanh toán / đặt đơn hàng
   const handlePlaceOrder = async () => {
-    const { customerName, phoneNumber, shippingAddress } = deliveryInfo;
+    const { customerName, phoneNumber, shippingAddress, note } = deliveryInfo;
     if (
       !customerName.trim() ||
       !phoneNumber.trim() ||
@@ -408,6 +409,7 @@ export default function CartPage() {
         lat: coordinates?.lat,
         lng: coordinates?.lng,
         voucherId: selectedVoucherId,
+        note,
       };
 
       const res = await createOrderApi(orderPayload);
@@ -721,6 +723,20 @@ export default function CartPage() {
                       Khoảng cách ước tính: {distance} km
                     </div>
                   )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    Ghi chú đơn hàng (Tùy chọn)
+                  </label>
+                  <Input.TextArea
+                    name="note"
+                    placeholder="Ví dụ: không hành, ít cay, giao ngoài giờ hành chính..."
+                    value={deliveryInfo.note}
+                    onChange={handleInputChange}
+                    className="rounded-xl"
+                    rows={2}
+                  />
                 </div>
               </div>
             </div>

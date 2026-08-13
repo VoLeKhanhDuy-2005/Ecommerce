@@ -18,17 +18,52 @@ const mapProductImageUrls = async (products) => {
   return Array.isArray(products) ? result : result[0];
 };
 
+const getTimeBasedRecommendations = async () => {
+  const vnHour = (new Date().getUTCHours() + 7) % 24;
+  let title = "";
+  let keywords = [];
+
+  if (vnHour >= 5 && vnHour < 10) {
+    title = "Năng lượng cho buổi sáng ☀️";
+    keywords = ["phở", "bún", "bánh mì", "cafe", "cà phê", "sáng", "xôi"];
+  } else if (vnHour >= 10 && vnHour < 14) {
+    title = "Trưa nay ăn gì? 🍱";
+    keywords = ["cơm", "bún", "lẩu", "trưa"];
+  } else if (vnHour >= 14 && vnHour < 18) {
+    title = "Nạp năng lượng xế chiều 🧋";
+    keywords = ["trà sữa", "ăn vặt", "bánh", "chè", "kem", "trà"];
+  } else {
+    title = "Món ngon buổi tối 🌙";
+    keywords = ["lẩu", "nướng", "cháo", "mì", "cơm", "đêm", "ốc"];
+  }
+
+  let products = await Product.find({ name: { $regex: new RegExp(keywords.join("|"), "i") } }).limit(10);
+
+  if (products.length < 10) {
+    const existingIds = products.map(p => p._id);
+    const fillerProducts = await Product.find({ _id: { $nin: existingIds } }).sort({ sold: -1 }).limit(10 - products.length);
+    products = [...products, ...fillerProducts];
+  }
+
+  return {
+    title,
+    products: await mapProductImageUrls(products)
+  };
+};
+
 const getHomePageProducts = async () => {
   const [
     newestProducts,
     bestSellingProducts,
     promotionalProducts,
     mostViewedProducts,
+    timeBasedData,
   ] = await Promise.all([
     Product.find().sort({ createdAt: -1 }).limit(10),
     Product.find().sort({ sold: -1 }).limit(10),
     Product.find().sort({ discountPercent: -1 }).limit(12),
     Product.find().sort({ views: -1 }).limit(10),
+    getTimeBasedRecommendations(),
   ]);
 
   return {
@@ -36,6 +71,7 @@ const getHomePageProducts = async () => {
     bestSelling: await mapProductImageUrls(bestSellingProducts),
     promotions: await mapProductImageUrls(promotionalProducts),
     mostViewed: await mapProductImageUrls(mostViewedProducts),
+    timeBased: timeBasedData,
   };
 };
 

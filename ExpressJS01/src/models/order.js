@@ -23,6 +23,10 @@ const orderSchema = new mongoose.Schema(
       required: [true, "Địa chỉ nhận hàng không được để trống"],
       trim: true,
     },
+    note: {
+      type: String,
+      trim: true,
+    },
     items: [
       {
         product: {

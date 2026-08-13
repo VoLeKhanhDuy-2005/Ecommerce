@@ -24,6 +24,7 @@ export default function Home() {
     bestSelling: [],
     promotions: [],
     mostViewed: [],
+    timeBased: { title: "", products: [] },
   });
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,6 +61,10 @@ export default function Home() {
             bestSelling: mapCategoryName(prodRes.data.bestSelling || []),
             promotions: mappedPromotions,
             mostViewed: mapCategoryName(prodRes.data.mostViewed || []),
+            timeBased: {
+              title: prodRes.data.timeBased?.title || "",
+              products: mapCategoryName(prodRes.data.timeBased?.products || [])
+            },
           });
         }
       } catch (err) {
@@ -212,6 +217,20 @@ export default function Home() {
           })}
         </div>
       </section>
+
+      {products.timeBased && products.timeBased.products.length > 0 && (
+        <>
+          <ProductSection
+            smallHeader={"Gợi ý cho bạn 🕒"}
+            bigHeader={products.timeBased.title}
+            productData={products.timeBased.products}
+            badge={"Gợi ý"}
+          />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="border-t border-gray-300 my-10"></div>
+          </div>
+        </>
+      )}
 
       <ProductSection
         smallHeader={"Vừa ra lò"}

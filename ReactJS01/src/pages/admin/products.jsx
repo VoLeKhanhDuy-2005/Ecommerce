@@ -40,6 +40,7 @@ const AdminProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [imageOption, setImageOption] = useState("upload");
   const [fileList, setFileList] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [form] = Form.useForm();
 
   const fetchProducts = async () => {
@@ -296,18 +297,28 @@ const AdminProductsPage = () => {
             <span>Quản Lý Sản Phẩm</span>
           </h1>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleOpenCreateModal}
-          className="bg-orange-500 hover:bg-orange-600"
-        >
-          Thêm Sản Phẩm
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <Input.Search
+            placeholder="Tìm kiếm sản phẩm theo tên..."
+            allowClear
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full sm:w-64"
+          />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleOpenCreateModal}
+            className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto"
+          >
+            Thêm Sản Phẩm
+          </Button>
+        </div>
       </div>
 
       <Table
-        dataSource={products}
+        dataSource={products.filter((p) =>
+          p.name.toLowerCase().includes(searchText.toLowerCase())
+        )}
         columns={columns}
         rowKey="_id"
         loading={loading}
