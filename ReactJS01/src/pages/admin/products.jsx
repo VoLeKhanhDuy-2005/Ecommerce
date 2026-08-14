@@ -38,9 +38,9 @@ const AdminProductsPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageOption, setImageOption] = useState("upload");
   const [fileList, setFileList] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [form] = Form.useForm();
 
   const fetchProducts = async () => {
@@ -83,11 +83,11 @@ const AdminProductsPage = () => {
   const handleOpenCreateModal = () => {
     setIsEditMode(false);
     setEditingProduct(null);
-    setImageOption("upload");
     setFileList([]);
+    setPreviewUrls([]);
     form.resetFields();
     // Default values
-    form.setFieldsValue({ discountPercent: 0, stock: 0 });
+    form.setFieldsValue({ discountPercent: 0, stock: 0, imageUrls: [""] });
     setIsModalVisible(true);
   };
 
@@ -96,18 +96,24 @@ const AdminProductsPage = () => {
     setEditingProduct(product);
 
     // Xử lý imageUrls nếu có ảnh từ url ngoài
-    let imageUrls = "";
+    let imageUrls = [""];
     if (product.images && product.images.length > 0) {
       const urls = product.images.filter(
         (img) => img.startsWith("http") && !img.includes("amazonaws.com"),
       );
+      const s3Urls = product.images.filter(
+        (img) => !img.startsWith("http") || img.includes("amazonaws.com"),
+      );
+
       if (urls.length > 0) {
-        imageUrls = urls.join(", ");
-        setImageOption("url");
+        imageUrls = urls;
+        setPreviewUrls(urls);
       } else {
-        setImageOption("upload");
-        // Convert S3 keys/URLs to Ant Design fileList format
-        const initialFileList = product.images.map((img, index) => ({
+        setPreviewUrls([]);
+      }
+      
+      if (s3Urls.length > 0) {
+        const initialFileList = s3Urls.map((img, index) => ({
           uid: `-${index}`,
           name: `image-${index}`,
           status: "done",
@@ -115,9 +121,14 @@ const AdminProductsPage = () => {
         }));
         setFileList(initialFileList);
         form.setFieldsValue({ uploadFiles: initialFileList });
+      } else {
+        setFileList([]);
+        form.setFieldsValue({ uploadFiles: [] });
       }
     } else {
-      setImageOption("upload");
+      setPreviewUrls([]);
+      setFileList([]);
+      form.setFieldsValue({ uploadFiles: [] });
     }
 
     form.setFieldsValue({
@@ -163,13 +174,43 @@ const AdminProductsPage = () => {
       formData.append("category", values.category);
       formData.append("stock", values.stock);
 
-      if (imageOption === "upload" && fileList.length > 0) {
-        fileList.forEach((file) => {
-          formData.append("images", file.originFileObj);
+      const currentFileList = fileList.filter(f => f.status !== "removed" && f.status !== "error");
+      const currentUrls = values.imageUrls ? values.imageUrls.filter((u) => u && u.trim()) : [];
+
+      if (currentFileList.length === 0 && currentUrls.length === 0) {
+        notification.error({
+          message: "Lỗi",
+          description: "Vui lòng cung cấp ít nhất 1 hình ảnh cho sản phẩm!",
         });
-      } else if (imageOption === "url" && values.imageUrls) {
-        formData.append("imageUrls", values.imageUrls);
+        return;
       }
+
+      // Gather all image URLs and old S3 keys
+      let finalImageUrls = [...currentUrls];
+      
+      // Keep old S3 images by sending their keys in imageUrls
+      currentFileList.forEach(file => {
+        if (!file.originFileObj && file.url) {
+          try {
+            const urlObj = new URL(file.url);
+            const key = decodeURIComponent(urlObj.pathname.substring(1));
+            finalImageUrls.push(key);
+          } catch(e) {
+            finalImageUrls.push(file.url);
+          }
+        }
+      });
+
+      if (finalImageUrls.length > 0) {
+        formData.append("imageUrls", finalImageUrls.join(","));
+      }
+
+      // Append new files
+      currentFileList.forEach((file) => {
+        if (file.originFileObj) {
+          formData.append("images", file.originFileObj);
+        }
+      });
 
       let res;
       if (isEditMode) {
@@ -403,62 +444,118 @@ const AdminProductsPage = () => {
             <TextArea rows={4} placeholder="Nhập mô tả sản phẩm..." />
           </Form.Item>
 
-          <Form.Item label="Phương thức ảnh">
-            <Radio.Group
-              value={imageOption}
-              onChange={(e) => setImageOption(e.target.value)}
-            >
-              <Radio value="upload">Tải file lên</Radio>
-              <Radio value="url">
-                Nhập URL (Nhiều ảnh cách nhau bằng dấu phẩy)
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+            <div className="mb-4">
+              <span className="font-semibold block mb-1">Quản lý hình ảnh (Tối đa 5 ảnh tổng cộng)</span>
+              <span className="text-gray-500 text-sm">Hiện có: {previewUrls.length + fileList.length}/5 ảnh</span>
+            </div>
+            
+            <Form.List name="imageUrls" initialValue={[""]}>
+                {(fields, { add, remove }) => (
+                  <>
+                    <div className="mb-2 font-medium">URLs Hình ảnh</div>
+                    {fields.map((field) => (
+                      <Form.Item
+                        required={false}
+                        key={field.key}
+                        className="mb-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Form.Item
+                            {...field}
+                            validateTrigger={["onChange", "onBlur"]}
+                            noStyle
+                          >
+                            <Input
+                              placeholder="https://example.com/image.jpg"
+                              onChange={() => {
+                                setTimeout(() => {
+                                  const currentUrls = form.getFieldValue("imageUrls") || [];
+                                  setPreviewUrls(currentUrls.filter((url) => url && url.trim()));
+                                }, 0);
+                              }}
+                            />
+                          </Form.Item>
+                          {fields.length > 1 ? (
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => {
+                                remove(field.name);
+                                setTimeout(() => {
+                                  const currentUrls = form.getFieldValue("imageUrls") || [];
+                                  setPreviewUrls(currentUrls.filter((url) => url && url.trim()));
+                                }, 0);
+                              }}
+                            />
+                          ) : null}
+                        </div>
+                      </Form.Item>
+                    ))}
+                    {(fields.length + fileList.length) < 5 && (
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Thêm URL Hình ảnh
+                        </Button>
+                      </Form.Item>
+                    )}
+                  </>
+                )}
+              </Form.List>
 
-          {imageOption === "url" ? (
+              {previewUrls.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {previewUrls.map((url, index) => (
+                    <img
+                      key={index}
+                      src={url}
+                      alt={`preview-${index}`}
+                      className="w-20 h-20 object-cover rounded border border-gray-200"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://via.placeholder.com/80?text=Error";
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
             <Form.Item
-              name="imageUrls"
-              label="URLs Hình ảnh"
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập ít nhất 1 link ảnh sản phẩm!",
-                },
-              ]}
-            >
-              <Input placeholder="https://image1.jpg, https://image2.png" />
-            </Form.Item>
-          ) : (
-            <Form.Item
-              label="Tải ảnh lên"
+              label="Tải ảnh lên từ máy tính"
               name="uploadFiles"
               valuePropName="fileList"
               getValueFromEvent={(e) => {
                 if (Array.isArray(e)) return e;
                 return e?.fileList;
               }}
-              rules={[
-                {
-                  required: true,
-                  type: "array",
-                  message: "Vui lòng chọn ít nhất 1 ảnh sản phẩm!",
-                },
-              ]}
             >
               <Upload
+                listType="picture-card"
                 beforeUpload={() => false}
                 multiple
                 maxCount={5}
                 fileList={fileList}
-                onChange={({ fileList }) => setFileList(fileList)}
+                onChange={({ fileList }) => {
+                  const limit = 5 - previewUrls.length;
+                  setFileList(fileList.slice(0, limit));
+                }}
                 accept="image/*"
               >
-                <Button icon={<UploadOutlined />}>
-                  Chọn ảnh (Tối đa 5 file)
-                </Button>
+                {(fileList.length + previewUrls.length) >= 5 ? null : (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                  </div>
+                )}
               </Upload>
             </Form.Item>
-          )}
+          </div>
 
           <Form.Item className="mb-0 flex justify-end">
             <Space>

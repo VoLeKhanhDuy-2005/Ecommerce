@@ -129,14 +129,14 @@ const updateProduct = async (req, res) => {
       images = [...images, ...s3Keys];
     }
 
-    // Nếu không cập nhật ảnh mới thì giữ nguyên ảnh cũ
     if (images.length === 0) {
+      // Nếu không gửi ảnh mới thì giữ nguyên ảnh cũ
       images = product.images;
     } else {
-      // Có upload ảnh mới hoặc link mới => xóa ảnh cũ trên S3 nếu là ảnh S3
-      const deletePromises = product.images.map((img) =>
-        deleteFileFromS3ByKey(img),
-      );
+      // Xóa những ảnh cũ trên S3 mà người dùng đã bỏ khỏi danh sách ảnh mới.
+      const deletePromises = product.images
+        .filter((img) => !images.includes(img))
+        .map((img) => deleteFileFromS3ByKey(img));
       await Promise.all(deletePromises);
     }
 

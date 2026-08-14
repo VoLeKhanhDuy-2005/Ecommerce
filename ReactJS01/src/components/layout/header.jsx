@@ -49,7 +49,7 @@ const Header = () => {
           ? [
               {
                 to: "/livestream",
-                label: "Live stream",
+                label: "Livestream",
                 icon: <VideoCameraOutlined />,
               },
               {
@@ -72,13 +72,12 @@ const Header = () => {
                 to: "/rewards",
                 label: (
                   <div className="flex items-center gap-1.5">
-                    <span>Kho Voucher</span>
                     <span className="font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full border border-orange-200 flex items-center shadow-sm text-xs leading-none">
                       🪙 {auth?.user?.coins || 0}
                     </span>
                   </div>
                 ),
-                icon: <TagOutlined />,
+                
               },
             ]
           : []),

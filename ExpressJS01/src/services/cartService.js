@@ -1,10 +1,64 @@
 const Cart = require("../models/cart");
 const Product = require("../models/product");
 const { redisClient } = require("../config/redis");
+const { getImagePresignedUrlByKey } = require("./fileService");
 const CART_CACHE_PREFIX = process.env.CART_CACHE_PREFIX || "cart:";
 const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 604800;
 
 const getCartCacheKey = (userEmail) => `${CART_CACHE_PREFIX}${userEmail}`;
+
+const getCartRecommendations = async (cart) => {
+  if (!cart || !cart.items || cart.items.length === 0) return null;
+  
+  const cartProductIds = cart.items.map(item => item.product._id || item.product);
+  const cartProductNames = cart.items.map(item => (item.product.name || "").toLowerCase());
+  
+  const foodKeywords = ["cơm", "phở", "bún", "lẩu", "gà", "burger", "pizza", "mì", "cháo", "bánh mì", "cuốn", "thịt", "cá"];
+  const drinkKeywords = ["nước", "trà", "cafe", "cà phê", "sữa", "cam", "ép", "cola", "pepsi"];
+  const snackKeywords = ["bánh", "khoai", "kem", "chè", "ăn vặt", "xúc xích"];
+
+  const hasFood = cartProductNames.some(name => foodKeywords.some(k => name.includes(k)));
+  const hasDrink = cartProductNames.some(name => drinkKeywords.some(k => name.includes(k)));
+
+  let targetKeywords = [];
+  let title = "Có thể bạn sẽ thích 😋";
+  
+  if (hasFood && !hasDrink) {
+    targetKeywords = drinkKeywords;
+    title = "Thêm ly nước cho bữa ăn hoàn hảo 🥤";
+  } else if (!hasFood && hasDrink) {
+    targetKeywords = snackKeywords.concat(foodKeywords);
+    title = "Mua kèm món ăn lót dạ nhé 🥪";
+  } else {
+    targetKeywords = snackKeywords;
+    title = "Mua kèm tráng miệng cho tròn vị 🍟";
+  }
+
+  let recommendedProducts = await Product.find({
+    _id: { $nin: cartProductIds },
+    name: { $regex: new RegExp(targetKeywords.join("|"), "i") }
+  }).sort({ sold: -1 }).limit(4);
+
+  if (recommendedProducts.length < 4) {
+      const existingIds = cartProductIds.concat(recommendedProducts.map(p => p._id));
+      const filler = await Product.find({ _id: { $nin: existingIds } }).sort({ sold: -1 }).limit(4 - recommendedProducts.length);
+      recommendedProducts = [...recommendedProducts, ...filler];
+  }
+
+  const result = await Promise.all(
+    recommendedProducts.map(async (product) => {
+      const pObj = product.toObject ? product.toObject() : product;
+      if (pObj.images?.length) {
+        pObj.images = await Promise.all(
+          pObj.images.map(getImagePresignedUrlByKey),
+        );
+      }
+      return pObj;
+    })
+  );
+
+  return { title, products: result };
+};
 
 const cacheCart = async (userEmail, cartData) => {
   try {
@@ -38,10 +92,13 @@ const getCart = async (userEmail) => {
         const cachedCart = await redisClient.get(getCartCacheKey(userEmail));
         if (cachedCart) {
           console.log(`[Cache Hit] Lấy giỏ hàng từ Redis cho ${userEmail}`);
+          const cartData = JSON.parse(cachedCart);
+          const recommendations = await getCartRecommendations(cartData);
           return {
             statusCode: 200,
             success: true,
-            data: JSON.parse(cachedCart),
+            data: cartData,
+            recommendations
           };
         }
       } catch (cacheError) {
@@ -58,7 +115,10 @@ const getCart = async (userEmail) => {
 
     // Update Cache
     await cacheCart(userEmail, cart);
-    return { statusCode: 200, success: true, data: cart };
+    
+    const recommendations = await getCartRecommendations(cart);
+
+    return { statusCode: 200, success: true, data: cart, recommendations };
   } catch (error) {
     return {
       statusCode: 500,
@@ -119,11 +179,13 @@ const addToCart = async (userEmail, productId, quantity = 1) => {
 
     // Write-Through: Update Cache with fresh data
     await cacheCart(userEmail, updatedCart);
+    const recommendations = await getCartRecommendations(updatedCart);
     return {
       statusCode: 200,
       success: true,
       message: "Đã thêm sản phẩm vào giỏ hàng",
       data: updatedCart,
+      recommendations,
     };
   } catch (error) {
     return {
@@ -198,11 +260,13 @@ const updateCartItem = async (userEmail, productId, quantity) => {
 
     // Write-Through: Update Cache
     await cacheCart(userEmail, updatedCart);
+    const recommendations = await getCartRecommendations(updatedCart);
     return {
       statusCode: 200,
       success: true,
       message: "Đã cập nhật số lượng thành công",
       data: updatedCart,
+      recommendations,
     };
   } catch (error) {
     return {
@@ -239,11 +303,13 @@ const deleteCartItem = async (userEmail, productId) => {
 
     // Write-Through: Update Cache
     await cacheCart(userEmail, updatedCart);
+    const recommendations = await getCartRecommendations(updatedCart);
     return {
       statusCode: 200,
       success: true,
       message: "Đã xóa sản phẩm khỏi giỏ hàng",
       data: updatedCart,
+      recommendations,
     };
   } catch (error) {
     return {
