@@ -9,20 +9,52 @@ const getCartCacheKey = (userEmail) => `${CART_CACHE_PREFIX}${userEmail}`;
 
 const getCartRecommendations = async (cart) => {
   if (!cart || !cart.items || cart.items.length === 0) return null;
-  
-  const cartProductIds = cart.items.map(item => item.product._id || item.product);
-  const cartProductNames = cart.items.map(item => (item.product.name || "").toLowerCase());
-  
-  const foodKeywords = ["cơm", "phở", "bún", "lẩu", "gà", "burger", "pizza", "mì", "cháo", "bánh mì", "cuốn", "thịt", "cá"];
-  const drinkKeywords = ["nước", "trà", "cafe", "cà phê", "sữa", "cam", "ép", "cola", "pepsi"];
+
+  const cartProductIds = cart.items.map(
+    (item) => item.product._id || item.product,
+  );
+  const cartProductNames = cart.items.map((item) =>
+    (item.product.name || "").toLowerCase(),
+  );
+
+  const foodKeywords = [
+    "cơm",
+    "phở",
+    "bún",
+    "lẩu",
+    "gà",
+    "burger",
+    "pizza",
+    "mì",
+    "cháo",
+    "bánh mì",
+    "cuốn",
+    "thịt",
+    "cá",
+  ];
+  const drinkKeywords = [
+    "nước",
+    "trà",
+    "cafe",
+    "cà phê",
+    "sữa",
+    "cam",
+    "ép",
+    "cola",
+    "pepsi",
+  ];
   const snackKeywords = ["bánh", "khoai", "kem", "chè", "ăn vặt", "xúc xích"];
 
-  const hasFood = cartProductNames.some(name => foodKeywords.some(k => name.includes(k)));
-  const hasDrink = cartProductNames.some(name => drinkKeywords.some(k => name.includes(k)));
+  const hasFood = cartProductNames.some((name) =>
+    foodKeywords.some((k) => name.includes(k)),
+  );
+  const hasDrink = cartProductNames.some((name) =>
+    drinkKeywords.some((k) => name.includes(k)),
+  );
 
   let targetKeywords = [];
   let title = "Có thể bạn sẽ thích 😋";
-  
+
   if (hasFood && !hasDrink) {
     targetKeywords = drinkKeywords;
     title = "Thêm ly nước cho bữa ăn hoàn hảo 🥤";
@@ -36,13 +68,19 @@ const getCartRecommendations = async (cart) => {
 
   let recommendedProducts = await Product.find({
     _id: { $nin: cartProductIds },
-    name: { $regex: new RegExp(targetKeywords.join("|"), "i") }
-  }).sort({ sold: -1 }).limit(4);
+    name: { $regex: new RegExp(targetKeywords.join("|"), "i") },
+  })
+    .sort({ sold: -1 })
+    .limit(4);
 
   if (recommendedProducts.length < 4) {
-      const existingIds = cartProductIds.concat(recommendedProducts.map(p => p._id));
-      const filler = await Product.find({ _id: { $nin: existingIds } }).sort({ sold: -1 }).limit(4 - recommendedProducts.length);
-      recommendedProducts = [...recommendedProducts, ...filler];
+    const existingIds = cartProductIds.concat(
+      recommendedProducts.map((p) => p._id),
+    );
+    const filler = await Product.find({ _id: { $nin: existingIds } })
+      .sort({ sold: -1 })
+      .limit(4 - recommendedProducts.length);
+    recommendedProducts = [...recommendedProducts, ...filler];
   }
 
   const result = await Promise.all(
@@ -54,7 +92,7 @@ const getCartRecommendations = async (cart) => {
         );
       }
       return pObj;
-    })
+    }),
   );
 
   return { title, products: result };
@@ -98,7 +136,7 @@ const getCart = async (userEmail) => {
             statusCode: 200,
             success: true,
             data: cartData,
-            recommendations
+            recommendations,
           };
         }
       } catch (cacheError) {
@@ -115,7 +153,7 @@ const getCart = async (userEmail) => {
 
     // Update Cache
     await cacheCart(userEmail, cart);
-    
+
     const recommendations = await getCartRecommendations(cart);
 
     return { statusCode: 200, success: true, data: cart, recommendations };

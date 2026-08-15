@@ -77,7 +77,6 @@ const Header = () => {
                     </span>
                   </div>
                 ),
-                
               },
             ]
           : []),

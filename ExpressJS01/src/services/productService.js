@@ -37,17 +37,21 @@ const getTimeBasedRecommendations = async () => {
     keywords = ["lẩu", "nướng", "cháo", "mì", "cơm", "đêm", "ốc"];
   }
 
-  let products = await Product.find({ name: { $regex: new RegExp(keywords.join("|"), "i") } }).limit(10);
+  let products = await Product.find({
+    name: { $regex: new RegExp(keywords.join("|"), "i") },
+  }).limit(10);
 
   if (products.length < 10) {
-    const existingIds = products.map(p => p._id);
-    const fillerProducts = await Product.find({ _id: { $nin: existingIds } }).sort({ sold: -1 }).limit(10 - products.length);
+    const existingIds = products.map((p) => p._id);
+    const fillerProducts = await Product.find({ _id: { $nin: existingIds } })
+      .sort({ sold: -1 })
+      .limit(10 - products.length);
     products = [...products, ...fillerProducts];
   }
 
   return {
     title,
-    products: await mapProductImageUrls(products)
+    products: await mapProductImageUrls(products),
   };
 };
 

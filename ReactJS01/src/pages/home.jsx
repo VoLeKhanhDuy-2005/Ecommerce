@@ -63,7 +63,7 @@ export default function Home() {
             mostViewed: mapCategoryName(prodRes.data.mostViewed || []),
             timeBased: {
               title: prodRes.data.timeBased?.title || "",
-              products: mapCategoryName(prodRes.data.timeBased?.products || [])
+              products: mapCategoryName(prodRes.data.timeBased?.products || []),
             },
           });
         }

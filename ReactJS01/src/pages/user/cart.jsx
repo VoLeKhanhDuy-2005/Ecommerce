@@ -137,7 +137,10 @@ export default function CartPage() {
     try {
       const res = await updateCartItemApi(productId, quantity);
       if (res && res.success) {
-        setCart(prev => ({ ...res.data, recommendations: res.recommendations || prev?.recommendations }));
+        setCart((prev) => ({
+          ...res.data,
+          recommendations: res.recommendations || prev?.recommendations,
+        }));
         //Chờ lấy gợi ý mới từ Backend. Nếu Backend không trả về gợi ý mới thì tiếp tục hiển thị gợi ý cũ thay vì làm trắng màn hình
         const totalItems = res.data.items.reduce(
           (sum, item) => sum + item.quantity,
@@ -164,7 +167,10 @@ export default function CartPage() {
     try {
       const res = await deleteCartItemApi(productId);
       if (res && res.success) {
-        setCart(prev => ({ ...res.data, recommendations: res.recommendations || prev?.recommendations }));
+        setCart((prev) => ({
+          ...res.data,
+          recommendations: res.recommendations || prev?.recommendations,
+        }));
         const totalItems = res.data.items.reduce(
           (sum, item) => sum + item.quantity,
           0,
@@ -191,7 +197,9 @@ export default function CartPage() {
         notification.success({ message: "Đã thêm món vào giỏ hàng!" });
         fetchCart(); // Tải lại giỏ hàng để cập nhật danh sách và gợi ý mới
       } else {
-        notification.error({ message: res.message || "Không thể thêm vào giỏ hàng." });
+        notification.error({
+          message: res.message || "Không thể thêm vào giỏ hàng.",
+        });
       }
     } catch (error) {
       console.error(error);
@@ -611,30 +619,52 @@ export default function CartPage() {
             </div>
 
             {/* Gợi ý mua kèm */}
-            {cart.recommendations && cart.recommendations.products && cart.recommendations.products.length > 0 && (
-              <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-800 pb-4">
-                  {cart.recommendations.title}
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {cart.recommendations.products.map(item => {
-                    const price = item.discountPrice && item.discountPrice > 0 ? item.discountPrice : item.price;
-                    return (
-                      <div key={item._id} className="border border-gray-100 rounded-2xl p-3 flex flex-col gap-2 hover:border-orange-300 transition-colors shadow-sm hover:shadow-md">
-                        <img src={item.images?.[0]} alt={item.name} className="w-full h-28 object-cover rounded-xl" />
-                        <Link to={`/product/${item._id}`} className="font-bold text-gray-800 text-sm hover:text-orange-500 line-clamp-1">{item.name}</Link>
-                        <div className="flex justify-between items-center mt-auto pt-2">
-                          <span className="text-orange-600 font-bold text-sm">{formatPrice(price)}</span>
-                          <button onClick={() => handleAddRecommendation(item._id)} className="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-orange-100 transition-colors">
-                            + Thêm
-                          </button>
+            {cart.recommendations &&
+              cart.recommendations.products &&
+              cart.recommendations.products.length > 0 && (
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                  <h2 className="text-lg font-bold text-gray-800 pb-4">
+                    {cart.recommendations.title}
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {cart.recommendations.products.map((item) => {
+                      const price =
+                        item.discountPrice && item.discountPrice > 0
+                          ? item.discountPrice
+                          : item.price;
+                      return (
+                        <div
+                          key={item._id}
+                          className="border border-gray-100 rounded-2xl p-3 flex flex-col gap-2 hover:border-orange-300 transition-colors shadow-sm hover:shadow-md"
+                        >
+                          <img
+                            src={item.images?.[0]}
+                            alt={item.name}
+                            className="w-full h-28 object-cover rounded-xl"
+                          />
+                          <Link
+                            to={`/product/${item._id}`}
+                            className="font-bold text-gray-800 text-sm hover:text-orange-500 line-clamp-1"
+                          >
+                            {item.name}
+                          </Link>
+                          <div className="flex justify-between items-center mt-auto pt-2">
+                            <span className="text-orange-600 font-bold text-sm">
+                              {formatPrice(price)}
+                            </span>
+                            <button
+                              onClick={() => handleAddRecommendation(item._id)}
+                              className="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-orange-100 transition-colors"
+                            >
+                              + Thêm
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Tổng quan hóa đơn */}
             <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
