@@ -6,7 +6,7 @@ const saltRounds = 10;
 const {
   deleteOldAndInsertNewImageInS3,
   getImagePresignedUrl,
-} = require("../services/fileService");
+} = require("./fileService");
 const { generateOTP, verifyOTP } = require("./otpService");
 const { sendMail } = require("./emailService");
 
