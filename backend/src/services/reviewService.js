@@ -57,8 +57,8 @@ const getProductReviews = async (productId, page = 1, limit = 5) => {
   );
 
   return {
-    EC: 0,
-    EM: "Lấy danh sách đánh giá thành công",
+    success: true,
+    message: "Lấy danh sách đánh giá thành công",
     data: {
       reviews,
       total,
@@ -71,7 +71,7 @@ const getProductReviews = async (productId, page = 1, limit = 5) => {
 const addOrUpdateReview = async (email, productId, rating, comment) => {
   const user = await User.findOne({ email });
   if (!user) {
-    return { EC: 1, EM: "Người dùng không tồn tại" };
+    return { success: false, message: "Người dùng không tồn tại" };
   }
 
   // Kiểm tra người dùng đã mua và nhận hàng chưa
@@ -83,8 +83,9 @@ const addOrUpdateReview = async (email, productId, rating, comment) => {
 
   if (!hasReceivedOrder) {
     return {
-      EC: 1,
-      EM: "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
+      success: false,
+      message:
+        "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
     };
   }
 
@@ -97,8 +98,8 @@ const addOrUpdateReview = async (email, productId, rating, comment) => {
   await updateProductRating(productId);
 
   return {
-    EC: 0,
-    EM: "Đánh giá sản phẩm thành công",
+    success: true,
+    message: "Đánh giá sản phẩm thành công",
     data: review,
   };
 };
@@ -106,7 +107,7 @@ const addOrUpdateReview = async (email, productId, rating, comment) => {
 const deleteReview = async (email, productId) => {
   const user = await User.findOne({ email });
   if (!user) {
-    return { EC: 1, EM: "Người dùng không tồn tại" };
+    return { success: false, message: "Người dùng không tồn tại" };
   }
 
   const review = await Review.findOneAndDelete({
@@ -115,14 +116,14 @@ const deleteReview = async (email, productId) => {
   });
 
   if (!review) {
-    return { EC: 1, EM: "Không tìm thấy đánh giá để xóa" };
+    return { success: false, message: "Không tìm thấy đánh giá để xóa" };
   }
 
   await updateProductRating(productId);
 
   return {
-    EC: 0,
-    EM: "Xóa đánh giá thành công",
+    success: true,
+    message: "Xóa đánh giá thành công",
   };
 };
 
@@ -133,8 +134,8 @@ const checkReviewEligibility = async (email, productId) => {
     "items.product": productId,
   });
   return {
-    EC: 0,
-    EM: "Thành công",
+    success: true,
+    message: "Thành công",
     data: {
       canReview: !!hasReceivedOrder,
     },

@@ -35,7 +35,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
     setLoading(true);
     try {
       const res = await getProductReviewsApi(productId, currentPage, 5);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setReviews(res.data.reviews);
         setTotal(res.data.total);
       }
@@ -49,7 +49,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
   const checkEligibility = async () => {
     try {
       const res = await checkReviewEligibilityApi(productId);
-      if (res && res.EC === 0 && res.data) {
+      if (res && res.success && res.data) {
         setCanReview(res.data.canReview);
       }
     } catch (error) {
@@ -81,7 +81,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
     setSubmitting(true);
     try {
       const res = await submitReviewApi(productId, { rating, comment });
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Đánh giá thành công",
           description: "Cảm ơn bạn đã đánh giá sản phẩm!",
@@ -95,7 +95,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
       } else {
         notification.error({
           message: "Đánh giá thất bại",
-          description: res.EM || "Có lỗi xảy ra.",
+          description: res.message || "Có lỗi xảy ra.",
         });
       }
     } catch (error) {
@@ -113,7 +113,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
       try {
         const res = await deleteReviewApi(productId);
-        if (res && res.EC === 0) {
+        if (res && res.success) {
           notification.success({
             message: "Xóa thành công",
           });
@@ -123,7 +123,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
         } else {
           notification.error({
             message: "Xóa thất bại",
-            description: res.EM || "Có lỗi xảy ra.",
+            description: res.message || "Có lỗi xảy ra.",
           });
         }
       } catch (error) {

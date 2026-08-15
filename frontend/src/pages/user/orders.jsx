@@ -431,13 +431,13 @@ export default function OrdersPage() {
         rating: reviewRating,
         comment: reviewComment,
       });
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({ message: "Đánh giá thành công!" });
         setIsReviewModalOpen(false);
       } else {
         notification.error({
           message: "Đánh giá thất bại",
-          description: res.EM || "Có lỗi xảy ra",
+          description: res.message || "Có lỗi xảy ra",
         });
       }
     } catch (error) {

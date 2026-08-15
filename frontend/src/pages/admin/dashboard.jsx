@@ -88,7 +88,7 @@ const AdminDashboardPage = () => {
       ]);
 
       let fetchedCategories = [];
-      if (catRes && catRes.EC === 0) {
+      if (catRes && catRes.success) {
         fetchedCategories = catRes.data;
       }
 
@@ -116,7 +116,7 @@ const AdminDashboardPage = () => {
     setLoading(true);
     try {
       const res = await getDashboardStatsApi(year);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setStats(res.data);
       }
     } catch (error) {

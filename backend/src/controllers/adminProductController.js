@@ -22,13 +22,13 @@ const getAllProducts = async (req, res) => {
       }),
     );
     return res.status(200).json({
-      EC: 0,
-      EM: "Lấy danh sách sản phẩm thành công",
+      success: true,
+      message: "Lấy danh sách sản phẩm thành công",
       data: productsWithUrls,
     });
   } catch (error) {
     console.error("Error getting products:", error);
-    return res.status(500).json({ EC: -1, EM: "Lỗi server" });
+    return res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
@@ -53,7 +53,10 @@ const createProduct = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ EC: 1, EM: "Vui lòng cung cấp đầy đủ thông tin" });
+        .json({
+          success: false,
+          message: "Vui lòng cung cấp đầy đủ thông tin",
+        });
     }
 
     let images = [];
@@ -76,7 +79,10 @@ const createProduct = async (req, res) => {
     if (images.length === 0) {
       return res
         .status(400)
-        .json({ EC: 1, EM: "Vui lòng cung cấp ít nhất 1 hình ảnh" });
+        .json({
+          success: false,
+          message: "Vui lòng cung cấp ít nhất 1 hình ảnh",
+        });
     }
 
     const discountPrice = price - price * (discountPercent / 100);
@@ -92,10 +98,16 @@ const createProduct = async (req, res) => {
     });
     return res
       .status(201)
-      .json({ EC: 0, EM: "Tạo sản phẩm thành công", data: newProduct });
+      .json({
+        success: true,
+        message: "Tạo sản phẩm thành công",
+        data: newProduct,
+      });
   } catch (error) {
     console.error("Error creating product:", error);
-    return res.status(500).json({ EC: -1, EM: "Lỗi server: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server: " + error.message });
   }
 };
 
@@ -113,7 +125,9 @@ const updateProduct = async (req, res) => {
     } = req.body;
     const product = await Product.findById(id);
     if (!product) {
-      return res.status(404).json({ EC: 1, EM: "Không tìm thấy sản phẩm" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy sản phẩm" });
     }
 
     let images = [];
@@ -164,13 +178,15 @@ const updateProduct = async (req, res) => {
       runValidators: true,
     });
     return res.status(200).json({
-      EC: 0,
-      EM: "Cập nhật sản phẩm thành công",
+      success: true,
+      message: "Cập nhật sản phẩm thành công",
       data: updatedProduct,
     });
   } catch (error) {
     console.error("Error updating product:", error);
-    return res.status(500).json({ EC: -1, EM: "Lỗi server: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server: " + error.message });
   }
 };
 
@@ -179,7 +195,9 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) {
-      return res.status(404).json({ EC: 1, EM: "Không tìm thấy sản phẩm" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy sản phẩm" });
     }
 
     // Xóa file trên S3
@@ -191,10 +209,14 @@ const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(id);
-    return res.status(200).json({ EC: 0, EM: "Xóa sản phẩm thành công" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Xóa sản phẩm thành công" });
   } catch (error) {
     console.error("Error deleting product:", error);
-    return res.status(500).json({ EC: -1, EM: "Lỗi server: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server: " + error.message });
   }
 };
 

@@ -12,8 +12,8 @@ const createCategory = async (req, res) => {
 
     if (!categoryId || !name) {
       return res.status(400).json({
-        EC: 1,
-        EM: "Vui lòng cung cấp đầy đủ mã và tên danh mục",
+        success: false,
+        message: "Vui lòng cung cấp đầy đủ mã và tên danh mục",
       });
     }
 
@@ -23,30 +23,30 @@ const createCategory = async (req, res) => {
 
     if (!image) {
       return res.status(400).json({
-        EC: 1,
-        EM: "Vui lòng cung cấp hình ảnh danh mục hoặc tải file lên",
+        success: false,
+        message: "Vui lòng cung cấp hình ảnh danh mục hoặc tải file lên",
       });
     }
 
     const existingCategory = await Category.findOne({ categoryId });
     if (existingCategory) {
       return res.status(400).json({
-        EC: 1,
-        EM: "Mã danh mục đã tồn tại",
+        success: false,
+        message: "Mã danh mục đã tồn tại",
       });
     }
 
     const newCategory = await Category.create({ categoryId, name, image });
     return res.status(201).json({
-      EC: 0,
-      EM: "Tạo danh mục thành công",
+      success: true,
+      message: "Tạo danh mục thành công",
       data: newCategory,
     });
   } catch (error) {
     console.error("Error creating category:", error);
     return res.status(500).json({
-      EC: 1,
-      EM: "Lỗi server",
+      success: false,
+      message: "Lỗi server",
       error: error.message,
     });
   }
@@ -66,15 +66,15 @@ const getAllCategories = async (req, res) => {
     );
 
     return res.status(200).json({
-      EC: 0,
-      EM: "Lấy danh sách danh mục thành công",
+      success: true,
+      message: "Lấy danh sách danh mục thành công",
       data: categoriesWithUrls,
     });
   } catch (error) {
     console.error("Error getting categories:", error);
     return res.status(500).json({
-      EC: 1,
-      EM: "Lỗi server",
+      success: false,
+      message: "Lỗi server",
       error: error.message,
     });
   }
@@ -86,16 +86,16 @@ const updateCategory = async (req, res) => {
     const { categoryId, name, imageUrl } = req.body;
     if (!categoryId || !name) {
       return res.status(400).json({
-        EC: 1,
-        EM: "Vui lòng cung cấp đầy đủ mã và tên danh mục",
+        success: false,
+        message: "Vui lòng cung cấp đầy đủ mã và tên danh mục",
       });
     }
 
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({
-        EC: 1,
-        EM: "Không tìm thấy danh mục",
+        success: false,
+        message: "Không tìm thấy danh mục",
       });
     }
 
@@ -112,8 +112,8 @@ const updateCategory = async (req, res) => {
     });
     if (existingCategory) {
       return res.status(400).json({
-        EC: 1,
-        EM: "Mã danh mục đã tồn tại cho một danh mục khác",
+        success: false,
+        message: "Mã danh mục đã tồn tại cho một danh mục khác",
       });
     }
 
@@ -125,21 +125,21 @@ const updateCategory = async (req, res) => {
 
     if (!updatedCategory) {
       return res.status(404).json({
-        EC: 1,
-        EM: "Không tìm thấy danh mục",
+        success: false,
+        message: "Không tìm thấy danh mục",
       });
     }
 
     return res.status(200).json({
-      EC: 0,
-      EM: "Cập nhật danh mục thành công",
+      success: true,
+      message: "Cập nhật danh mục thành công",
       data: updatedCategory,
     });
   } catch (error) {
     console.error("Error updating category:", error);
     return res.status(500).json({
-      EC: 1,
-      EM: "Lỗi server",
+      success: false,
+      message: "Lỗi server",
       error: error.message,
     });
   }
@@ -151,8 +151,8 @@ const deleteCategory = async (req, res) => {
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({
-        EC: 1,
-        EM: "Không tìm thấy danh mục",
+        success: false,
+        message: "Không tìm thấy danh mục",
       });
     }
 
@@ -161,21 +161,21 @@ const deleteCategory = async (req, res) => {
     });
     if (productsCount > 0) {
       return res.status(400).json({
-        EC: 1,
-        EM: `Không thể xóa danh mục này vì có ${productsCount} sản phẩm đang bán`,
+        success: false,
+        message: `Không thể xóa danh mục này vì có ${productsCount} sản phẩm đang bán`,
       });
     }
 
     await Category.findByIdAndDelete(id);
     return res.status(200).json({
-      EC: 0,
-      EM: "Xóa danh mục thành công",
+      success: true,
+      message: "Xóa danh mục thành công",
     });
   } catch (error) {
     console.error("Error deleting category:", error);
     return res.status(500).json({
-      EC: 1,
-      EM: "Lỗi server",
+      success: false,
+      message: "Lỗi server",
       error: error.message,
     });
   }

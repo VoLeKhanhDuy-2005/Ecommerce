@@ -50,7 +50,7 @@ describe("Admin Product Controller", () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          EC: 0,
+          success: true,
           data: [{ name: "Test", images: ["presigned-url"] }],
         }),
       );
@@ -65,7 +65,7 @@ describe("Admin Product Controller", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: -1 }),
+        expect.objectContaining({ success: false }),
       );
     });
   });
@@ -75,7 +75,10 @@ describe("Admin Product Controller", () => {
       await createProduct(mockReq, mockRes);
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 1, EM: expect.any(String) }),
+        expect.objectContaining({
+          success: false,
+          message: expect.any(String),
+        }),
       );
     });
 
@@ -120,7 +123,7 @@ describe("Admin Product Controller", () => {
       );
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 0, data: createdProduct }),
+        expect.objectContaining({ success: true, data: createdProduct }),
       );
     });
   });
@@ -232,7 +235,7 @@ describe("Admin Product Controller", () => {
       expect(fileService.deleteFileFromS3ByKey).toHaveBeenCalledWith("img2");
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 0 }),
+        expect.objectContaining({ success: true }),
       );
     });
   });

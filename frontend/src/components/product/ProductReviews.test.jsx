@@ -40,7 +40,7 @@ describe("ProductReviews Component", () => {
 
   it("renders empty state when no reviews", async () => {
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: [], total: 0 },
     });
 
@@ -68,7 +68,7 @@ describe("ProductReviews Component", () => {
       },
     ];
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: mockReviews, total: 1 },
     });
 
@@ -86,7 +86,7 @@ describe("ProductReviews Component", () => {
 
   it("shows login prompt if not authenticated", async () => {
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: [], total: 0 },
     });
 
@@ -105,11 +105,11 @@ describe("ProductReviews Component", () => {
 
   it("shows review form if authenticated and eligible", async () => {
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: [], total: 0 },
     });
     checkReviewEligibilityApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { canReview: true },
     });
 
@@ -131,11 +131,11 @@ describe("ProductReviews Component", () => {
 
   it("shows eligibility error if authenticated but not eligible", async () => {
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: [], total: 0 },
     });
     checkReviewEligibilityApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { canReview: false },
     });
 
@@ -172,12 +172,12 @@ describe("ProductReviews Component", () => {
       },
     ];
     getProductReviewsApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { reviews: mockReviews, total: 2 },
     });
-    deleteReviewApi.mockResolvedValue({ EC: 0 });
+    deleteReviewApi.mockResolvedValue({ success: true });
     checkReviewEligibilityApi.mockResolvedValue({
-      EC: 0,
+      success: true,
       data: { canReview: true },
     });
 

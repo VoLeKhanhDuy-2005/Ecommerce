@@ -23,8 +23,9 @@ const apiLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   store: createRedisStore("rl_api_v2:"),
   message: {
-    EC: 429,
-    EM: "Too many requests from this IP, please try again after 15 minutes",
+    success: false,
+    message:
+      "Too many requests from this IP, please try again after 15 minutes",
     DT: null,
   },
 });
@@ -38,8 +39,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   store: createRedisStore("rl_auth_v2:"),
   message: {
-    EC: 429,
-    EM: "Too many authentication attempts from this IP, please try again after 15 minutes",
+    success: false,
+    message:
+      "Too many authentication attempts from this IP, please try again after 15 minutes",
     DT: null,
   },
 });

@@ -59,7 +59,7 @@ export default function ProductDetailPage() {
           const related = res.data.relatedProducts || [];
 
           let fetchedCategories = [];
-          if (catRes && catRes.EC === 0) {
+          if (catRes && catRes.success) {
             fetchedCategories = catRes.data;
           }
 

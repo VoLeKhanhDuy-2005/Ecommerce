@@ -24,13 +24,15 @@ const handleAddReview = async (req, res, next) => {
     const { rating, comment } = req.body;
 
     if (!rating) {
-      return res.status(400).json({ EC: 1, EM: "Vui lòng chọn số sao" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Vui lòng chọn số sao" });
     }
 
     const email = req.user.email;
     const result = await addOrUpdateReview(email, id, rating, comment);
 
-    if (result.EC === 0) {
+    if (result.success) {
       return res.status(200).json(result);
     } else {
       return res.status(400).json(result);
@@ -46,7 +48,7 @@ const handleDeleteReview = async (req, res, next) => {
     const email = req.user.email;
     const result = await deleteReview(email, id);
 
-    if (result.EC === 0) {
+    if (result.success) {
       return res.status(200).json(result);
     } else {
       return res.status(400).json(result);

@@ -29,7 +29,7 @@ const AdminLayout = () => {
     const fetchAccount = async () => {
       setIsLoading(true);
       const res = await getCurrentUserApi();
-      if (res && res.EC === 0 && res.user) {
+      if (res && res.success && res.user) {
         if (res.user.role !== "admin") {
           navigate("/"); // Nếu không phải admin thì về trang chủ
           return;

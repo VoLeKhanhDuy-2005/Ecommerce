@@ -164,7 +164,7 @@ const ProductModal = ({
         res = await createProductApi(formData);
       }
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Thành công",
           description: isEditMode

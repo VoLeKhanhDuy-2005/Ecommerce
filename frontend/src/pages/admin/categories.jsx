@@ -39,12 +39,12 @@ const AdminCategoriesPage = () => {
     setLoading(true);
     try {
       const res = await getCategoriesApi();
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setCategories(res.data);
       } else {
         notification.error({
           message: "Lỗi",
-          description: res?.EM || "Không thể tải danh mục",
+          description: res?.message || "Không thể tải danh mục",
         });
       }
     } catch (error) {
@@ -98,16 +98,16 @@ const AdminCategoriesPage = () => {
   const handleDeleteCategory = async (id) => {
     try {
       const res = await deleteCategoryApi(id);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Xóa danh mục thành công",
-          description: res.EM,
+          description: res.message,
         });
         fetchCategories();
       } else {
         notification.error({
           message: "Lỗi",
-          description: res?.EM || "Không thể xóa danh mục",
+          description: res?.message || "Không thể xóa danh mục",
         });
       }
     } catch (error) {
@@ -137,10 +137,10 @@ const AdminCategoriesPage = () => {
         res = await createCategoryApi(formData);
       }
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Lưu thành công",
-          description: res.EM,
+          description: res.message,
         });
         setIsModalVisible(false);
         fetchCategories();

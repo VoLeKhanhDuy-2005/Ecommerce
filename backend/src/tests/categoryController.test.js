@@ -33,7 +33,7 @@ describe("Category Controller", () => {
       await createCategory(mockReq, mockRes);
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 1 }),
+        expect.objectContaining({ success: false }),
       );
     });
 
@@ -47,7 +47,7 @@ describe("Category Controller", () => {
       await createCategory(mockReq, mockRes);
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EM: "Mã danh mục đã tồn tại" }),
+        expect.objectContaining({ message: "Mã danh mục đã tồn tại" }),
       );
     });
 
@@ -76,7 +76,7 @@ describe("Category Controller", () => {
       );
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 0, data: createdCategory }),
+        expect.objectContaining({ success: true, data: createdCategory }),
       );
     });
   });
@@ -104,7 +104,7 @@ describe("Category Controller", () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          EC: 0,
+          success: true,
           data: [{ image: "presigned-img-url", name: "Cat 1" }],
         }),
       );
@@ -176,7 +176,7 @@ describe("Category Controller", () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          EM: expect.stringContaining("Không thể xóa"),
+          message: expect.stringContaining("Không thể xóa"),
         }),
       );
     });
@@ -192,7 +192,7 @@ describe("Category Controller", () => {
       expect(Category.findByIdAndDelete).toHaveBeenCalledWith("cat-id");
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({ EC: 0 }),
+        expect.objectContaining({ success: true }),
       );
     });
   });

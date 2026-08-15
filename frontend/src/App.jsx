@@ -15,7 +15,7 @@ function App() {
       setIsLoading(true);
       try {
         const res = await getCurrentUserApi();
-        if (res && res.EC === 0 && res.user) {
+        if (res && res.success && res.user) {
           setAuth({
             isAuthenticated: true,
             user: {

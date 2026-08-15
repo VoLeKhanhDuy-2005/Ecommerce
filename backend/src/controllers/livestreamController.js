@@ -4,12 +4,14 @@ const generateToken = async (req, res) => {
   try {
     const { room } = req.query;
     if (!room) {
-      return res.status(400).json({ EC: 1, EM: "Missing room parameter" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing room parameter" });
     }
 
     const user = req.user; // từ middleware auth
     if (!user) {
-      return res.status(401).json({ EC: -1, EM: "Unauthorized" });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const roomName = room;
@@ -21,7 +23,10 @@ const generateToken = async (req, res) => {
       );
       return res
         .status(500)
-        .json({ EC: -1, EM: "Server LiveKit Configuration Error" });
+        .json({
+          success: false,
+          message: "Server LiveKit Configuration Error",
+        });
     }
 
     // Khởi tạo access token
@@ -45,10 +50,14 @@ const generateToken = async (req, res) => {
     });
 
     const token = await at.toJwt();
-    return res.status(200).json({ EC: 0, EM: "Success", data: { token } });
+    return res
+      .status(200)
+      .json({ success: true, message: "Success", data: { token } });
   } catch (error) {
     console.error("Generate LiveKit token error: ", error);
-    return res.status(500).json({ EC: -1, EM: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 

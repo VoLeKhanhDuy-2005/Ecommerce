@@ -103,7 +103,7 @@ const getDashboardStats = async (req, res) => {
     }
 
     return res.status(200).json({
-      EC: 0,
+      success: true,
       data: {
         summary: {
           totalUsers,
@@ -118,8 +118,8 @@ const getDashboardStats = async (req, res) => {
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
     return res.status(500).json({
-      EC: 1,
-      EM: "Lỗi lấy dữ liệu thống kê",
+      success: false,
+      message: "Lỗi lấy dữ liệu thống kê",
       data: null,
     });
   }
@@ -131,7 +131,10 @@ const exportDashboardStats = async (req, res) => {
     if (!yearsParam) {
       return res
         .status(400)
-        .json({ EC: 1, EM: "Vui lòng chọn ít nhất 1 năm để xuất báo cáo" });
+        .json({
+          success: false,
+          message: "Vui lòng chọn ít nhất 1 năm để xuất báo cáo",
+        });
     }
 
     const years = yearsParam
@@ -253,7 +256,7 @@ const exportDashboardStats = async (req, res) => {
     res.end();
   } catch (error) {
     console.error("Export Error:", error);
-    res.status(500).json({ EC: 1, EM: "Lỗi xuất file Excel" });
+    res.status(500).json({ success: false, message: "Lỗi xuất file Excel" });
   }
 };
 

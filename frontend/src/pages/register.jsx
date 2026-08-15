@@ -44,7 +44,7 @@ const RegisterPage = () => {
       const { email } = values;
       const res = await sendRegisterOtpApi(email);
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Gửi OTP thành công",
           description: "Vui lòng kiểm tra email của bạn để lấy mã OTP.",
@@ -73,7 +73,7 @@ const RegisterPage = () => {
       const { name, email, password, otp } = values;
       const res = await registerApi(name, email, password, otp);
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Đăng ký thành công",
           description:
@@ -102,7 +102,7 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const res = await sendRegisterOtpApi(email);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Đã gửi lại mã OTP",
           description: "Vui lòng kiểm tra lại email của bạn.",

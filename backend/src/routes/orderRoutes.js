@@ -35,7 +35,11 @@ router.get("/orders/:id/invoice", exportInvoice);
 
 router.get("/admin/orders", isAdmin, getShopOrders);
 router.patch("/admin/orders/:id", isAdmin, updateShopOrderStatus);
-router.post("/admin/orders/:id/cancel-request", isAdmin, handleShopCancelRequest);
+router.post(
+  "/admin/orders/:id/cancel-request",
+  isAdmin,
+  handleShopCancelRequest,
+);
 router.put("/admin/orders/:id/return-approve", isAdmin, adminApproveReturn);
 router.put("/admin/orders/:id/return-reject", isAdmin, adminRejectReturn);
 router.put("/admin/orders/:id/return-complete", isAdmin, adminCompleteReturn);

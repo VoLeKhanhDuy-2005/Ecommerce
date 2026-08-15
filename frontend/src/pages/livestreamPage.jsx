@@ -193,7 +193,7 @@ const LivestreamPage = () => {
           },
         );
 
-        if (response.data && response.data.EC === 0) {
+        if (response.data && response.data.success) {
           setToken(response.data.data.token);
         }
       } catch (error) {

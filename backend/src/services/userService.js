@@ -12,17 +12,17 @@ const { sendMail } = require("./emailService");
 
 const registerService = async (name, email, password, otp) => {
   try {
-    if (!otp) return { EC: 1, EM: "Vui lòng nhập mã OTP" };
+    if (!otp) return { success: false, message: "Vui lòng nhập mã OTP" };
 
     const verification = await verifyOTP(email, "register", otp);
     if (!verification.success) {
-      return { EC: 1, EM: verification.message };
+      return { success: false, message: verification.message };
     }
 
     //check user exist
     const user = await User.findOne({ email });
     if (user) {
-      return { EC: 1, EM: "Email đã tồn tại" };
+      return { success: false, message: "Email đã tồn tại" };
     }
 
     //hash user password
@@ -34,10 +34,10 @@ const registerService = async (name, email, password, otp) => {
       password: hashPassword,
       role: "user",
     });
-    return { EC: 0, EM: "Đăng ký thành công", data: result };
+    return { success: true, message: "Đăng ký thành công", data: result };
   } catch (error) {
     console.log(error);
-    return { EC: -1, EM: "Lỗi hệ thống" };
+    return { success: false, message: "Lỗi hệ thống" };
   }
 };
 
@@ -45,7 +45,7 @@ const sendRegisterOTPService = async (email) => {
   try {
     const user = await User.findOne({ email });
     if (user) {
-      return { EC: 1, EM: "Email đã tồn tại trong hệ thống" };
+      return { success: false, message: "Email đã tồn tại trong hệ thống" };
     }
     const otp = await generateOTP(email, "register");
 
@@ -54,9 +54,9 @@ const sendRegisterOTPService = async (email) => {
       console.error("Lỗi gửi email ở background:", err);
     });
 
-    return { EC: 0, EM: "Mã OTP đang được gửi đến email của bạn" };
+    return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
   } catch (error) {
-    return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
+    return { success: false, message: "Lỗi hệ thống khi gửi OTP" };
   }
 };
 
@@ -64,7 +64,7 @@ const sendForgotPasswordOTPService = async (email) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return { EC: 1, EM: "Email không tồn tại trong hệ thống" };
+      return { success: false, message: "Email không tồn tại trong hệ thống" };
     }
     const otp = await generateOTP(email, "forgot");
 
@@ -73,36 +73,39 @@ const sendForgotPasswordOTPService = async (email) => {
       console.error("Lỗi gửi email quên mật khẩu ở background:", err);
     });
 
-    return { EC: 0, EM: "Mã OTP đang được gửi đến email của bạn" };
+    return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
   } catch (error) {
-    return { EC: -1, EM: "Lỗi hệ thống khi gửi OTP" };
+    return { success: false, message: "Lỗi hệ thống khi gửi OTP" };
   }
 };
 
 const resetPasswordService = async (email, otp, newPassword) => {
   try {
-    if (!otp) return { EC: 1, EM: "Vui lòng nhập mã OTP" };
+    if (!otp) return { success: false, message: "Vui lòng nhập mã OTP" };
     if (!newPassword || newPassword.length < 6)
-      return { EC: 1, EM: "Mật khẩu mới phải có ít nhất 6 ký tự" };
+      return {
+        success: false,
+        message: "Mật khẩu mới phải có ít nhất 6 ký tự",
+      };
 
     const verification = await verifyOTP(email, "forgot", otp);
     if (!verification.success) {
-      return { EC: 1, EM: verification.message };
+      return { success: false, message: verification.message };
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return { EC: 1, EM: "Không tìm thấy user" };
+      return { success: false, message: "Không tìm thấy user" };
     }
 
     const hashPassword = await bcrypt.hash(newPassword, saltRounds);
     user.password = hashPassword;
     await user.save();
 
-    return { EC: 0, EM: "Đổi mật khẩu thành công" };
+    return { success: true, message: "Đổi mật khẩu thành công" };
   } catch (error) {
     console.log(error);
-    return { EC: -1, EM: "Lỗi hệ thống" };
+    return { success: false, message: "Lỗi hệ thống" };
   }
 };
 
@@ -115,8 +118,8 @@ const loginService = async (email1, password) => {
       const isMatchPassword = await bcrypt.compare(password, user.password);
       if (!isMatchPassword) {
         return {
-          EC: 2,
-          EM: "Email/Password không hợp lệ",
+          success: false,
+          message: "Email/Password không hợp lệ",
         };
       } else {
         //create an access token
@@ -140,7 +143,7 @@ const loginService = async (email1, password) => {
         );
 
         return {
-          EC: 0,
+          success: true,
           access_token,
           refresh_token,
           user: {
@@ -152,8 +155,8 @@ const loginService = async (email1, password) => {
       }
     } else {
       return {
-        EC: 1,
-        EM: "Email/Password không hợp lệ",
+        success: false,
+        message: "Email/Password không hợp lệ",
       };
     }
   } catch (error) {
@@ -177,15 +180,15 @@ const refreshTokenService = async (token) => {
     });
 
     return {
-      EC: 0,
+      success: true,
       access_token,
       user: payload,
     };
   } catch (error) {
     console.log(error);
     return {
-      EC: 1,
-      EM: "Refresh token không hợp lệ hoặc đã hết hạn",
+      success: false,
+      message: "Refresh token không hợp lệ hoặc đã hết hạn",
     };
   }
 };
@@ -210,22 +213,22 @@ const getCurrentUserService = async (email1) => {
       if (user.avatarName) user.avatarURL = await getImagePresignedUrl(user);
 
       return {
-        EC: 0,
-        EM: "Lấy thông tin user thành công",
+        success: true,
+        message: "Lấy thông tin user thành công",
         user: user,
       };
     } else {
       return {
-        EC: 1,
-        EM: "User không tồn tại",
+        success: false,
+        message: "User không tồn tại",
         user: null,
       };
     }
   } catch (error) {
     console.log(error);
     return {
-      EC: -1,
-      EM: "Lỗi hệ thống",
+      success: false,
+      message: "Lỗi hệ thống",
       user: null,
     };
   }
@@ -236,7 +239,7 @@ const updateProfile = async (email, body, file) => {
     const data = { ...body };
     let user = await User.findOne({ email });
     if (!user) {
-      return { EC: 1, EM: "Không tìm thấy user" };
+      return { success: false, message: "Không tìm thấy user" };
     }
     if (file)
       data.avatarName = await deleteOldAndInsertNewImageInS3(user, file);
@@ -255,11 +258,11 @@ const updateProfile = async (email, body, file) => {
     user = user.toObject();
     if (user.avatarName) user.avatarURL = await getImagePresignedUrl(user);
 
-    return { EC: 0, EM: "Cập nhật hồ sơ thành công", data: user };
+    return { success: true, message: "Cập nhật hồ sơ thành công", data: user };
   } catch (error) {
     return {
-      EC: -1,
-      EM: "Lỗi cập nhật hồ sơ",
+      success: false,
+      message: "Lỗi cập nhật hồ sơ",
       user: null,
     };
   }

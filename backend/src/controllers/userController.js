@@ -23,7 +23,8 @@ const register = async (req, res, next) => {
 const handleSendRegisterOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ EC: 1, EM: "Thiếu email" });
+    if (!email)
+      return res.status(400).json({ success: false, message: "Thiếu email" });
     const data = await sendRegisterOTPService(email);
     return res.status(200).json(data);
   } catch (error) {
@@ -34,7 +35,8 @@ const handleSendRegisterOTP = async (req, res, next) => {
 const handleSendForgotOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ EC: 1, EM: "Thiếu email" });
+    if (!email)
+      return res.status(400).json({ success: false, message: "Thiếu email" });
     const data = await sendForgotPasswordOTPService(email);
     return res.status(200).json(data);
   } catch (error) {
@@ -46,7 +48,9 @@ const handleResetPassword = async (req, res, next) => {
   try {
     const { email, otp, newPassword } = req.body;
     if (!email || !otp || !newPassword)
-      return res.status(400).json({ EC: 1, EM: "Thiếu dữ liệu bắt buộc" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Thiếu dữ liệu bắt buộc" });
     const data = await resetPasswordService(email, otp, newPassword);
     return res.status(200).json(data);
   } catch (error) {
@@ -102,7 +106,10 @@ const handleRefreshToken = async (req, res, next) => {
     if (!refresh_token) {
       return res
         .status(401)
-        .json({ EC: 1, EM: "Không tìm thấy refresh token trong cookie" });
+        .json({
+          success: false,
+          message: "Không tìm thấy refresh token trong cookie",
+        });
     }
 
     const data = await refreshTokenService(refresh_token);
@@ -120,19 +127,21 @@ const handleLogout = (req, res) => {
     secure: isProduction,
     sameSite: isProduction ? "none" : "strict",
   });
-  return res.status(200).json({ EC: 0, EM: "Đăng xuất thành công" });
+  return res
+    .status(200)
+    .json({ success: true, message: "Đăng xuất thành công" });
 };
 
 const handleUpdateProfile = async (req, res, next) => {
   try {
     const result = await updateProfile(req.user.email, req.body, req.file);
-    if (result.EC === 0)
+    if (result.success)
       return res.status(200).json({
         success: true,
         message: "Cập nhật thành công",
         data: result.data,
       });
-    return res.status(400).json({ success: false, message: result.EM });
+    return res.status(400).json({ success: false, message: result.message });
   } catch (error) {
     next(error);
   }

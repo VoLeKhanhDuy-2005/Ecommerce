@@ -66,11 +66,11 @@ export default function SearchFilterPage() {
           axios.get("/v1/api/products/search", { params }),
           categories.length === 0
             ? getCategoriesApi()
-            : Promise.resolve({ EC: 0, data: categories }),
+            : Promise.resolve({ success: true, data: categories }),
         ]);
 
         let currentCategories = categories;
-        if (categories.length === 0 && catRes && catRes.EC === 0) {
+        if (categories.length === 0 && catRes && catRes.success) {
           currentCategories = catRes.data;
           setCategories(currentCategories);
         }

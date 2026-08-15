@@ -22,7 +22,7 @@ const AdminProductsPage = () => {
     setLoading(true);
     try {
       const res = await getAdminProductsApi();
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setProducts(res.data);
       } else {
         notification.error({
@@ -42,7 +42,7 @@ const AdminProductsPage = () => {
   const fetchCategories = async () => {
     try {
       const res = await getCategoriesApi();
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setCategories(res.data);
       }
     } catch (error) {
@@ -58,14 +58,14 @@ const AdminProductsPage = () => {
   const handleDeleteProduct = async (id) => {
     try {
       const res = await deleteProductApi(id);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Thành công",
           description: "Đã xóa sản phẩm",
         });
         fetchProducts();
       } else {
-        notification.error({ message: "Lỗi", description: res.EM });
+        notification.error({ message: "Lỗi", description: res.message });
       }
     } catch (error) {
       notification.error({

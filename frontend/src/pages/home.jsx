@@ -40,7 +40,7 @@ export default function Home() {
         ]);
 
         let fetchedCategories = [];
-        if (catRes && catRes.EC === 0) {
+        if (catRes && catRes.success) {
           fetchedCategories = catRes.data;
           setCategories(fetchedCategories);
         }

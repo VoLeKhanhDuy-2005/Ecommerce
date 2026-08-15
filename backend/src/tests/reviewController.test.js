@@ -28,8 +28,8 @@ describe("Review Controller", () => {
       mockReq.query = { page: "1", limit: "5" };
 
       const mockResult = {
-        EC: 0,
-        EM: "Lấy danh sách đánh giá thành công",
+        success: true,
+        message: "Lấy danh sách đánh giá thành công",
         data: { reviews: [], total: 0, page: 1, totalPages: 0 },
       };
 
@@ -75,8 +75,8 @@ describe("Review Controller", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        EC: 1,
-        EM: "Vui lòng chọn số sao",
+        success: false,
+        message: "Vui lòng chọn số sao",
       });
       expect(reviewService.addOrUpdateReview).not.toHaveBeenCalled();
     });
@@ -87,8 +87,8 @@ describe("Review Controller", () => {
       mockReq.user = { email: "test@example.com" };
 
       const mockResult = {
-        EC: 0,
-        EM: "Đánh giá sản phẩm thành công",
+        success: true,
+        message: "Đánh giá sản phẩm thành công",
         data: { rating: 5, comment: "Great!" },
       };
       reviewService.addOrUpdateReview.mockResolvedValue(mockResult);
@@ -111,8 +111,8 @@ describe("Review Controller", () => {
       mockReq.user = { email: "test@example.com" };
 
       const mockResult = {
-        EC: 1,
-        EM: "Người dùng không tồn tại",
+        success: false,
+        message: "Người dùng không tồn tại",
       };
       reviewService.addOrUpdateReview.mockResolvedValue(mockResult);
 
@@ -142,8 +142,8 @@ describe("Review Controller", () => {
       mockReq.user = { email: "test@example.com" };
 
       const mockResult = {
-        EC: 0,
-        EM: "Xóa đánh giá thành công",
+        success: true,
+        message: "Xóa đánh giá thành công",
       };
       reviewService.deleteReview.mockResolvedValue(mockResult);
 
@@ -162,8 +162,8 @@ describe("Review Controller", () => {
       mockReq.user = { email: "test@example.com" };
 
       const mockResult = {
-        EC: 1,
-        EM: "Không tìm thấy đánh giá để xóa",
+        success: false,
+        message: "Không tìm thấy đánh giá để xóa",
       };
       reviewService.deleteReview.mockResolvedValue(mockResult);
 

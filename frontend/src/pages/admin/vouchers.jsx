@@ -68,7 +68,7 @@ const AdminVouchersPage = () => {
   const fetchProducts = async () => {
     try {
       const res = await getAdminProductsApi();
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         setProducts(res.data);
       }
     } catch (error) {

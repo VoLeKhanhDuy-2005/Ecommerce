@@ -43,7 +43,7 @@ const ForgotPasswordPage = () => {
       const { email } = values;
       const res = await sendForgotPasswordOtpApi(email);
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Đã gửi OTP",
           description: "Mã xác thực đã được gửi đến email của bạn.",
@@ -72,7 +72,7 @@ const ForgotPasswordPage = () => {
       const { email, otp, newPassword } = values;
       const res = await resetPasswordApi(email, otp, newPassword);
 
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Thành công",
           description:
@@ -101,7 +101,7 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     try {
       const res = await sendForgotPasswordOtpApi(email);
-      if (res && res.EC === 0) {
+      if (res && res.success) {
         notification.success({
           message: "Đã gửi lại mã OTP",
           description: "Vui lòng kiểm tra lại email của bạn.",

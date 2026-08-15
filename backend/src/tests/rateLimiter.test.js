@@ -53,7 +53,7 @@ describe("Rate Limiter Middleware", () => {
         .set("X-Forwarded-For", testIp2);
       expect(blockedRes.status).toBe(429);
       expect(blockedRes.body.EC).toBe(429);
-      expect(blockedRes.body.EM).toBe(
+      expect(blockedRes.body.message).toBe(
         "Too many requests from this IP, please try again after 15 minutes",
       );
     });
@@ -86,7 +86,7 @@ describe("Rate Limiter Middleware", () => {
         .set("X-Forwarded-For", testIp4);
       expect(blockedRes.status).toBe(429);
       expect(blockedRes.body.EC).toBe(429);
-      expect(blockedRes.body.EM).toBe(
+      expect(blockedRes.body.message).toBe(
         "Too many authentication attempts from this IP, please try again after 15 minutes",
       );
     });

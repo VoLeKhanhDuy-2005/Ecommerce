@@ -33,7 +33,12 @@ router.delete("/products/:id/reviews", handleDeleteReview);
 
 router.get("/admin/products", isAdmin, getAllProducts);
 router.post("/admin/products", isAdmin, validateProductImages, createProduct);
-router.put("/admin/products/:id", isAdmin, validateProductImages, updateProduct);
+router.put(
+  "/admin/products/:id",
+  isAdmin,
+  validateProductImages,
+  updateProduct,
+);
 router.delete("/admin/products/:id", isAdmin, deleteProduct);
 
 module.exports = router;

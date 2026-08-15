@@ -68,7 +68,7 @@ export default function RewardsPage() {
         setMyVouchers(myRes.data);
       }
       const userRes = await getCurrentUserApi();
-      if (userRes && userRes.EC === 0 && userRes.user) {
+      if (userRes && userRes.success && userRes.user) {
         //request API thành công
         setUserCoins(userRes.user.coins || 0);
         setAuth((prev) => ({
