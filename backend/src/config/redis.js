@@ -6,22 +6,22 @@ const redisClient = createClient({
 });
 
 redisClient.on("error", (err) => {
-  console.error("Lỗi Redis Client:", err.message); // Không throw error để tránh crash app. App sẽ fallback xuống Database.
+  console.error("Redis Client Error:", err.message); // Không throw error để tránh crash app. App sẽ fallback xuống Database.
 });
 
 redisClient.on("connect", () => {
-  console.log("Đã kết nối thành công tới Redis!");
+  console.log("Redis connected");
 });
 
 redisClient.on("reconnecting", () => {
-  console.log("Đang thử kết nối lại với Redis...");
+  console.log("Redis reconnecting...");
 });
 
 // Start connecting immediately so that rate limiter commands can be queued
 if (process.env.NODE_ENV !== "test") {
   redisClient.connect().catch((error) => {
     console.error(
-      "Không thể kết nối đến Redis lúc khởi động. Hệ thống sẽ tiếp tục chạy bằng MongoDB.",
+      "Can not connect to Redis at startup. The system will continue to run using MongoDB.",
       error.message,
     );
   });
