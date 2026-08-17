@@ -129,12 +129,10 @@ const exportDashboardStats = async (req, res) => {
   try {
     const yearsParam = req.query.years;
     if (!yearsParam) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Vui lòng chọn ít nhất 1 năm để xuất báo cáo",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng chọn ít nhất 1 năm để xuất báo cáo",
+      });
     }
 
     const years = yearsParam

@@ -8,6 +8,26 @@ const createOrder = async (req, res, next) => {
       req.user.email,
       req.body,
     );
+
+    if (statusCode === 201) {
+      const io = req.app.get("io");
+      if (io) {
+        const adminRoom = io.sockets.adapter.rooms.get("admin_room");
+        const adminCount = adminRoom ? adminRoom.size : 0;
+        console.log(
+          `[Socket] Emitting NEW_ORDER to admin_room (${adminCount} admins connected)`,
+        );
+        io.to("admin_room").emit("NEW_ORDER", {
+          message:
+            req.body.paymentMethod === "COD"
+              ? "Có đơn hàng COD mới vừa được đặt!"
+              : "Có đơn hàng MoMo mới đang chờ thanh toán!",
+          orderId: data?.data?._id,
+        });
+      } else {
+        console.log("[Socket] ERROR: io không tìm thấy trong app!");
+      }
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -20,6 +40,20 @@ const verifyMomoPayment = async (req, res, next) => {
       req.params.id,
       req.user.email, // Tránh trường hợp người dùng lấy ID đơn hàng của người khác
     );
+    if (statusCode === 200 && data?.success) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin_room").emit("NEW_ORDER", {
+          message: `Đơn hàng MoMo #${data.data._id} vừa được thanh toán thành công!`,
+          orderId: data.data._id,
+        });
+        io.to(`user_${req.user.email}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Thanh toán MoMo thành công cho đơn hàng #${data.data._id}`,
+        });
+      }
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -29,6 +63,25 @@ const verifyMomoPayment = async (req, res, next) => {
 const handleMomoIPN = async (req, res, next) => {
   try {
     const { statusCode, ...data } = await orderService.handleMomoIPN(req.body);
+    if ((statusCode === 200 || statusCode === 204) && data?.success) {
+      //204 No contend
+      const io = req.app.get("io");
+      if (io) {
+        // req.body.orderId chứa orderId từ MoMo gửi về
+        const orderId = req.body.orderId || (data.data && data.data._id);
+        io.to("admin_room").emit("NEW_ORDER", {
+          message: `Đơn hàng MoMo #${orderId} vừa được thanh toán thành công qua IPN!`,
+          orderId: orderId,
+        });
+        if (data.data && data.data.userEmail) {
+          io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+            orderId: orderId,
+            status: data.data.status || "New",
+            message: `Thanh toán MoMo thành công cho đơn hàng #${orderId}`,
+          });
+        }
+      }
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -65,6 +118,10 @@ const cancelOrder = async (req, res, next) => {
       req.user.email,
       req.body.reason,
     );
+    if (statusCode === 200 && data?.success) {
+      const io = req.app.get("io");
+      if (io) io.to("admin_room").emit("ADMIN_REFRESH_ORDERS");
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -77,6 +134,10 @@ const markOrderAsReceived = async (req, res, next) => {
       req.params.id,
       req.user.email,
     );
+    if (statusCode === 200 && data?.success) {
+      const io = req.app.get("io");
+      if (io) io.to("admin_room").emit("ADMIN_REFRESH_ORDERS");
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -105,6 +166,18 @@ const updateShopOrderStatus = async (req, res, next) => {
       req.params.id,
       req.body.status,
     );
+
+    if (statusCode === 200 && data?.data) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Đơn hàng #${data.data._id} của bạn đã được cập nhật trạng thái: ${data.data.status}`,
+        });
+      }
+    }
+
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -117,6 +190,18 @@ const handleShopCancelRequest = async (req, res, next) => {
       req.params.id,
       req.body.action,
     );
+
+    if (statusCode === 200 && data?.data) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Yêu cầu hủy đơn #${data.data._id} đã được phản hồi.`,
+        });
+      }
+    }
+
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -175,6 +260,10 @@ const requestReturn = async (req, res, next) => {
       req.body,
       req.files,
     );
+    if (statusCode === 200 && data?.success) {
+      const io = req.app.get("io");
+      if (io) io.to("admin_room").emit("ADMIN_REFRESH_ORDERS");
+    }
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -187,6 +276,18 @@ const adminApproveReturn = async (req, res, next) => {
       req.params.id,
       "Approve",
     );
+
+    if (statusCode === 200 && data?.data) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Yêu cầu hoàn tiền đơn #${data.data._id} đã được chấp thuận.`,
+        });
+      }
+    }
+
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -201,6 +302,18 @@ const adminRejectReturn = async (req, res, next) => {
       "Reject",
       rejectReason,
     );
+
+    if (statusCode === 200 && data?.data) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Yêu cầu hoàn tiền đơn #${data.data._id} đã bị từ chối. Lý do: ${rejectReason || "Không có"}`,
+        });
+      }
+    }
+
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);
@@ -212,6 +325,18 @@ const adminCompleteReturn = async (req, res, next) => {
     const { statusCode, ...data } = await orderService.completeReturn(
       req.params.id,
     );
+
+    if (statusCode === 200 && data?.data) {
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${data.data.userEmail}`).emit("ORDER_STATUS_UPDATED", {
+          orderId: data.data._id,
+          status: data.data.status,
+          message: `Quá trình hoàn tiền đơn hàng #${data.data._id} đã hoàn tất.`,
+        });
+      }
+    }
+
     return res.status(statusCode).json(data);
   } catch (error) {
     next(error);

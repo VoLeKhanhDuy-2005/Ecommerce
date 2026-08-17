@@ -104,12 +104,10 @@ const handleRefreshToken = async (req, res, next) => {
     const refresh_token = req.cookies.refresh_token;
 
     if (!refresh_token) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Không tìm thấy refresh token trong cookie",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Không tìm thấy refresh token trong cookie",
+      });
     }
 
     const data = await refreshTokenService(refresh_token);

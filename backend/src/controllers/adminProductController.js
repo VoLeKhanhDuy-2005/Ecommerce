@@ -51,12 +51,10 @@ const createProduct = async (req, res) => {
       !category ||
       stock === undefined
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Vui lòng cung cấp đầy đủ thông tin",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng cung cấp đầy đủ thông tin",
+      });
     }
 
     let images = [];
@@ -77,12 +75,10 @@ const createProduct = async (req, res) => {
     }
 
     if (images.length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Vui lòng cung cấp ít nhất 1 hình ảnh",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng cung cấp ít nhất 1 hình ảnh",
+      });
     }
 
     const discountPrice = price - price * (discountPercent / 100);
@@ -96,13 +92,11 @@ const createProduct = async (req, res) => {
       stock: Number(stock),
       images,
     });
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "Tạo sản phẩm thành công",
-        data: newProduct,
-      });
+    return res.status(201).json({
+      success: true,
+      message: "Tạo sản phẩm thành công",
+      data: newProduct,
+    });
   } catch (error) {
     console.error("Error creating product:", error);
     return res

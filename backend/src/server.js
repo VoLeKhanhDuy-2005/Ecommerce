@@ -33,10 +33,10 @@ app.use(
 //config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
 //trong các req đến server
 
-const logDirectory = path.join(__dirname, '../logs');
+const logDirectory = path.join(__dirname, "../logs");
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
 
-const pad = num => (num > 9 ? "" : "0") + num;
+const pad = (num) => (num > 9 ? "" : "0") + num;
 const generator = (time) => {
   if (!time) time = new Date();
   const year = time.getFullYear();
@@ -46,10 +46,10 @@ const generator = (time) => {
 };
 
 const accessLogStream = rfs.createStream(generator, {
-  interval: '1d', // rotate daily
-  path: logDirectory
+  interval: "1d", // rotate daily
+  path: logDirectory,
 });
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(morgan("combined", { stream: accessLogStream }));
 /*
   ":referrer": Ghi lại địa chỉ trang web trước đó mà người dùng đã bấm vào để dẫn tới trang hiện tại
    (lấy từ HTTP Referer header)
@@ -95,11 +95,28 @@ app.use(errorHandler);
         methods: ["GET", "POST"],
         //cho phép trình duyệt gửi HTTP request bằng hai phương thức GET và POST đến Socket.IO server
         //thực hiện HTTP handshake trước khi chuyển sang kết nối WebSocket
+        credentials: true, // Cho phép gửi cookie (withCredentials: true) từ phía client
       },
     });
+    app.set("io", io); //Lưu instance io vào Express App
 
     io.on("connection", (socket) => {
       console.log("Client connected via Socket.io:", socket.id);
+
+      socket.on("JOIN_USER_ROOM", (userIdOrEmail) => {
+        if (userIdOrEmail) {
+          socket.join(`user_${userIdOrEmail}`);
+          console.log(`Socket ${socket.id} joined room: user_${userIdOrEmail}`);
+        }
+      });
+
+      socket.on("JOIN_ADMIN_ROOM", () => {
+        socket.join("admin_room");
+        const roomSize = io.sockets.adapter.rooms.get("admin_room")?.size || 0;
+        console.log(
+          `[Socket] ${socket.id} joined admin_room (total in room: ${roomSize})`,
+        );
+      });
 
       socket.on("disconnect", () => {
         console.log("Client disconnected:", socket.id);

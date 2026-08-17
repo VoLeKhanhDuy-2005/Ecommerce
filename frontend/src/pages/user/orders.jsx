@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { io } from "socket.io-client";
 import {
   Spin,
   Steps,
@@ -175,6 +176,39 @@ export default function OrdersPage() {
     verifyMomo();
   }, [auth.isAuthenticated, searchParams]);
 
+  // Lắng nghe cập nhật trạng thái đơn hàng theo thời gian thực (Socket.io)
+  useEffect(() => {
+    if (!auth.isAuthenticated || !auth.user?.email) return;
+
+    const socket = io(
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:8686",
+      {
+        withCredentials: true,
+      },
+    );
+
+    // Gia nhập phòng riêng của User
+    socket.on("connect", () => {
+      socket.emit("JOIN_USER_ROOM", auth.user.email);
+    });
+
+    // Nhận thông báo khi Admin đổi trạng thái đơn hàng
+    socket.on("ORDER_STATUS_UPDATED", (data) => {
+      notification.info({
+        message: "Cập nhật đơn hàng",
+        description:
+          data?.message ||
+          `Đơn hàng #${data?.orderId} của bạn đã được cập nhật trạng thái mới!`,
+        placement: "bottomLeft",
+      });
+      fetchOrders(data?.orderId || (selectedOrder ? selectedOrder._id : null));
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [auth.isAuthenticated, auth.user?.email, selectedOrder?._id]);
+
   // Bộ đếm ngược thời gian hủy đơn (30 phút)
   useEffect(() => {
     if (
@@ -211,22 +245,6 @@ export default function OrdersPage() {
 
     return () => clearInterval(timer);
   }, [selectedOrder]);
-
-  // TỰ ĐỘNG TẢI LẠI TRANG CHẠY NGẦM MỖI 10 GIÂY
-  useEffect(() => {
-    if (!auth.isAuthenticated || !selectedOrder) return;
-    // Nếu đơn hàng đã hoàn thành (Delivered) hoặc đã hủy (Cancelled), dừng bộ quét để tiết kiệm RAM
-    if (
-      selectedOrder.status === "Delivered" ||
-      selectedOrder.status === "Cancelled"
-    )
-      return;
-
-    const autoRefreshTimer = setInterval(() => {
-      fetchOrders(selectedOrder._id);
-    }, 10 * 1000);
-    return () => clearInterval(autoRefreshTimer);
-  }, [auth.isAuthenticated, selectedOrder?._id, selectedOrder?.status]);
 
   // Mở modal xác nhận hủy đơn
   const openCancelModal = () => {

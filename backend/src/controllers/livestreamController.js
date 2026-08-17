@@ -21,12 +21,10 @@ const generateToken = async (req, res) => {
       console.error(
         "Missing LIVEKIT_API_KEY or LIVEKIT_API_SECRET in environment variables.",
       );
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Server LiveKit Configuration Error",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Server LiveKit Configuration Error",
+      });
     }
 
     // Khởi tạo access token

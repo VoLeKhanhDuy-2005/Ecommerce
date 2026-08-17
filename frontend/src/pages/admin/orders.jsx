@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { io } from "socket.io-client";
 import {
   Button,
   Tag,
@@ -11,6 +12,7 @@ import {
   Select,
   Image,
   Input,
+  message,
 } from "antd";
 import {
   HistoryOutlined,
@@ -101,26 +103,59 @@ export default function AdminOrdersPage() {
     fetchShopOrders(false, 1, pagination.pageSize, statusFilter);
   }, [statusFilter]);
 
-  // TỰ ĐỘNG TẢI LẠI TRANG CHẠY NGẦM MỖI 10 GIÂY
+  // State trigger để buộc tải lại dữ liệu khi nhận thông báo qua socket
+  const [triggerRefresh, setTriggerRefresh] = useState(0);
+
   useEffect(() => {
-    if (!auth.isAuthenticated) return;
+    if (triggerRefresh > 0) {
+      fetchShopOrders(true, 1, pagination.pageSize, statusFilter);
+    }
+  }, [triggerRefresh]);
 
-    const autoRefreshTimer = setInterval(() => {
-      fetchShopOrders(
-        true,
-        pagination.current,
-        pagination.pageSize,
-        statusFilter,
+  useEffect(() => {
+    const socket = io(
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:8686",
+      {
+        withCredentials: true,
+      },
+    );
+
+    if (socket.connected) {
+      console.log("[Socket Admin] Already connected, joining admin_room");
+      socket.emit("JOIN_ADMIN_ROOM");
+    }
+
+    socket.on("connect", () => {
+      //cứ hễ kết nối thành công (kể cả lúc reconnect sau khi rớt mạng) thì frontend đều chủ động
+      // báo cho server biết mình cần vào phòng admin_room
+      console.log(
+        "[Socket Admin] Connected! socket.id =",
+        socket.id,
+        "-> joining admin_room",
       );
-    }, 10 * 1000);
+      socket.emit("JOIN_ADMIN_ROOM");
+    });
 
-    return () => clearInterval(autoRefreshTimer);
-  }, [
-    auth.isAuthenticated,
-    pagination.current,
-    pagination.pageSize,
-    statusFilter,
-  ]);
+    socket.on("NEW_ORDER", (data) => {
+      console.log("[Socket Admin] Received NEW_ORDER event:", data);
+      message.info(data?.message || "Có đơn hàng mới vừa được đặt!");
+      setTriggerRefresh((prev) => prev + 1);
+    });
+
+    // Lắng nghe khi user chủ động đổi trạng thái (hủy đơn, đã nhận hàng, v.v)
+    socket.on("ADMIN_REFRESH_ORDERS", () => {
+      console.log("[Socket Admin] Received ADMIN_REFRESH_ORDERS event");
+      setTriggerRefresh((prev) => prev + 1);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("[Socket Admin] Connection error:", err.message);
+    });
+
+    return () => {
+      socket.disconnect(); //Ngắt kết nối khi rời trang
+    };
+  }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -411,6 +446,21 @@ export default function AdminOrdersPage() {
                   <span className="text-base font-black text-orange-600">
                     Tổng: {formatPrice(ord.totalAmount)}
                   </span>
+                  <div className="mt-1">
+                    {ord.paymentStatus === "Paid" ? (
+                      <span className="text-green-600 font-bold text-xs bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                        Đã thanh toán (MoMo)
+                      </span>
+                    ) : ord.paymentMethod === "MOMO" ? (
+                      <span className="text-orange-500 font-bold text-xs bg-orange-50 px-2 py-1 rounded-md border border-orange-200">
+                        Chờ thanh toán (MoMo)
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 font-bold text-xs bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+                        Thanh toán khi nhận hàng (COD)
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
