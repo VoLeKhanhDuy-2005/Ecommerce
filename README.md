@@ -11,14 +11,14 @@ A professional, production-ready Fullstack Web Application built with the modern
 - [Installation & Setup](#installation--setup)
   - [Prerequisites](#prerequisites)
   - [1. Clone the repository](#1-clone-the-repository)
-  - [2. Backend Setup (`ExpressJS01`)](#2-backend-setup-expressjs01)
-  - [3. Frontend Setup (`ReactJS01`)](#3-frontend-setup-reactjs01)
+  - [2. Backend Setup (`ExpressJS`)](#2-backend-setup-expressjs)
+  - [3. Frontend Setup (`ReactJS`)](#3-frontend-setup-reactjs)
 - [Key Features](#key-features)
 - [Author](#author)
 
 ## Technologies Used
 
-### Backend (`ExpressJS01`)
+### Backend (`ExpressJS`)
 
 - **Core Framework**: Node.js & Express v5
 - **Database**: MongoDB (Mongoose)
@@ -28,7 +28,7 @@ A professional, production-ready Fullstack Web Application built with the modern
 - **Image Processing**: Sharp
 - **Security & Middlewares**: CORS, Cookie-parser, dotenv
 
-### Frontend (`ReactJS01`)
+### Frontend (`ReactJS`)
 
 - **Core Framework**: React 19 + Vite
 - **Styling & UI**: Tailwind CSS, Ant Design (antd)
@@ -36,6 +36,7 @@ A professional, production-ready Fullstack Web Application built with the modern
 - **Routing**: React Router v7
 - **Data Fetching & State**: Axios
 - **Form Validation**: Zod
+- **Desgin Pattern**: Presentational and Container Component Pattern
 
 ---
 
