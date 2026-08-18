@@ -96,14 +96,14 @@ const AdminLayout = () => {
       label: <Link to="/admin/vouchers">Quản lý Voucher</Link>,
     },
     {
-      key: "/admin/settings",
-      icon: <SettingOutlined />,
-      label: <Link to="/admin/settings">Cấu hình Hệ thống</Link>,
-    },
-    {
       key: "/livestream",
       label: <Link to="/livestream">Livestream</Link>,
       icon: <VideoCameraOutlined />,
+    },
+    {
+      key: "/admin/settings",
+      icon: <SettingOutlined />,
+      label: <Link to="/admin/settings">Cấu hình Hệ thống</Link>,
     },
   ];
 
