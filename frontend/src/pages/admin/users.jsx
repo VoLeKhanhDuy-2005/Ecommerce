@@ -36,7 +36,7 @@ const UserPage = () => {
           </h1>
         </div>
       </div>
-      
+
       <UserTable dataSource={dataSource} loading={loading} />
     </div>
   );

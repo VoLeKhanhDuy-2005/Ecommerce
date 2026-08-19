@@ -8,7 +8,9 @@ const UserTable = ({ dataSource, loading }) => {
         title: "Email",
         dataIndex: "email",
         key: "email",
-        render: (text) => <span className="font-medium text-gray-700">{text}</span>,
+        render: (text) => (
+          <span className="font-medium text-gray-700">{text}</span>
+        ),
       },
       {
         title: "Tên",
@@ -32,7 +34,7 @@ const UserTable = ({ dataSource, loading }) => {
         },
       },
     ],
-    []
+    [],
   );
 
   return (
