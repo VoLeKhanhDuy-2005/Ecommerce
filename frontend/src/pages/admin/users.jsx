@@ -1,7 +1,8 @@
-import { notification, Table } from "antd";
+import { notification } from "antd";
 import { useEffect, useState } from "react";
 import { getUserApi } from "../../util/api";
 import { TeamOutlined } from "@ant-design/icons";
+import UserTable from "../../components/admin/users/UserTable";
 
 const UserPage = () => {
   const [dataSource, setDataSource] = useState([]);
@@ -24,25 +25,6 @@ const UserPage = () => {
     fetchUser();
   }, []);
 
-  const columns = [
-    {
-      title: "Email",
-      dataIndex: "email",
-    },
-    {
-      title: "Tên",
-      dataIndex: "name",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-    },
-    {
-      title: "Điện thoại",
-      dataIndex: "phone",
-    },
-  ];
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
@@ -54,15 +36,8 @@ const UserPage = () => {
           </h1>
         </div>
       </div>
-      <Table
-        bordered
-        dataSource={dataSource}
-        columns={columns}
-        rowKey={"_id"}
-        loading={loading}
-        pagination={{ pageSize: 6 }}
-        className="bg-white rounded-lg shadow-sm"
-      />
+      
+      <UserTable dataSource={dataSource} loading={loading} />
     </div>
   );
 };
