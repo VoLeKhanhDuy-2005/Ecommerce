@@ -4,11 +4,13 @@ import { SettingOutlined } from "@ant-design/icons";
 import { getSettingsApi } from "../../util/api";
 import { AuthContext } from "../../components/context/auth.context";
 import StoreLocationCard from "../../components/admin/settings/StoreLocationCard";
+import ShippingFeeCard from "../../components/admin/settings/ShippingFeeCard";
 
 export default function AdminSettingsPage() {
   const { auth } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [storeLocation, setStoreLocation] = useState(null);
+  const [shippingFeeConfig, setShippingFeeConfig] = useState(null);
 
   useEffect(() => {
     fetchSettings();
@@ -22,6 +24,9 @@ export default function AdminSettingsPage() {
       if (res && res.success) {
         if (res.data.store_location) {
           setStoreLocation(res.data.store_location);
+        }
+        if (res.data.default_shipping_fee) {
+          setShippingFeeConfig(res.data.default_shipping_fee);
         }
       }
     } catch (error) {
@@ -57,6 +62,11 @@ export default function AdminSettingsPage() {
           <StoreLocationCard
             initialLat={storeLocation?.lat}
             initialLng={storeLocation?.lng}
+          />
+          <ShippingFeeCard
+            initialBaseFee={shippingFeeConfig?.baseFee}
+            initialBaseDistance={shippingFeeConfig?.baseDistance}
+            initialExtraFeePerKm={shippingFeeConfig?.extraFeePerKm}
           />
           {/* Thêm các thẻ Cấu hình khác ở đây trong tương lai */}
         </div>

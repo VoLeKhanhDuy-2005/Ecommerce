@@ -25,14 +25,25 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
-const calculateShippingLogic = (distanceKm) => {
+const calculateShippingLogic = async (distanceKm) => {
   let fee = 0;
   if (distanceKm > 0) {
-    // 15k for first 3km, 5k for each additional km
-    if (distanceKm <= 3) {
-      fee = 15000;
+    let baseFee = 15000;
+    let baseDistance = 3;
+    let extraFeePerKm = 5000;
+
+    const res = await settingService.getSettings();
+    if (res && res.success && res.data && res.data.default_shipping_fee) {
+      baseFee = res.data.default_shipping_fee.baseFee ?? baseFee;
+      baseDistance = res.data.default_shipping_fee.baseDistance ?? baseDistance;
+      extraFeePerKm =
+        res.data.default_shipping_fee.extraFeePerKm ?? extraFeePerKm;
+    }
+
+    if (distanceKm <= baseDistance) {
+      fee = baseFee;
     } else {
-      fee = 15000 + Math.ceil(distanceKm - 3) * 5000;
+      fee = baseFee + Math.ceil(distanceKm - baseDistance) * extraFeePerKm;
     }
   }
   return fee;
@@ -188,7 +199,7 @@ const createOrder = async (userEmail, payload) => {
         parseFloat(lat),
         parseFloat(lng),
       );
-      shippingFee = calculateShippingLogic(distance);
+      shippingFee = await calculateShippingLogic(distance);
       deliveryCoordinates = { lat: parseFloat(lat), lng: parseFloat(lng) };
     }
 
@@ -848,7 +859,7 @@ const calculateShipping = async (lat, lng) => {
     parseFloat(lat),
     parseFloat(lng),
   );
-  const fee = calculateShippingLogic(distance);
+  const fee = await calculateShippingLogic(distance);
   return {
     statusCode: 200,
     success: true,

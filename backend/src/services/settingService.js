@@ -24,6 +24,15 @@ const getSettings = async () => {
       };
     }
 
+    // Đảm bảo luôn có cấu hình phí vận chuyển mặc định nếu chưa cấu hình
+    if (!settingsObj.default_shipping_fee) {
+      settingsObj.default_shipping_fee = {
+        baseFee: 15000,
+        baseDistance: 3,
+        extraFeePerKm: 5000,
+      };
+    }
+
     return { statusCode: 200, success: true, data: settingsObj };
   } catch (error) {
     return {
