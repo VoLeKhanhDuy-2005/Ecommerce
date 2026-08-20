@@ -6,7 +6,7 @@ import {
   getProductsApi,
   getCategoriesApi,
   exportDashboardStatsApi,
-} from "../../util/api";
+} from "../../apis";
 import SummaryCards from "../../components/admin/dashboard/SummaryCards";
 import RevenueChart from "../../components/admin/dashboard/RevenueChart";
 import OrderStatusChart from "../../components/admin/dashboard/OrderStatusChart";

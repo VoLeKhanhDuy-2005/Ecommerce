@@ -9,18 +9,19 @@ import {
   Row,
   Typography,
 } from "antd";
-import { sendForgotPasswordOtpApi, resetPasswordApi } from "../util/api";
+import { registerApi, sendRegisterOtpApi } from "../../apis";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeftOutlined,
   LockOutlined,
+  UserOutlined,
   MailOutlined,
   SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const ForgotPasswordPage = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
@@ -41,18 +42,18 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     try {
       const { email } = values;
-      const res = await sendForgotPasswordOtpApi(email);
+      const res = await sendRegisterOtpApi(email);
 
       if (res && res.success) {
         notification.success({
-          message: "Đã gửi OTP",
-          description: "Mã xác thực đã được gửi đến email của bạn.",
+          message: "Gửi OTP thành công",
+          description: "Vui lòng kiểm tra email của bạn để lấy mã OTP.",
         });
         setStep(2);
         setCountdown(300); // 5 phút
       } else {
         notification.error({
-          message: "Thất bại",
+          message: "Gửi OTP thất bại",
           description: res?.EM || "Đã có lỗi xảy ra. Vui lòng thử lại.",
         });
       }
@@ -69,21 +70,21 @@ const ForgotPasswordPage = () => {
   const onFinishStep2 = async (values) => {
     setLoading(true);
     try {
-      const { email, otp, newPassword } = values;
-      const res = await resetPasswordApi(email, otp, newPassword);
+      const { name, email, password, otp } = values;
+      const res = await registerApi(name, email, password, otp);
 
       if (res && res.success) {
         notification.success({
-          message: "Thành công",
+          message: "Đăng ký thành công",
           description:
-            "Mật khẩu của bạn đã được thay đổi. Vui lòng đăng nhập bằng mật khẩu mới.",
+            "Bạn đã tạo tài khoản thành công. Vui lòng đăng nhập để tiếp tục.",
         });
         navigate("/login");
       } else {
         notification.error({
-          message: "Thất bại",
+          message: "Đăng ký thất bại",
           description:
-            res?.EM || "Không thể đổi mật khẩu. Vui lòng kiểm tra lại OTP.",
+            res?.EM || "Không thể tạo tài khoản. Vui lòng thử lại sau.",
         });
       }
     } catch (error) {
@@ -100,7 +101,7 @@ const ForgotPasswordPage = () => {
     const email = form.getFieldValue("email");
     setLoading(true);
     try {
-      const res = await sendForgotPasswordOtpApi(email);
+      const res = await sendRegisterOtpApi(email);
       if (res && res.success) {
         notification.success({
           message: "Đã gửi lại mã OTP",
@@ -159,33 +160,50 @@ const ForgotPasswordPage = () => {
                 fontSize: "28px",
               }}
             >
-              🔑
+              {step === 1 ? "✨" : "📩"}
             </div>
             <Title level={3} style={{ marginBottom: 8 }}>
-              Quên mật khẩu
+              {step === 1 ? "Đăng ký tài khoản" : "Xác thực Email"}
             </Title>
             <Text type="secondary">
               {step === 1
-                ? "Nhập email của bạn để nhận mã khôi phục mật khẩu."
-                : "Vui lòng nhập mã OTP gồm 6 chữ số và mật khẩu mới."}
+                ? "Tạo tài khoản để đặt món và nhận ưu đãi."
+                : "Vui lòng nhập mã OTP gồm 6 chữ số vừa được gửi đến email của bạn."}
             </Text>
           </div>
           <Form
             form={form}
-            name="forgot-password"
+            name="register"
             onFinish={step === 1 ? onFinishStep1 : onFinishStep2}
             autoComplete="off"
             layout="vertical"
           >
-            {/* Bước 1: Nhập email */}
+            {/* Bước 1: Nhập thông tin */}
             <div style={{ display: step === 1 ? "block" : "none" }}>
+              <Form.Item
+                label="Tên của bạn"
+                name="name"
+                rules={[
+                  {
+                    required: step === 1,
+                    message: "Vui lòng nhập tên của bạn",
+                  },
+                ]}
+              >
+                <Input
+                  prefix={<UserOutlined />}
+                  size="large"
+                  placeholder="Nguyễn Văn A"
+                />
+              </Form.Item>
+
               <Form.Item
                 label="Email"
                 name="email"
                 rules={[
                   {
-                    required: true,
-                    message: "Vui lòng nhập email đã đăng ký",
+                    required: step === 1,
+                    message: "Vui lòng nhập email",
                   },
                   {
                     type: "email",
@@ -199,9 +217,30 @@ const ForgotPasswordPage = () => {
                   placeholder="name@example.com"
                 />
               </Form.Item>
+
+              <Form.Item
+                label="Mật khẩu"
+                name="password"
+                rules={[
+                  {
+                    required: step === 1,
+                    message: "Vui lòng nhập mật khẩu",
+                  },
+                  {
+                    min: 6,
+                    message: "Mật khẩu phải từ 6 ký tự trở lên",
+                  },
+                ]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  size="large"
+                  placeholder="Tạo mật khẩu"
+                />
+              </Form.Item>
             </div>
 
-            {/* Bước 2: Nhập OTP và Mật khẩu mới */}
+            {/* Bước 2: Nhập OTP */}
             <div style={{ display: step === 2 ? "block" : "none" }}>
               <Form.Item
                 label="Mã OTP"
@@ -222,27 +261,6 @@ const ForgotPasswordPage = () => {
                   size="large"
                   placeholder="Nhập 6 số OTP"
                   maxLength={6}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Mật khẩu mới"
-                name="newPassword"
-                rules={[
-                  {
-                    required: step === 2,
-                    message: "Vui lòng nhập mật khẩu mới",
-                  },
-                  {
-                    min: 6,
-                    message: "Mật khẩu phải từ 6 ký tự trở lên",
-                  },
-                ]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  size="large"
-                  placeholder="Nhập mật khẩu mới"
                 />
               </Form.Item>
 
@@ -271,7 +289,7 @@ const ForgotPasswordPage = () => {
                 size="large"
                 loading={loading}
               >
-                {step === 1 ? "Gửi mã xác thực" : "Đổi mật khẩu"}
+                {step === 1 ? "Tiếp tục" : "Đăng ký"}
               </Button>
             </Form.Item>
 
@@ -283,7 +301,7 @@ const ForgotPasswordPage = () => {
                   size="large"
                   onClick={() => setStep(1)}
                 >
-                  Quay lại nhập Email
+                  Quay lại sửa thông tin
                 </Button>
               </Form.Item>
             )}
@@ -291,10 +309,23 @@ const ForgotPasswordPage = () => {
 
           <Divider />
 
-          <div style={{ textAlign: "center" }}>
-            <Text type="secondary">Nhớ lại mật khẩu? </Text>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <Text type="secondary">Đã có tài khoản?</Text>
             <Link to="/login" style={{ fontWeight: 600, color: "#fa541c" }}>
-              Đăng nhập ngay
+              Đăng nhập
+            </Link>
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <Link to="/">
+              <ArrowLeftOutlined /> Quay lại trang chủ
             </Link>
           </div>
         </div>
@@ -303,4 +334,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default ForgotPasswordPage;
+export default RegisterPage;

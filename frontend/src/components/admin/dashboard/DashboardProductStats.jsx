@@ -1,6 +1,6 @@
 import React from "react";
 import { Typography } from "antd";
-import ProductSection from "../../../components/product/ProductSection";
+import ProductSection from "../../common/products/ProductSection";
 
 const { Title } = Typography;
 

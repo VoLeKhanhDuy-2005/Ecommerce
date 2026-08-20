@@ -5,7 +5,7 @@ import {
   getAdminProductsApi,
   deleteProductApi,
   getCategoriesApi,
-} from "../../util/api";
+} from "../../apis";
 import ProductTable from "../../components/admin/products/ProductTable";
 import ProductModal from "../../components/admin/products/ProductModal";
 

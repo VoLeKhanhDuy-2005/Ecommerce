@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+
 import { Spin, notification, Button, Empty, Modal } from "antd";
 import {
   GiftOutlined,
@@ -9,13 +10,17 @@ import {
   DollarCircleFilled,
   CarFilled,
 } from "@ant-design/icons";
-import { AuthContext } from "../../components/context/auth.context";
+
+import { AuthContext } from "../../components/common/context/auth.context";
+
 import {
   getActiveVouchersApi,
   redeemVoucherApi,
   getCurrentUserApi,
   getMyVouchersApi,
-} from "../../util/api";
+} from "../../apis";
+
+import { formatCurrency } from "../../utils/formatter";
 
 export default function RewardsPage() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -146,18 +151,12 @@ export default function RewardsPage() {
     }
   };
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
   const getVoucherDescription = (v) => {
-    if (v.type === "DISCOUNT_AMOUNT") return `Giảm ${formatPrice(v.value)}`;
+    if (v.type === "DISCOUNT_AMOUNT") return `Giảm ${formatCurrency(v.value)}`;
     if (v.type === "DISCOUNT_PERCENT")
-      return `Giảm ${v.value}% (Tối đa ${formatPrice(v.maxDiscountAmount)})`;
+      return `Giảm ${v.value}% (Tối đa ${formatCurrency(v.maxDiscountAmount)})`;
     if (v.type === "FREE_SHIP")
-      return `Giảm ${formatPrice(v.value)} phí vận chuyển`;
+      return `Giảm ${formatCurrency(v.value)} phí vận chuyển`;
     if (v.type === "FREE_ITEM") return `Tặng kèm sản phẩm miễn phí`;
     return "";
   };
@@ -247,7 +246,7 @@ export default function RewardsPage() {
                     </p>
                     <div className="flex flex-wrap gap-2 text-[10px] font-medium">
                       <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-                        Đơn Tối Thiểu: {formatPrice(v.minOrderValue)}
+                        Đơn Tối Thiểu: {formatCurrency(v.minOrderValue)}
                       </span>
                     </div>
                   </div>

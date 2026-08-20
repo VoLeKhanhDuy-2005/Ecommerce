@@ -17,9 +17,9 @@ import {
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { AuthContext } from "../context/auth.context";
+import { AuthContext } from "../../common/context/auth.context";
 import { Avatar, Dropdown } from "antd";
-import { logoutApi } from "../../util/api";
+import { logoutApi } from "../../../apis";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ const Header = () => {
             to="/profile"
             className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition-colors"
           >
-            <SettingOutlined /> Chỉnh sửa hồ sơ
+            <SettingOutlined /> Hồ sơ
           </Link>
         ),
       },

@@ -5,6 +5,8 @@ import { Navigation } from "swiper/modules";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "swiper/css";
 
+import { formatCurrency } from "../../../utils/formatter";
+
 export default function ProductSection({
   smallHeader,
   bigHeader,
@@ -17,12 +19,6 @@ export default function ProductSection({
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
 
   // Cập nhật chỉ số trang khi Swiper thay đổi
   const handleSlideChange = (swiper) => {
@@ -119,7 +115,7 @@ export default function ProductSection({
               <ProductCard
                 id={item._id}
                 name={item.name}
-                price={formatPrice(
+                price={formatCurrency(
                   item.discountPrice && item.discountPrice !== 0
                     ? item.discountPrice
                     : item.price,

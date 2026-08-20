@@ -9,8 +9,8 @@ import {
   updateSettingApi,
   resolveMapLinkApi,
   searchNominatim,
-} from "../../../util/api";
-import MapSelector from "../../MapSelector";
+} from "../../../apis";
+import MapSelector from "../../common/settings/MapSelector";
 
 const StoreLocationCard = ({ initialLat, initialLng }) => {
   const [lat, setLat] = useState("");

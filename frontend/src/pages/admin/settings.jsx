@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { notification, Spin } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
-import { getSettingsApi } from "../../util/api";
-import { AuthContext } from "../../components/context/auth.context";
+import { getSettingsApi } from "../../apis";
+import { AuthContext } from "../../components/common/context/auth.context";
 import StoreLocationCard from "../../components/admin/settings/StoreLocationCard";
 import ShippingFeeCard from "../../components/admin/settings/ShippingFeeCard";
 

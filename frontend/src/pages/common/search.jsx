@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useReducer } from "react";
 import { useSearchParams } from "react-router-dom";
+
 import { Input, Spin, Empty, Radio, Divider, Pagination } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
-import ProductCard from "../components/product/ProductCard";
-import axios from "../util/axios.customize";
-import { getCategoriesApi } from "../util/api";
+
+import ProductCard from "../../components/common/products/ProductCard";
+
+import axios from "../../apis/axios.customize";
+import { getCategoriesApi } from "../../apis";
+
+import { formatCurrency } from "../../utils/formatter";
 
 const { Search } = Input;
 
@@ -135,12 +140,6 @@ export default function SearchFilterPage() {
     const params = new URLSearchParams();
     setSearchParams(params);
   };
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
 
   return (
     <div className="pb-20">
@@ -293,7 +292,7 @@ export default function SearchFilterPage() {
                     key={item._id}
                     id={item._id}
                     name={item.name}
-                    price={formatPrice(
+                    price={formatCurrency(
                       item.discountPrice && item.discountPrice !== 0
                         ? item.discountPrice
                         : item.price,

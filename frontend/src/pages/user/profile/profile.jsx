@@ -1,20 +1,21 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { putProfileSchema } from "./user.schemas";
-import { AuthContext } from "../../components/context/auth.context";
+
+import { putProfileSchema } from "./profile.schemas";
+
+import { AuthContext } from "../../../components/common/context/auth.context";
+
 import {
   getCurrentUserApi,
   updateProfileApi,
   resolveMapLinkApi,
   searchNominatim,
-} from "../../util/api";
-import {
-  EditOutlined,
-  EnvironmentOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Spin, Button, notification } from "antd";
-import MapSelector from "../../components/MapSelector";
+} from "../../../apis";
+
+import { Spin, notification } from "antd";
+
+import ProfileForm from "../../../components/user/profile/ProfileForm";
+import AvatarUpload from "../../../components/user/profile/AvatarUpload";
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -195,9 +196,7 @@ export default function EditProfilePage() {
         }
       } else {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            address,
-          )}`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
         );
         const data = await response.json();
 
@@ -330,174 +329,20 @@ export default function EditProfilePage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-2/3 space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Họ tên
-                  </label>
-                  <input
-                    type="text"
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      fieldErrors.fullname
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-200 focus:ring-orange-500"
-                    } focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                    name="fullname"
-                    value={formData.fullname}
-                    onChange={handleChange}
-                    placeholder="Nhập họ tên của bạn"
-                  />
-                  {fieldErrors.fullname && (
-                    <p className="text-red-500 text-sm mt-1.5 font-medium">
-                      {fieldErrors.fullname}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Giới tính
-                  </label>
-                  <select
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                  >
-                    <option value="">Chọn giới tính</option>
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Số điện thoại
-                  </label>
-                  <input
-                    type="text"
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      fieldErrors.phone
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-200 focus:ring-orange-500"
-                    } focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Nhập số điện thoại"
-                  />
-                  {fieldErrors.phone && (
-                    <p className="text-red-500 text-sm mt-1.5 font-medium">
-                      {fieldErrors.phone}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày sinh
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-gray-700"
-                    name="birthday"
-                    value={formData.birthday}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Địa chỉ (Hoặc dán Link Google Maps)
-                </label>
-                <textarea
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
-                  rows="3"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Địa chỉ nhà hoặc link Google Maps..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <EnvironmentOutlined className="mr-1 text-orange-500" /> Vị
-                  trí trên bản đồ (Dùng để tính phí giao hàng)
-                </label>
-                <p className="text-xs text-gray-500 mb-3">
-                  Bạn có thể nhấp vào bản đồ để chọn tọa độ chính xác của mình.
-                </p>
-                <MapSelector
-                  defaultLat={formData.lat || 10.850438}
-                  defaultLng={formData.lng || 106.772596}
-                  onChange={({ lat, lng }) => {
-                    setFormData((prev) => ({ ...prev, lat, lng }));
-                  }}
-                />
-                <Button
-                  type="dashed"
-                  icon={<EnvironmentOutlined />}
-                  onClick={handleGetLocation}
-                  loading={isGettingLocation}
-                  className="w-full !text-orange-500 !border-orange-500 hover:!bg-orange-50 hover:!text-orange-500 hover:!border-orange-500 mt-3"
-                >
-                  Lấy vị trí hiện tại của tôi (GPS)
-                </Button>
-                <Button
-                  type="default"
-                  icon={<SearchOutlined />}
-                  onClick={handleSearchAddress}
-                  loading={isSearchingAddress}
-                  className="w-full !text-blue-600 !border-blue-500 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-500 mt-2"
-                >
-                  Tìm từ Link / Địa chỉ
-                </Button>
-              </div>
-            </div>
-
-            <div className="w-full md:w-1/3 flex flex-col items-center justify-start pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100">
-              <label className="block text-sm font-semibold text-gray-700 mb-4">
-                Ảnh đại diện
-              </label>
-              <div className="relative group">
-                <div className="w-40 h-40 rounded-full border-4 border-orange-50 shadow-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-                  {preview ? (
-                    <img
-                      src={preview}
-                      alt="preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-4xl text-gray-300">👤</span>
-                  )}
-                </div>
-
-                <label
-                  htmlFor="avatar-input"
-                  className="absolute bottom-1 right-1 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-orange-600 transition-colors border-2 border-white"
-                  title="Thay đổi ảnh"
-                >
-                  <EditOutlined className="text-lg" />
-                </label>
-
-                <input
-                  id="avatar-input"
-                  type="file"
-                  accept="image/jpeg, image/png"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
-              <p className="text-xs text-gray-400 mt-4 text-center">
-                Cho phép định dạng JPG, PNG. <br />
-                Kích thước tối đa 2MB.
-              </p>
-            </div>
+            <ProfileForm
+              formData={formData}
+              fieldErrors={fieldErrors}
+              handleChange={handleChange}
+              handleGetLocation={handleGetLocation}
+              isGettingLocation={isGettingLocation}
+              handleSearchAddress={handleSearchAddress}
+              isSearchingAddress={isSearchingAddress}
+              setFormData={setFormData}
+            />
+            <AvatarUpload
+              preview={preview}
+              handleFileChange={handleFileChange}
+            />
           </div>
 
           <div className="flex gap-4 pt-6 border-t border-gray-100">

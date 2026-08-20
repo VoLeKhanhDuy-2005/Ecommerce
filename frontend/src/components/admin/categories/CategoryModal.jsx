@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Space, Button, Upload, notification } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { createCategoryApi, updateCategoryApi } from "../../../util/api";
+import { createCategoryApi, updateCategoryApi } from "../../../apis";
 
 const extractS3KeyFromUrl = (url) => {
   try {

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../components/context/auth.context";
+import { AuthContext } from "../../components/common/context/auth.context";
 import {
   PhoneOutlined,
   EyeOutlined,

@@ -1,30 +1,33 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import AdminLayout from "./components/layout/adminLayout.jsx";
+import AdminLayout from "./components/admin/layout/adminLayout.jsx";
 import AdminDashboardPage from "./pages/admin/dashboard.jsx";
 import AdminOrdersPage from "./pages/admin/orders.jsx";
 import AdminCategoriesPage from "./pages/admin/categories.jsx";
 import AdminProductsPage from "./pages/admin/products.jsx";
 import AdminSettingsPage from "./pages/admin/settings.jsx";
 import AdminVouchersPage from "./pages/admin/vouchers.jsx";
-import RegisterPage from "./pages/register.jsx";
 import UserPage from "./pages/admin/users.jsx";
-import HomePage from "./pages/home.jsx";
-import LoginPage from "./pages/login.jsx";
-import ProductDetailPage from "./pages/productDetail.jsx";
-import SearchFilterPage from "./pages/search.jsx";
+
+import RegisterPage from "./pages/common/register.jsx";
+import HomePage from "./pages/common/home.jsx";
+import LoginPage from "./pages/common/login.jsx";
+import SearchFilterPage from "./pages/common/search.jsx";
+import ForgotPasswordPage from "./pages/common/forgotPassword.jsx";
+import LivestreamPage from "./pages/common/livestreamPage.jsx";
+
+import { AuthWrapper } from "./components/common/context/auth.context.jsx";
+
+import ProductDetailPage from "./pages/user/productDetail.jsx";
 import CartPage from "./pages/user/cart.jsx";
-import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import OrdersPage from "./pages/user/orders.jsx";
-import EditProfilePage from "./pages/user/editProfile.jsx";
+import EditProfilePage from "./pages/user/profile/profile.jsx";
 import RewardsPage from "./pages/user/rewards.jsx";
 import GamePage from "./pages/user/game.jsx";
-import LivestreamPage from "./pages/livestreamPage.jsx";
-import { AuthWrapper } from "./components/context/auth.context.jsx";
 
 const router = createBrowserRouter([
   {

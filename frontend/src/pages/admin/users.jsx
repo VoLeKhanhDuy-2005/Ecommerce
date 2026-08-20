@@ -1,6 +1,6 @@
 import { notification } from "antd";
 import { useEffect, useState } from "react";
-import { getUserApi } from "../../util/api";
+import { getUserApi } from "../../apis";
 import { TeamOutlined } from "@ant-design/icons";
 import UserTable from "../../components/admin/users/UserTable";
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, notification, Card } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
-import { updateSettingApi } from "../../../util/api";
+import { updateSettingApi } from "../../../apis";
 
 const ShippingFeeCard = ({
   initialBaseFee,

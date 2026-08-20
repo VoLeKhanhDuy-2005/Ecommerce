@@ -11,7 +11,7 @@ import {
   notification,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { createProductApi, updateProductApi } from "../../../util/api";
+import { createProductApi, updateProductApi } from "../../../apis";
 
 const { TextArea } = Input;
 const { Option } = Select;

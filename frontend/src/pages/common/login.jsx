@@ -9,9 +9,9 @@ import {
   Row,
   Typography,
 } from "antd";
-import { loginApi } from "../util/api";
+import { loginApi } from "../../apis";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../components/context/auth.context";
+import { AuthContext } from "../../components/common/context/auth.context";
 import {
   ArrowLeftOutlined,
   LockOutlined,

@@ -1,21 +1,27 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+
 import { Spin } from "antd";
 import {
   ArrowRightOutlined,
   FireOutlined,
   StarOutlined,
 } from "@ant-design/icons";
-import { AuthContext } from "../components/context/auth.context";
-import ProductCard from "../components/product/ProductCard";
-import ProductSection from "../components/product/ProductSection";
-import axios from "../util/axios.customize";
-import { getCategoriesApi } from "../util/api";
+import { AuthContext } from "../../components/common/context/auth.context";
+
+import ProductCard from "../../components/common/products/ProductCard";
+import ProductSection from "../../components/common/products/ProductSection";
+
+import axios from "../../apis/axios.customize";
+import { getCategoriesApi } from "../../apis";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
+import { formatCurrency } from "../../utils/formatter";
 
 export default function Home() {
   const { auth } = useContext(AuthContext);
@@ -88,12 +94,6 @@ export default function Home() {
   // 2. Update -> component re-render khi state/props thay đổi
   // 3. Unmount -> component bị xóa khỏi màn hình
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
   if (isLoading) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center">
@@ -156,7 +156,7 @@ export default function Home() {
                     <ProductCard
                       id={item._id}
                       name={item.name}
-                      price={formatPrice(
+                      price={formatCurrency(
                         item.discountPrice && item.discountPrice !== 0
                           ? item.discountPrice
                           : item.price,

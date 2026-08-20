@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const putProfileSchema = z.object({
-  userId: z.string().min(1, "userId là bắt buộc"), //
+  userId: z.string().min(1, "userId là bắt buộc"),
   phone: z
     .string()
     .regex(/^\d+$/, "Số điện thoại chỉ được chứa chữ số")

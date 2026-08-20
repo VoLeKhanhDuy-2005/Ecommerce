@@ -28,7 +28,9 @@ import {
   UploadOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
-import { AuthContext } from "../../components/context/auth.context";
+
+import { AuthContext } from "../../components/common/context/auth.context";
+
 import {
   getMyOrdersApi,
   getOrderDetailsApi,
@@ -39,7 +41,9 @@ import {
   submitReviewApi,
   exportInvoiceApi,
   requestReturnApi,
-} from "../../util/api";
+} from "../../apis";
+
+import { formatCurrency } from "../../utils/formatter";
 
 export default function OrdersPage() {
   const { auth, setCartCount } = useContext(AuthContext);
@@ -468,12 +472,6 @@ export default function OrdersPage() {
     }
   };
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
   const getPaymentMethodLabel = (method) => {
     return method === "MOMO"
       ? "Ví điện tử MoMo"
@@ -635,7 +633,7 @@ export default function OrdersPage() {
                       <div className="font-medium text-gray-600">
                         {ord.items.length} món • Tổng:{" "}
                         <span className="font-bold text-orange-600">
-                          {formatPrice(ord.totalAmount)}
+                          {formatCurrency(ord.totalAmount)}
                         </span>
                       </div>
                     </div>
@@ -927,7 +925,7 @@ export default function OrdersPage() {
                         </div>
                         <div className="flex flex-col items-end justify-center gap-1">
                           <span className="font-bold text-gray-800">
-                            {formatPrice(item.price)}
+                            {formatCurrency(item.price)}
                           </span>
                           {selectedOrder.status === "Delivered" && (
                             <button
@@ -949,7 +947,7 @@ export default function OrdersPage() {
                           Phí giao hàng ({selectedOrder.distance || 0} km):
                         </span>
                         <span className="font-bold text-gray-700">
-                          {formatPrice(selectedOrder.shippingFee)}
+                          {formatCurrency(selectedOrder.shippingFee)}
                         </span>
                       </div>
                     )}
@@ -959,7 +957,7 @@ export default function OrdersPage() {
                           Giảm giá:
                         </span>
                         <span className="font-bold text-gray-700">
-                          {formatPrice(selectedOrder.discountAmount)}
+                          {formatCurrency(selectedOrder.discountAmount)}
                         </span>
                       </div>
                     )}
@@ -968,7 +966,7 @@ export default function OrdersPage() {
                         Tổng cộng hóa đơn:
                       </span>
                       <span className="text-lg font-black text-orange-600">
-                        {formatPrice(selectedOrder.totalAmount)}
+                        {formatCurrency(selectedOrder.totalAmount)}
                       </span>
                     </div>
                   </div>

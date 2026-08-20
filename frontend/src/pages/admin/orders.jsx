@@ -10,7 +10,7 @@ import {
   message,
 } from "antd";
 import { HistoryOutlined } from "@ant-design/icons";
-import { AuthContext } from "../../components/context/auth.context";
+import { AuthContext } from "../../components/common/context/auth.context";
 import {
   getShopOrdersApi,
   updateShopOrderStatusApi,
@@ -19,7 +19,7 @@ import {
   adminApproveReturnApi,
   adminRejectReturnApi,
   adminCompleteReturnApi,
-} from "../../util/api";
+} from "../../apis";
 import { ORDER_FILTER_OPTIONS } from "../../utils/constants";
 import OrderCard from "../../components/admin/orders/OrderCard";
 import OrderDetailModal from "../../components/admin/orders/OrderDetailModal";

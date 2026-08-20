@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { describe, it, expect } from "vitest";
 import Header from "./header";
-import { AuthContext } from "../context/auth.context";
+import { AuthContext } from "../../common/context/auth.context";
 
 describe("Header Component", () => {
   it("renders correctly with logo", () => {

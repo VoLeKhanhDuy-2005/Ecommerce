@@ -9,13 +9,13 @@ import {
   Spin,
 } from "antd";
 import { UserOutlined, SendOutlined } from "@ant-design/icons";
-import { AuthContext } from "../context/auth.context";
+import { AuthContext } from "../../common/context/auth.context";
 import {
   getProductReviewsApi,
   submitReviewApi,
   deleteReviewApi,
   checkReviewEligibilityApi,
-} from "../../util/api";
+} from "../../../apis";
 import dayjs from "dayjs";
 
 const { TextArea } = Input;

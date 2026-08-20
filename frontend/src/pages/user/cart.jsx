@@ -1,27 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Spin,
-  InputNumber,
-  notification,
-  Button,
-  Empty,
-  Steps,
-  Input,
-} from "antd";
-import {
-  DeleteOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
-  PhoneOutlined,
-  EnvironmentOutlined,
-  SearchOutlined,
-  CreditCardOutlined,
-  ArrowRightOutlined,
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
-import { AuthContext } from "../../components/context/auth.context";
-import MapSelector from "../../components/MapSelector";
+import { Spin, notification, Empty, Steps } from "antd";
+import { ArrowRightOutlined } from "@ant-design/icons";
+import { AuthContext } from "../../components/common/context/auth.context";
 import {
   getCartApi,
   addToCartApi,
@@ -32,7 +13,15 @@ import {
   resolveMapLinkApi,
   searchNominatim,
   getMyVouchersApi,
-} from "../../util/api";
+} from "../../apis";
+
+import CartItemList from "../../components/user/cart/CartItemList";
+import CartRecommendations from "../../components/user/cart/CartRecommendations";
+import DeliveryForm from "../../components/user/cart/DeliveryForm";
+import PaymentMethods from "../../components/user/cart/PaymentMethods";
+import OrderSummary from "../../components/user/cart/OrderSummary";
+
+import { formatCurrency } from "../../utils/formatter";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -71,7 +60,6 @@ export default function CartPage() {
       const res = await getCartApi();
       if (res && res.success) {
         setCart({ ...res.data, recommendations: res.recommendations });
-        // Cập nhật số lượng Badge trên Header
         const totalItems = res.data.items.reduce(
           (sum, item) => sum + item.quantity,
           0,
@@ -98,6 +86,10 @@ export default function CartPage() {
         }
       } catch (error) {
         console.error("Lỗi tải voucher:", error);
+        notification.error({
+          message: "Lỗi tải voucher",
+          description: "Không thể lấy thông tin voucher từ server.",
+        });
       }
     };
 
@@ -124,6 +116,10 @@ export default function CartPage() {
           }
         } catch (e) {
           console.error("Lỗi tự động tính phí:", e);
+          notification.error({
+            message: "Lỗi tự động tính phí",
+            description: "Không thể tự động tính phí.",
+          });
         } finally {
           setIsGettingLocation(false);
         }
@@ -142,6 +138,7 @@ export default function CartPage() {
           recommendations: res.recommendations || prev?.recommendations,
         }));
         //Chờ lấy gợi ý mới từ Backend. Nếu Backend không trả về gợi ý mới thì tiếp tục hiển thị gợi ý cũ thay vì làm trắng màn hình
+
         const totalItems = res.data.items.reduce(
           (sum, item) => sum + item.quantity,
           0,
@@ -195,7 +192,7 @@ export default function CartPage() {
       const res = await addToCartApi(productId, 1);
       if (res && res.success) {
         notification.success({ message: "Đã thêm món vào giỏ hàng!" });
-        fetchCart(); // Tải lại giỏ hàng để cập nhật danh sách và gợi ý mới
+        fetchCart();
       } else {
         notification.error({
           message: res.message || "Không thể thêm vào giỏ hàng.",
@@ -243,12 +240,6 @@ export default function CartPage() {
     return 0; // FREE_ITEM logic
   };
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
   // Xử lý thay đổi thông tin form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -278,7 +269,9 @@ export default function CartPage() {
               setDistance(res.data.distance);
               notification.success({
                 message: "Định vị thành công",
-                description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatPrice(res.data.fee)}`,
+                description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatCurrency(
+                  res.data.fee,
+                )}`,
               });
             } else {
               notification.error({ message: "Lỗi tính phí giao hàng" });
@@ -351,9 +344,7 @@ export default function CartPage() {
       } else {
         // Xử lý địa chỉ chữ (Geocoding)
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            address,
-          )}`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
         );
         const data = await response.json();
 
@@ -379,7 +370,6 @@ export default function CartPage() {
             "Đã cập nhật vị trí trên bản đồ, đang tính lại phí giao hàng...",
         });
 
-        // Tính phí giao hàng
         const resShipping = await calculateShippingApi(lat, lng);
         if (resShipping && resShipping.success) {
           setShippingFee(resShipping.data.fee);
@@ -393,6 +383,28 @@ export default function CartPage() {
       notification.error({ message: "Lỗi kết nối khi tìm kiếm vị trí" });
     } finally {
       setIsSearchingAddress(false);
+    }
+  };
+
+  const handleMapChange = async ({ lat, lng }) => {
+    setCoordinates({ lat, lng });
+    setIsGettingLocation(true);
+    try {
+      const res = await calculateShippingApi(lat, lng);
+      if (res && res.success) {
+        setShippingFee(res.data.fee);
+        setDistance(res.data.distance);
+        notification.success({
+          message: "Đã cập nhật phí giao hàng",
+          description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatCurrency(res.data.fee)}`,
+        });
+      } else {
+        notification.error({ message: "Lỗi tính phí giao hàng" });
+      }
+    } catch (e) {
+      notification.error({ message: "Lỗi kết nối khi tính phí giao hàng" });
+    } finally {
+      setIsGettingLocation(false);
     }
   };
 
@@ -440,9 +452,7 @@ export default function CartPage() {
       const res = await createOrderApi(orderPayload);
 
       if (res && res.success) {
-        // Cập nhật giỏ hàng trống trên UI và Badge
         setCartCount(0);
-
         if (paymentMethod === "MOMO" && res.payUrl) {
           notification.success({
             message: "Đặt đơn thành công",
@@ -453,7 +463,6 @@ export default function CartPage() {
           // Mở tab thanh toán MoMo
           window.location.href = res.payUrl;
         } else {
-          // COD đặt hàng trực tiếp thành công
           notification.success({
             message: "🎉 Đặt hàng thành công!",
             description: "Đơn hàng COD của bạn đã được tiếp nhận.",
@@ -541,137 +550,24 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm divide-y divide-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 pb-4 flex items-center gap-2">
-                <ShoppingCartOutlined className="text-orange-500" /> Chi tiết
-                giỏ hàng ({cart.items.length} món)
-              </h2>
+            <CartItemList
+              cartItems={cart.items}
+              handleQuantityChange={handleQuantityChange}
+              handleDeleteItem={handleDeleteItem}
+              formatCurrency={formatCurrency}
+            />
 
-              {cart.items.map((item) => {
-                const isDiscounted =
-                  item.product.price != item.product.discountPrice;
-                const activePrice = isDiscounted
-                  ? item.product.discountPrice
-                  : item.product.price;
-                const originalPrice = item.product.price;
+            <CartRecommendations
+              recommendations={cart.recommendations}
+              handleAddRecommendation={handleAddRecommendation}
+              formatCurrency={formatCurrency}
+            />
 
-                return (
-                  <div
-                    key={item.product._id}
-                    className="py-4 flex items-center gap-4"
-                  >
-                    <img
-                      src={
-                        item.product.images?.[0] || "https://placehold.co/100"
-                      }
-                      alt={item.product.name}
-                      className="w-16 h-16 rounded-xl object-cover border border-gray-100"
-                    />
-
-                    <div className="flex-grow">
-                      <Link
-                        to={`/product/${item.product._id}`}
-                        className="font-bold text-gray-800 hover:text-orange-500 transition-colors text-sm line-clamp-1"
-                      >
-                        {item.product.name}
-                      </Link>
-
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-gray-500">Giá:</span>
-                        <span className="text-sm font-bold text-orange-600">
-                          {formatPrice(activePrice)}
-                        </span>
-                        {isDiscounted && (
-                          <span className="text-xs text-gray-400 line-through">
-                            {formatPrice(originalPrice)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Số lượng */}
-                    <div className="flex flex-col items-center gap-1.5">
-                      <InputNumber
-                        min={1}
-                        max={item.product.stock}
-                        value={item.quantity}
-                        onChange={(value) =>
-                          handleQuantityChange(item.product._id, value)
-                        }
-                        size="small"
-                        className="w-16 rounded-lg text-center"
-                      />
-                      <span className="text-[10px] text-gray-400">
-                        Kho: {item.product.stock}
-                      </span>
-                    </div>
-
-                    {/* Nút xóa */}
-                    <button
-                      onClick={() => handleDeleteItem(item.product._id)}
-                      className="p-2 text-gray-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-colors"
-                    >
-                      <DeleteOutlined />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Gợi ý mua kèm */}
-            {cart.recommendations &&
-              cart.recommendations.products &&
-              cart.recommendations.products.length > 0 && (
-                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-800 pb-4">
-                    {cart.recommendations.title}
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {cart.recommendations.products.map((item) => {
-                      const price =
-                        item.discountPrice && item.discountPrice > 0
-                          ? item.discountPrice
-                          : item.price;
-                      return (
-                        <div
-                          key={item._id}
-                          className="border border-gray-100 rounded-2xl p-3 flex flex-col gap-2 hover:border-orange-300 transition-colors shadow-sm hover:shadow-md"
-                        >
-                          <img
-                            src={item.images?.[0]}
-                            alt={item.name}
-                            className="w-full h-28 object-cover rounded-xl"
-                          />
-                          <Link
-                            to={`/product/${item._id}`}
-                            className="font-bold text-gray-800 text-sm hover:text-orange-500 line-clamp-1"
-                          >
-                            {item.name}
-                          </Link>
-                          <div className="flex justify-between items-center mt-auto pt-2">
-                            <span className="text-orange-600 font-bold text-sm">
-                              {formatPrice(price)}
-                            </span>
-                            <button
-                              onClick={() => handleAddRecommendation(item._id)}
-                              className="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-orange-100 transition-colors"
-                            >
-                              + Thêm
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-            {/* Tổng quan hóa đơn */}
             <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-gray-400">Tổng thanh toán</p>
                 <p className="text-2xl font-black text-orange-600">
-                  {formatPrice(calculateTotal())}
+                  {formatCurrency(calculateTotal())}
                 </p>
               </div>
 
@@ -689,345 +585,40 @@ export default function CartPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Thông tin giao hàng (2/3 width) */}
           <div className="md:col-span-2 space-y-6">
-            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
-              <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
-                📍 Thông tin giao hàng
-              </h2>
+            <DeliveryForm
+              deliveryInfo={deliveryInfo}
+              handleInputChange={handleInputChange}
+              handleSearchAddress={handleSearchAddress}
+              isSearchingAddress={isSearchingAddress}
+              handleGetLocation={handleGetLocation}
+              isGettingLocation={isGettingLocation}
+              coordinates={coordinates}
+              handleMapChange={handleMapChange}
+              distance={distance}
+            />
 
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Họ và tên người nhận
-                  </label>
-                  <Input
-                    name="customerName"
-                    prefix={<UserOutlined className="text-gray-400" />}
-                    placeholder="Nhập họ tên đầy đủ"
-                    value={deliveryInfo.customerName}
-                    onChange={handleInputChange}
-                    className="rounded-xl h-11"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Số điện thoại
-                  </label>
-                  <Input
-                    name="phoneNumber"
-                    prefix={<PhoneOutlined className="text-gray-400" />}
-                    placeholder="Nhập số điện thoại nhận hàng"
-                    value={deliveryInfo.phoneNumber}
-                    onChange={handleInputChange}
-                    className="rounded-xl h-11"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Địa chỉ nhận hàng (Hoặc dán Link Google Maps)
-                  </label>
-                  <Input.TextArea
-                    name="shippingAddress"
-                    placeholder="Địa chỉ cụ thể hoặc dán link Google Maps (ngắn/dài đều được)..."
-                    value={deliveryInfo.shippingAddress}
-                    onChange={handleInputChange}
-                    className="rounded-xl mb-2"
-                    rows={2}
-                  />
-                  <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                    <Button
-                      type="default"
-                      icon={<SearchOutlined />}
-                      onClick={handleSearchAddress}
-                      loading={isSearchingAddress}
-                      className="flex-1 !text-blue-600 !border-blue-500 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-500"
-                    >
-                      Tìm từ Link / Địa chỉ
-                    </Button>
-                    <Button
-                      type="dashed"
-                      icon={<EnvironmentOutlined />}
-                      onClick={handleGetLocation}
-                      loading={isGettingLocation}
-                      className="flex-1 text-orange-500 border-orange-500 hover:bg-orange-50"
-                    >
-                      Dùng GPS của tôi
-                    </Button>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="text-xs font-semibold text-gray-500 block mb-2">
-                      Hoặc chọn vị trí trực tiếp trên bản đồ:
-                    </label>
-                    <MapSelector
-                      defaultLat={coordinates?.lat || 10.850438}
-                      defaultLng={coordinates?.lng || 106.772596}
-                      onChange={async ({ lat, lng }) => {
-                        setCoordinates({ lat, lng });
-                        setIsGettingLocation(true);
-                        try {
-                          const res = await calculateShippingApi(lat, lng);
-                          if (res && res.success) {
-                            setShippingFee(res.data.fee);
-                            setDistance(res.data.distance);
-                            notification.success({
-                              message: "Đã cập nhật phí giao hàng",
-                              description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatPrice(res.data.fee)}`,
-                            });
-                          } else {
-                            notification.error({
-                              message: "Lỗi tính phí giao hàng",
-                            });
-                          }
-                        } catch (e) {
-                          notification.error({
-                            message: "Lỗi kết nối khi tính phí giao hàng",
-                          });
-                        } finally {
-                          setIsGettingLocation(false);
-                        }
-                      }}
-                    />
-                  </div>
-
-                  {distance > 0 && (
-                    <div className="mt-2 text-xs text-green-600 font-medium">
-                      Khoảng cách ước tính: {distance} km
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">
-                    Ghi chú đơn hàng (Tùy chọn)
-                  </label>
-                  <Input.TextArea
-                    name="note"
-                    placeholder="Ví dụ: không hành, ít cay, giao ngoài giờ hành chính..."
-                    value={deliveryInfo.note}
-                    onChange={handleInputChange}
-                    className="rounded-xl"
-                    rows={2}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Chọn phương thức thanh toán */}
-            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
-              <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
-                💳 Phương thức thanh toán
-              </h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Phương thức COD */}
-                <div
-                  onClick={() => setPaymentMethod("COD")}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-2 relative ${
-                    paymentMethod === "COD"
-                      ? "border-orange-500 bg-orange-50/50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800 text-sm">
-                      Thanh toán khi nhận hàng (COD)
-                    </span>
-                    <input
-                      type="radio"
-                      checked={paymentMethod === "COD"}
-                      onChange={() => {}}
-                      className="accent-orange-500 w-4 h-4"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    Nhận hàng và thanh toán tiền mặt trực tiếp cho shipper.
-                  </p>
-                  <span className="text-2xl mt-1">💵</span>
-                </div>
-
-                {/* Phương thức MOMO */}
-                <div
-                  onClick={() => setPaymentMethod("MOMO")}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-2 relative ${
-                    paymentMethod === "MOMO"
-                      ? "border-purple-600 bg-purple-50/30"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800 text-sm">
-                      Ví Điện Tử MoMo (Sandbox)
-                    </span>
-                    <input
-                      type="radio"
-                      checked={paymentMethod === "MOMO"}
-                      onChange={() => {}}
-                      className="accent-purple-600 w-4 h-4"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    Tích hợp thanh toán thật qua cổng thử nghiệm Sandbox của ví
-                    MoMo.
-                  </p>
-                  <span className="text-lg font-black text-purple-600 mt-1 flex items-center gap-1.5">
-                    <span className="w-6 h-6 bg-pink-500 text-white rounded-lg flex items-center justify-center text-xs font-bold font-sans">
-                      Mo
-                    </span>
-                    MoMo Payment
-                  </span>
-                </div>
-              </div>
-            </div>
+            <PaymentMethods
+              paymentMethod={paymentMethod}
+              setPaymentMethod={setPaymentMethod}
+            />
           </div>
 
           {/* Tóm tắt đơn hàng (1/3 width) */}
           <div className="space-y-6">
-            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4 sticky top-24">
-              <h2 className="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">
-                📋 Tóm tắt đơn hàng
-              </h2>
-
-              <div className="max-h-40 overflow-y-auto space-y-2.5 pr-1">
-                {cart.items.map((item) => {
-                  const activePrice =
-                    item.product.discountPrice && item.product.discountPrice > 0
-                      ? item.product.discountPrice
-                      : item.product.price;
-                  return (
-                    <div
-                      key={item.product._id}
-                      className="flex justify-between items-center text-xs"
-                    >
-                      <span className="text-gray-600 font-medium line-clamp-1 max-w-[120px]">
-                        {item.product.name}
-                      </span>
-                      <span className="text-gray-400 text-2xs">
-                        x{item.quantity}
-                      </span>
-                      <span className="text-gray-800 font-bold">
-                        {formatPrice(activePrice)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="border-t border-gray-100 pt-3 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-500">
-                    Tiền hàng:
-                  </span>
-                  <span className="text-sm font-black text-gray-700">
-                    {formatPrice(calculateTotal())}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-500">
-                    Phí giao hàng:
-                  </span>
-                  <span className="text-sm font-black text-gray-700">
-                    {formatPrice(shippingFee)}
-                  </span>
-                </div>
-
-                {/* Voucher Selection UI */}
-                {myVouchers.length > 0 && (
-                  <div className="pt-2">
-                    <label className="text-xs font-semibold text-gray-500 block mb-1">
-                      Áp dụng Voucher
-                    </label>
-                    <select
-                      className="w-full text-xs p-2 border border-gray-200 rounded-lg outline-none focus:border-orange-500"
-                      value={selectedVoucherId || ""}
-                      onChange={(e) =>
-                        setSelectedVoucherId(e.target.value || null)
-                      }
-                    >
-                      <option value="">-- Không sử dụng voucher --</option>
-                      {(() => {
-                        const seen = new Set();
-                        const uniqueVouchers = [];
-                        for (const uv of myVouchers) {
-                          if (uv.voucher && !seen.has(uv.voucher._id)) {
-                            seen.add(uv.voucher._id);
-                            uniqueVouchers.push(uv.voucher);
-                          }
-                        }
-
-                        return uniqueVouchers.map((v) => {
-                          const isEligible =
-                            calculateTotal() >= v.minOrderValue;
-                          return (
-                            <option
-                              key={v._id}
-                              value={v._id}
-                              disabled={!isEligible}
-                            >
-                              {v.title}{" "}
-                              {isEligible
-                                ? ""
-                                : `(Cần tối thiểu ${formatPrice(v.minOrderValue)})`}
-                            </option>
-                          );
-                        });
-                      })()}
-                    </select>
-                  </div>
-                )}
-
-                {calculateDiscount() > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-orange-500">
-                      Khuyến mãi:
-                    </span>
-                    <span className="text-sm font-black text-orange-500">
-                      - {formatPrice(calculateDiscount())}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center border-t border-gray-50 pt-2">
-                  <span className="text-sm font-semibold text-gray-800">
-                    Tổng thanh toán:
-                  </span>
-                  <span className="text-lg font-black text-orange-600">
-                    {formatPrice(
-                      Math.max(
-                        0,
-                        calculateTotal() + shippingFee - calculateDiscount(),
-                      ),
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <Button
-                  type="primary"
-                  onClick={handlePlaceOrder}
-                  loading={isSubmitting}
-                  className={`w-full h-11 rounded-xl font-bold border-none ${
-                    paymentMethod === "MOMO"
-                      ? "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90"
-                      : "bg-orange-500 hover:bg-orange-600"
-                  }`}
-                >
-                  {paymentMethod === "MOMO"
-                    ? "Thanh toán qua MoMo"
-                    : "Đặt hàng COD"}
-                </Button>
-
-                <button
-                  onClick={() => setCurrentStep(0)}
-                  disabled={isSubmitting}
-                  className="w-full h-10 border border-gray-200 text-gray-500 rounded-xl text-xs font-semibold hover:bg-gray-50 hover:text-gray-700 transition-colors flex items-center justify-center gap-1"
-                >
-                  <ArrowLeftOutlined /> Quay lại giỏ hàng
-                </button>
-              </div>
-            </div>
+            <OrderSummary
+              cartItems={cart.items}
+              formatCurrency={formatCurrency}
+              calculateTotal={calculateTotal}
+              shippingFee={shippingFee}
+              myVouchers={myVouchers}
+              selectedVoucherId={selectedVoucherId}
+              setSelectedVoucherId={setSelectedVoucherId}
+              calculateDiscount={calculateDiscount}
+              handlePlaceOrder={handlePlaceOrder}
+              isSubmitting={isSubmitting}
+              paymentMethod={paymentMethod}
+              setCurrentStep={setCurrentStep}
+            />
           </div>
         </div>
       )}

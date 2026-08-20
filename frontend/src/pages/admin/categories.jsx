@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { notification } from "antd";
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { getCategoriesApi, deleteCategoryApi } from "../../util/api";
+import { getCategoriesApi, deleteCategoryApi } from "../../apis";
 import CategoryTable from "../../components/admin/categories/CategoryTable";
 import CategoryModal from "../../components/admin/categories/CategoryModal";
 

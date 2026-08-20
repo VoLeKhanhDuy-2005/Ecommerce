@@ -9,10 +9,13 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
-import ProductCard from "../components/product/ProductCard";
-import ProductReviews from "../components/product/ProductReviews";
-import axios from "../util/axios.customize";
-import { getCategoriesApi } from "../util/api";
+
+import ProductCard from "../../components/common/products/ProductCard";
+import ProductReviews from "../../components/user/products/ProductReviews";
+
+import axios from "../../apis/axios.customize";
+import { getCategoriesApi } from "../../apis";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   Navigation,
@@ -26,8 +29,12 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "swiper/css/thumbs";
-import { AuthContext } from "../components/context/auth.context";
-import { addToCartApi } from "../util/api";
+
+import { AuthContext } from "../../components/common/context/auth.context";
+
+import { addToCartApi } from "../../apis";
+
+import { formatCurrency } from "../../utils/formatter";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -105,12 +112,6 @@ export default function ProductDetailPage() {
     fetchProduct();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [id]);
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
 
   // Xử lý thêm vào giỏ hàng thực tế
   const handleAddToCart = async () => {
@@ -369,7 +370,7 @@ export default function ProductDetailPage() {
                   Giá bán
                 </p>
                 <p className="text-4xl font-black text-orange-600 tracking-tight">
-                  {formatPrice(
+                  {formatCurrency(
                     product.discountPrice && product.discountPrice !== 0
                       ? product.discountPrice
                       : product.price,
@@ -454,7 +455,7 @@ export default function ProductDetailPage() {
                   key={item._id}
                   id={item._id}
                   name={item.name}
-                  price={formatPrice(
+                  price={formatCurrency(
                     item.discountPrice && item.discountPrice !== 0
                       ? item.discountPrice
                       : item.price,

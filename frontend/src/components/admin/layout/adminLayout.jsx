@@ -13,8 +13,8 @@ import {
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/auth.context";
-import { getCurrentUserApi, logoutApi } from "../../util/api";
+import { AuthContext } from "../../common/context/auth.context";
+import { getCurrentUserApi, logoutApi } from "../../../apis";
 import { Spin } from "antd";
 
 const { Sider, Content } = Layout;

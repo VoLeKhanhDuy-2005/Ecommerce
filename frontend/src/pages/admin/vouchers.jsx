@@ -7,7 +7,7 @@ import {
   updateVoucherApi,
   deleteVoucherApi,
   getAdminProductsApi,
-} from "../../util/api";
+} from "../../apis";
 import moment from "moment";
 import VoucherTable from "../../components/admin/vouchers/VoucherTable";
 import VoucherModal from "../../components/admin/vouchers/VoucherModal";

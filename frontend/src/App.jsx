@@ -1,9 +1,13 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import Header from "./components/layout/header";
-import { getCurrentUserApi, getCartApi } from "./util/api";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "./components/context/auth.context";
+
 import { Spin } from "antd";
+
+import Header from "./components/user/header/header";
+
+import { getCurrentUserApi, getCartApi } from "./apis";
+
+import { AuthContext } from "./components/common/context/auth.context";
 
 function App() {
   const { setAuth, setCartCount } = useContext(AuthContext);
