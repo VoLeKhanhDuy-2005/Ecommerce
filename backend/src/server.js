@@ -9,6 +9,7 @@ const rfs = require("rotating-file-stream");
 const apiRoutes = require("./routes/index");
 
 const connection = require("./config/database");
+const { initCronJobs } = require("./services/cronJobsService");
 
 const cors = require("cors");
 
@@ -68,26 +69,6 @@ app.use(errorHandler);
   try {
     await connection();
 
-    setInterval(async () => {
-      try {
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-        const result = await Order.updateMany(
-          { status: "New", createdAt: { $lte: thirtyMinutesAgo } },
-          { $set: { status: "Confirmed" } },
-        );
-        if (result.modifiedCount > 0) {
-          console.log(
-            `[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`,
-          );
-        }
-      } catch (err) {
-        console.error(
-          "Lỗi trong tiến trình quét tự động xác nhận đơn hàng:",
-          err,
-        );
-      }
-    }, 60000); // Quét mỗi 60 giây tự động xác nhận đơn hàng quá 30 phút
-
     const server = http.createServer(app);
     const io = new Server(server, {
       cors: {
@@ -99,6 +80,8 @@ app.use(errorHandler);
       },
     });
     app.set("io", io); //Lưu instance io vào Express App
+
+    initCronJobs(app);
 
     io.on("connection", (socket) => {
       console.log("Client connected via Socket.io:", socket.id);
