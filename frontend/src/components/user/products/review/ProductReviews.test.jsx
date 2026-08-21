@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ProductReviews from "./ProductReviews";
-import { AuthContext } from "../../common/context/auth.context";
+import { AuthContext } from "../../../common/context/auth.context";
 import { vi } from "vitest";
 
 // Mock the API calls
@@ -17,7 +17,7 @@ import {
   submitReviewApi,
   deleteReviewApi,
   checkReviewEligibilityApi,
-} from "../../../apis";
+} from "../../../../apis";
 
 describe("ProductReviews Component", () => {
   beforeEach(() => {
