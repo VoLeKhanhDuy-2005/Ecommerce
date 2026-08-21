@@ -1,6 +1,4 @@
 const express = require("express");
-const auth = require("../middleware/auth");
-
 const authRoutes = require("./authRoutes");
 const userRoutes = require("./userRoutes");
 const productRoutes = require("./productRoutes");
@@ -15,8 +13,6 @@ const livestreamRoutes = require("./livestreamRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
 
 const router = express.Router();
-
-router.all(/(.*)/, auth); // Kiểm tra đăng nhập cho tất cả các route bên dưới
 
 router.use("/", authRoutes);
 router.use("/", userRoutes);

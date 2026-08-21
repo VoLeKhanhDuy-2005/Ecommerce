@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
 const {
   getDashboardStats,
@@ -7,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.get("/admin/dashboard/stats", isAdmin, getDashboardStats);
-router.get("/admin/dashboard/export", isAdmin, exportDashboardStats);
+router.get("/admin/dashboard/stats", auth, isAdmin, getDashboardStats);
+router.get("/admin/dashboard/export", auth, isAdmin, exportDashboardStats);
 
 module.exports = router;

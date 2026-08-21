@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 const {
   getFoodQuestion,
   submitGameAnswer,
@@ -6,7 +7,7 @@ const {
 
 const router = express.Router();
 
-router.get("/game/question", getFoodQuestion);
-router.post("/game/submit", submitGameAnswer);
+router.get("/game/question", auth, getFoodQuestion);
+router.post("/game/submit", auth, submitGameAnswer);
 
 module.exports = router;

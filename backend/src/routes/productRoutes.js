@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
 const { validateProductImages } = require("../middleware/fileValidate");
 const {
@@ -27,18 +28,19 @@ router.get("/products/search", searchProducts);
 router.get("/products/:id", getProductDetail);
 router.patch("/products/:id/view", incrementView);
 router.get("/products/:id/reviews", handleGetProductReviews);
-router.get("/products/:id/reviews/eligibility", handleCheckEligibility);
-router.post("/products/:id/reviews", handleAddReview);
-router.delete("/products/:id/reviews", handleDeleteReview);
+router.get("/products/:id/reviews/eligibility", auth, handleCheckEligibility);
+router.post("/products/:id/reviews", auth, handleAddReview);
+router.delete("/products/:id/reviews", auth, handleDeleteReview);
 
-router.get("/admin/products", isAdmin, getAllProducts);
-router.post("/admin/products", isAdmin, validateProductImages, createProduct);
+router.get("/admin/products", auth, isAdmin, getAllProducts);
+router.post("/admin/products", auth, isAdmin, validateProductImages, createProduct);
 router.put(
   "/admin/products/:id",
+  auth,
   isAdmin,
   validateProductImages,
   updateProduct,
 );
-router.delete("/admin/products/:id", isAdmin, deleteProduct);
+router.delete("/admin/products/:id", auth, isAdmin, deleteProduct);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
 const {
   getSettings,
@@ -8,6 +9,6 @@ const {
 const router = express.Router();
 
 router.get("/settings", getSettings);
-router.put("/admin/settings", isAdmin, updateSetting);
+router.put("/admin/settings", auth, isAdmin, updateSetting);
 
 module.exports = router;
