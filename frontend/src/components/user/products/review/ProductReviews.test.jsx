@@ -5,7 +5,7 @@ import { AuthContext } from "../../../common/context/auth.context";
 import { vi } from "vitest";
 
 // Mock the API calls
-vi.mock("../../../apis", () => ({
+vi.mock("../../../../apis", () => ({
   getProductReviewsApi: vi.fn(),
   submitReviewApi: vi.fn(),
   deleteReviewApi: vi.fn(),
