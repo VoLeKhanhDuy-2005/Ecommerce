@@ -1,5 +1,9 @@
 require("dotenv").config();
 const express = require("express"); //commonjs
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const compression = require("compression");
 
 const morgan = require("morgan");
 const fs = require("fs");
@@ -17,12 +21,29 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/errorHandler");
 const { apiLimiter } = require("./middleware/rateLimiter");
 
-const Order = require("./models/order");
-
 const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express(); //cấu hình app là express
+
+// --- Security & Performance Middlewares ---
+app.use(helmet({ crossOriginResourcePolicy: false })); // Bảo vệ HTTP headers (tắt CORP để không lỗi load ảnh S3)
+
+// Workaround cho express-mongo-sanitize bị lỗi trên Express 5.x (req.query is read-only)
+app.use((req, res, next) => {
+  if (req.query) {
+    Object.defineProperty(req, "query", {
+      value: { ...req.query },
+      writable: true,
+      configurable: true,
+    });
+  }
+  next();
+});
+app.use(mongoSanitize()); // Ngăn chặn NoSQL Injection
+app.use(xss()); // Ngăn chặn XSS
+app.use(compression()); // Nén response bằng GZIP
+
 app.set("trust proxy", 1); // Trust first proxy (Render) for rate limiting behind load balancers
 const port = process.env.PORT || 8888;
 app.use(
