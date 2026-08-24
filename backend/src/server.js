@@ -8,9 +8,6 @@ const xss = require("xss-clean");
 const compression = require("compression");
 
 const morgan = require("morgan");
-const fs = require("fs");
-const path = require("path");
-const rfs = require("rotating-file-stream");
 
 const apiRoutes = require("./routes/index");
 
@@ -57,23 +54,13 @@ app.use(
 //config cors cho phép từ trình duyệt gửi thông tin xác thực (cookie, Authorization headers ,...)
 //trong các req đến server
 
-const logDirectory = path.join(__dirname, "../logs");
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
-
-const pad = (num) => (num > 9 ? "" : "0") + num;
-const generator = (time) => {
-  if (!time) time = new Date();
-  const year = time.getFullYear();
-  const month = pad(time.getMonth() + 1);
-  const day = pad(time.getDate());
-  return `${year}-${month}-${day}-access.log`;
+// Tích hợp Morgan (HTTP Access Logger) đẩy dữ liệu thẳng vào Winston
+const morganStream = {
+  write: (message) => {
+    logger.info(message.trim());
+  },
 };
-
-const accessLogStream = rfs.createStream(generator, {
-  interval: "1d", // rotate daily
-  path: logDirectory,
-});
-app.use(morgan("combined", { stream: accessLogStream }));
+app.use(morgan("combined", { stream: morganStream }));
 /*
   ":referrer": Ghi lại địa chỉ trang web trước đó mà người dùng đã bấm vào để dẫn tới trang hiện tại
    (lấy từ HTTP Referer header)
