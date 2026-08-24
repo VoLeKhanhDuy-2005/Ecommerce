@@ -1,4 +1,6 @@
 require("dotenv").config();
+const logger = require("../utils/logger");
+
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -57,10 +59,10 @@ const sendMail = async ({ to, subject, text, html, type, otp }) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: " + info.response);
+    logger.info("Email sent: " + info.response);
     return true;
   } catch (error) {
-    console.error("Lỗi khi gửi email:", error);
+    logger.error("Lỗi khi gửi email:", error);
     return false;
   }
 };

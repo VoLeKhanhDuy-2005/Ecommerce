@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Cart = require("../models/cart");
 const Product = require("../models/product");
 const { redisClient } = require("../config/redis");
@@ -108,7 +109,7 @@ const cacheCart = async (userEmail, cartData) => {
       );
     }
   } catch (error) {
-    console.error(`Lỗi khi lưu cache cho cart ${userEmail}:`, error.message);
+    logger.error(`Lỗi khi lưu cache cho cart ${userEmail}:`, error.message);
   }
 };
 
@@ -118,7 +119,7 @@ const invalidateCartCache = async (userEmail) => {
       await redisClient.del(getCartCacheKey(userEmail));
     }
   } catch (error) {
-    console.error(`Lỗi khi xóa cache cho cart ${userEmail}:`, error.message);
+    logger.error(`Lỗi khi xóa cache cho cart ${userEmail}:`, error.message);
   }
 };
 
@@ -129,7 +130,7 @@ const getCart = async (userEmail) => {
       try {
         const cachedCart = await redisClient.get(getCartCacheKey(userEmail));
         if (cachedCart) {
-          console.log(`[Cache Hit] Lấy giỏ hàng từ Redis cho ${userEmail}`);
+          logger.info(`[Cache Hit] Lấy giỏ hàng từ Redis cho ${userEmail}`);
           const cartData = JSON.parse(cachedCart);
           const recommendations = await getCartRecommendations(cartData);
           return {
@@ -140,11 +141,11 @@ const getCart = async (userEmail) => {
           };
         }
       } catch (cacheError) {
-        console.error(`[Cache Error] Lỗi đọc từ Redis: ${cacheError.message}`);
+        logger.error(`[Cache Error] Lỗi đọc từ Redis: ${cacheError.message}`);
       }
     }
 
-    console.log(`[Cache Miss] Đọc giỏ hàng từ MongoDB cho ${userEmail}`);
+    logger.info(`[Cache Miss] Đọc giỏ hàng từ MongoDB cho ${userEmail}`);
     // Fetch from DB
     let cart = await Cart.findOne({ userEmail }).populate("items.product");
     if (!cart) {

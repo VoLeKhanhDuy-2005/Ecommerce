@@ -7,6 +7,8 @@ const {
 const crypto = require("crypto");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 require("dotenv").config();
+const logger = require("../utils/logger");
+
 const sharp = require("sharp");
 
 const bucketName = process.env.BUCKET_NAME;
@@ -46,7 +48,7 @@ const getImagePresignedUrlByKey = async (key) => {
       expiresIn: 60,
     });
   } catch (error) {
-    console.error(`Error presigning URL for key ${key}:`, error.message);
+    logger.error(`Error presigning URL for key ${key}:`, error.message);
     return key;
   }
 };
@@ -67,7 +69,7 @@ const deleteFileFromS3ByKey = async (key) => {
   try {
     await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
   } catch (error) {
-    console.error(`Failed to delete S3 object ${key}:`, error.message);
+    logger.error(`Failed to delete S3 object ${key}:`, error.message);
   }
 };
 

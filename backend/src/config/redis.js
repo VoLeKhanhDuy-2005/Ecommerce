@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const { createClient } = require("redis");
 
 const redisClient = createClient({
@@ -6,21 +7,21 @@ const redisClient = createClient({
 });
 
 redisClient.on("error", (err) => {
-  console.error("Redis Client Error:", err.message); // Không throw error để tránh crash app. App sẽ fallback xuống Database.
+  logger.error("Redis Client Error:", err.message); // Không throw error để tránh crash app. App sẽ fallback xuống Database.
 });
 
 redisClient.on("connect", () => {
-  console.log("Redis connected");
+  logger.info("Redis connected");
 });
 
 redisClient.on("reconnecting", () => {
-  console.log("Redis reconnecting...");
+  logger.info("Redis reconnecting...");
 });
 
 // Start connecting immediately so that rate limiter commands can be queued
 if (process.env.NODE_ENV !== "test") {
   redisClient.connect().catch((error) => {
-    console.error(
+    logger.error(
       "Can not connect to Redis at startup. The system will continue to run using MongoDB.",
       error.message,
     );

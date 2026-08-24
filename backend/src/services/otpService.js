@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const { redisClient } = require("../config/redis");
 const OTPModel = require("../models/otp");
 
@@ -17,13 +18,13 @@ const generateOTP = async (email, type) => {
       return otp;
     } else {
       // Fallback: Lưu vào MongoDB
-      console.log("Redis không sẵn sàng, sử dụng MongoDB làm fallback lưu OTP");
+      logger.info("Redis không sẵn sàng, sử dụng MongoDB làm fallback lưu OTP");
       await OTPModel.deleteMany({ email, type }); // Xóa OTP cũ nếu có
       await OTPModel.create({ email, type, otp });
       return otp;
     }
   } catch (error) {
-    console.error("Lỗi khi tạo OTP:", error.message);
+    logger.error("Lỗi khi tạo OTP:", error.message);
     throw error;
   }
 };
@@ -51,7 +52,7 @@ const verifyOTP = async (email, type, inputOtp) => {
       }
     } else {
       // Fallback: Xác thực bằng MongoDB
-      console.log(
+      logger.info(
         "Redis không sẵn sàng, sử dụng MongoDB làm fallback xác thực OTP",
       );
       const storedOtpDoc = await OTPModel.findOne({ email, type });
@@ -72,7 +73,7 @@ const verifyOTP = async (email, type, inputOtp) => {
       }
     }
   } catch (error) {
-    console.error("Lỗi khi xác thực OTP:", error.message);
+    logger.error("Lỗi khi xác thực OTP:", error.message);
     throw error;
   }
 };

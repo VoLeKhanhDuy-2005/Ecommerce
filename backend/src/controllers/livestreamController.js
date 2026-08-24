@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const { AccessToken } = require("livekit-server-sdk");
 
 const generateToken = async (req, res) => {
@@ -18,7 +19,7 @@ const generateToken = async (req, res) => {
     const participantName = user.name || user.email;
 
     if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET) {
-      console.error(
+      logger.error(
         "Missing LIVEKIT_API_KEY or LIVEKIT_API_SECRET in environment variables.",
       );
       return res.status(500).json({
@@ -52,7 +53,7 @@ const generateToken = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Success", data: { token } });
   } catch (error) {
-    console.error("Generate LiveKit token error: ", error);
+    logger.error("Generate LiveKit token error: ", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

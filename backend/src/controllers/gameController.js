@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Product = require("../models/product");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
@@ -54,7 +55,7 @@ const getFoodQuestion = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Lỗi getFoodQuestion:", error);
+    logger.error("Lỗi getFoodQuestion:", error);
     return res.status(500).json({ success: false, message: "Lỗi Server" });
   }
 };
@@ -109,7 +110,7 @@ const submitGameAnswer = async (req, res) => {
       coinsEarned,
     });
   } catch (error) {
-    console.error("Lỗi submitGameAnswer:", error);
+    logger.error("Lỗi submitGameAnswer:", error);
     return res.status(500).json({ success: false, message: "Lỗi Server" });
   }
 };

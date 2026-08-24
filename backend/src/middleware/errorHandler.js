@@ -1,5 +1,6 @@
+const logger = require("../utils/logger");
 function errorHandler(err, req, res, next) {
-  console.error(err);
+  logger.error(err);
 
   const statusCode = err.statusCode || err.status || 500;
   const message = err.message || "Lỗi server";

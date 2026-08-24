@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Product = require("../models/product");
 const {
   uploadFileToS3,
@@ -27,7 +28,7 @@ const getAllProducts = async (req, res) => {
       data: productsWithUrls,
     });
   } catch (error) {
-    console.error("Error getting products:", error);
+    logger.error("Error getting products:", error);
     return res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
@@ -98,7 +99,7 @@ const createProduct = async (req, res) => {
       data: newProduct,
     });
   } catch (error) {
-    console.error("Error creating product:", error);
+    logger.error("Error creating product:", error);
     return res
       .status(500)
       .json({ success: false, message: "Lỗi server: " + error.message });
@@ -177,7 +178,7 @@ const updateProduct = async (req, res) => {
       data: updatedProduct,
     });
   } catch (error) {
-    console.error("Error updating product:", error);
+    logger.error("Error updating product:", error);
     return res
       .status(500)
       .json({ success: false, message: "Lỗi server: " + error.message });
@@ -207,7 +208,7 @@ const deleteProduct = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Xóa sản phẩm thành công" });
   } catch (error) {
-    console.error("Error deleting product:", error);
+    logger.error("Error deleting product:", error);
     return res
       .status(500)
       .json({ success: false, message: "Lỗi server: " + error.message });

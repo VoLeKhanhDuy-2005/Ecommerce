@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const User = require("../models/user");
 const Order = require("../models/order");
 const excel = require("exceljs");
@@ -116,7 +117,7 @@ const getDashboardStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Dashboard Stats Error:", error);
+    logger.error("Dashboard Stats Error:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi lấy dữ liệu thống kê",
@@ -253,7 +254,7 @@ const exportDashboardStats = async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
   } catch (error) {
-    console.error("Export Error:", error);
+    logger.error("Export Error:", error);
     res.status(500).json({ success: false, message: "Lỗi xuất file Excel" });
   }
 };

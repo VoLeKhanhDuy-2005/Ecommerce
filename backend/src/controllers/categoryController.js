@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Category = require("../models/category");
 const Product = require("../models/product");
 const {
@@ -43,7 +44,7 @@ const createCategory = async (req, res) => {
       data: newCategory,
     });
   } catch (error) {
-    console.error("Error creating category:", error);
+    logger.error("Error creating category:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi server",
@@ -71,7 +72,7 @@ const getAllCategories = async (req, res) => {
       data: categoriesWithUrls,
     });
   } catch (error) {
-    console.error("Error getting categories:", error);
+    logger.error("Error getting categories:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi server",
@@ -136,7 +137,7 @@ const updateCategory = async (req, res) => {
       data: updatedCategory,
     });
   } catch (error) {
-    console.error("Error updating category:", error);
+    logger.error("Error updating category:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi server",
@@ -172,7 +173,7 @@ const deleteCategory = async (req, res) => {
       message: "Xóa danh mục thành công",
     });
   } catch (error) {
-    console.error("Error deleting category:", error);
+    logger.error("Error deleting category:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi server",

@@ -1,4 +1,6 @@
 require("dotenv").config();
+const logger = require("../utils/logger");
+
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -36,7 +38,7 @@ const registerService = async (name, email, password, otp) => {
     });
     return { success: true, message: "Đăng ký thành công", data: result };
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return { success: false, message: "Lỗi hệ thống" };
   }
 };
@@ -51,7 +53,7 @@ const sendRegisterOTPService = async (email) => {
 
     // Gửi email ở background (không dùng await) để frontend phản hồi ngay lập tức
     sendMail({ to: email, otp, type: "register" }).catch((err) => {
-      console.error("Lỗi gửi email ở background:", err);
+      logger.error("Lỗi gửi email ở background:", err);
     });
 
     return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
@@ -70,7 +72,7 @@ const sendForgotPasswordOTPService = async (email) => {
 
     // Gửi email ở background
     sendMail({ to: email, otp, type: "forgot" }).catch((err) => {
-      console.error("Lỗi gửi email quên mật khẩu ở background:", err);
+      logger.error("Lỗi gửi email quên mật khẩu ở background:", err);
     });
 
     return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
@@ -104,7 +106,7 @@ const resetPasswordService = async (email, otp, newPassword) => {
 
     return { success: true, message: "Đổi mật khẩu thành công" };
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return { success: false, message: "Lỗi hệ thống" };
   }
 };
@@ -160,7 +162,7 @@ const loginService = async (email1, password) => {
       };
     }
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return null;
   }
 };
@@ -185,7 +187,7 @@ const refreshTokenService = async (token) => {
       user: payload,
     };
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return {
       success: false,
       message: "Refresh token không hợp lệ hoặc đã hết hạn",
@@ -198,14 +200,14 @@ const getUserService = async () => {
     let result = await User.find({}).select("-password");
     return result;
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return null;
   }
 };
 
 const getCurrentUserService = async (email1) => {
   try {
-    console.log(email1);
+    logger.info(email1);
     let user = await User.findOne({ email: email1 }).select("-password");
 
     if (user) {
@@ -225,7 +227,7 @@ const getCurrentUserService = async (email1) => {
       };
     }
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     return {
       success: false,
       message: "Lỗi hệ thống",

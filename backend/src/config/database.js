@@ -1,4 +1,6 @@
 require("dotenv").config();
+const logger = require("../utils/logger");
+
 const mongoose = require("mongoose");
 
 const dbState = [
@@ -23,7 +25,7 @@ const dbState = [
 const connection = async () => {
   await mongoose.connect(process.env.MONGO_DB_URL);
   const state = Number(mongoose.connection.readyState);
-  console.log(dbState.find((f) => f.value === state).label, "to database"); // connected to db
+  logger.info(dbState.find((f) => f.value === state).label, "to database"); // connected to db
 };
 
 module.exports = connection;

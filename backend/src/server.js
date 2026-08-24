@@ -1,4 +1,6 @@
 require("dotenv").config();
+const logger = require("./utils/logger");
+
 const express = require("express"); //commonjs
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -105,32 +107,32 @@ app.use(errorHandler);
     initCronJobs(app);
 
     io.on("connection", (socket) => {
-      console.log("Client connected via Socket.io:", socket.id);
+      logger.info("Client connected via Socket.io:", socket.id);
 
       socket.on("JOIN_USER_ROOM", (userIdOrEmail) => {
         if (userIdOrEmail) {
           socket.join(`user_${userIdOrEmail}`);
-          console.log(`Socket ${socket.id} joined room: user_${userIdOrEmail}`);
+          logger.info(`Socket ${socket.id} joined room: user_${userIdOrEmail}`);
         }
       });
 
       socket.on("JOIN_ADMIN_ROOM", () => {
         socket.join("admin_room");
         const roomSize = io.sockets.adapter.rooms.get("admin_room")?.size || 0;
-        console.log(
+        logger.info(
           `[Socket] ${socket.id} joined admin_room (total in room: ${roomSize})`,
         );
       });
 
       socket.on("disconnect", () => {
-        console.log("Client disconnected:", socket.id);
+        logger.info("Client disconnected:", socket.id);
       });
     });
 
     server.listen(port, () => {
-      console.log(`Backend Nodejs App listening on port ${port}`);
+      logger.info(`Backend Nodejs App listening on port ${port}`);
     });
   } catch (error) {
-    console.log(">>> Error connect to DB: ", error);
+    logger.info(">>> Error connect to DB: ", error);
   }
 })();

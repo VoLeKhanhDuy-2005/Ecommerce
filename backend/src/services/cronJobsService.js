@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const cron = require("node-cron");
 const Order = require("../models/order");
 const { redisClient } = require("../config/redis");
@@ -31,7 +32,7 @@ const initCronJobs = (app) => {
           { $set: { status: "Confirmed" } }
         );
 
-        console.log(
+        logger.info(
           `[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`
         );
 
@@ -50,14 +51,14 @@ const initCronJobs = (app) => {
         }
       }
     } catch (err) {
-      console.error(
+      logger.error(
         "Lỗi trong tiến trình quét tự động xác nhận đơn hàng:",
         err
       );
     }
   });
 
-  console.log("Cron jobs initialized.");
+  logger.info("Cron jobs initialized.");
 };
 
 module.exports = {

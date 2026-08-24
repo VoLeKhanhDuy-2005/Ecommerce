@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const orderService = require("../services/orderService");
 const invoiceService = require("../services/invoiceService");
 const Order = require("../models/order");
@@ -14,7 +15,7 @@ const createOrder = async (req, res, next) => {
       if (io) {
         const adminRoom = io.sockets.adapter.rooms.get("admin_room");
         const adminCount = adminRoom ? adminRoom.size : 0;
-        console.log(
+        logger.info(
           `[Socket] Emitting NEW_ORDER to admin_room (${adminCount} admins connected)`,
         );
         io.to("admin_room").emit("NEW_ORDER", {
@@ -25,7 +26,7 @@ const createOrder = async (req, res, next) => {
           orderId: data?.data?._id,
         });
       } else {
-        console.log("[Socket] ERROR: io không tìm thấy trong app!");
+        logger.info("[Socket] ERROR: io không tìm thấy trong app!");
       }
     }
     return res.status(statusCode).json(data);

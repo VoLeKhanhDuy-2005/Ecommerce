@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const handleResolveMapLink = async (req, res) => {
   const { url } = req.body;
   if (!url) {
@@ -95,7 +96,7 @@ const handleResolveMapLink = async (req, res) => {
       message: "Không tìm thấy tọa độ trong link bản đồ này",
     });
   } catch (error) {
-    console.error("Resolve map link error:", error);
+    logger.error("Resolve map link error:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi kết nối khi phân tích link bản đồ",
