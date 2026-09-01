@@ -90,7 +90,7 @@ const postHTTPS = (url, data) => {
       res.on("end", () => {
         try {
           resolve(JSON.parse(body));
-        } catch (e) {
+        } catch {
           reject({ error: "Failed to parse JSON response: " + body });
         }
       });
@@ -511,7 +511,7 @@ const getMyOrders = async (userEmail) => {
   }
 };
 
-const getOrderDetails = async (orderIdParams, userEmail) => {
+const getOrderDetails = async (orderIdParams) => {
   try {
     const order = await Order.findById(orderIdParams);
     if (!order) {
@@ -893,11 +893,11 @@ const requestReturn = async (orderId, userEmail, body, files) => {
     };
   }
 
-  let returnItems = [];
+  let returnItems;
   try {
     returnItems =
       typeof body.items === "string" ? JSON.parse(body.items) : body.items;
-  } catch (e) {
+  } catch {
     return {
       statusCode: 400,
       success: false,
@@ -1083,6 +1083,7 @@ async function completeReturn(orderIdOrDoc) {
               refundRes.resultCode === 9000
             ) {
               //mã lỗi 7002 (Đang xử lý) hoặc 9000 (Giao dịch đang chờ xác nhận)
+              // eslint-disable-next-line no-console
               console.warn(
                 `MOMO Sandbox Warning: ${refundRes.message} (Mã lỗi: ${refundRes.resultCode}). Bỏ qua lỗi này trong môi trường test.`,
               );
@@ -1095,6 +1096,7 @@ async function completeReturn(orderIdOrDoc) {
         } catch (err) {
           throw new Error(
             "Lỗi khi kết nối hoặc hoàn tiền qua MoMo: " + err.message,
+            { cause: err },
           );
         }
       }

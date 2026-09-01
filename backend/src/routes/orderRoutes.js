@@ -42,8 +42,18 @@ router.post(
   isAdmin,
   handleShopCancelRequest,
 );
-router.put("/admin/orders/:id/return-approve", auth, isAdmin, adminApproveReturn);
+router.put(
+  "/admin/orders/:id/return-approve",
+  auth,
+  isAdmin,
+  adminApproveReturn,
+);
 router.put("/admin/orders/:id/return-reject", auth, isAdmin, adminRejectReturn);
-router.put("/admin/orders/:id/return-complete", auth, isAdmin, adminCompleteReturn);
+router.put(
+  "/admin/orders/:id/return-complete",
+  auth,
+  isAdmin,
+  adminCompleteReturn,
+);
 
 module.exports = router;

@@ -15,7 +15,7 @@ const auth = (req, res, next) => {
         createdBy: "volekhanhduy2005",
       };
       next();
-    } catch (error) {
+    } catch {
       return res.status(401).json({
         success: false,
         message: "Token bị hết hạn/hoặc không hợp lệ",

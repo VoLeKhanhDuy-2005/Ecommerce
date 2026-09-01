@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+// Đây là file test (chạy độc lập) nên việc dùng console.log để xem kết quả là hoàn toàn bình thường
+
 const { AccessToken } = require("livekit-server-sdk");
 const dotenv = require("dotenv");
 const path = require("path");

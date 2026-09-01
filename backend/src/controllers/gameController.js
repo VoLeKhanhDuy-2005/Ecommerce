@@ -76,7 +76,7 @@ const submitGameAnswer = async (req, res) => {
         token,
         process.env.JWT_SECRET || "secret-key-for-game",
       );
-    } catch (err) {
+    } catch {
       return res.status(400).json({
         success: false,
         message: "Token không hợp lệ hoặc đã hết hạn",

@@ -15,11 +15,7 @@ const consoleFormat = combine(
 );
 
 // Định dạng log cho File (chuẩn JSON để hệ thống khác dễ đọc)
-const fileFormat = combine(
-  timestamp(),
-  errors({ stack: true }),
-  json(),
-);
+const fileFormat = combine(timestamp(), errors({ stack: true }), json());
 
 const logDirectory = path.join(__dirname, "../../logs");
 

@@ -20,8 +20,8 @@ const mapProductImageUrls = async (products) => {
 
 const getTimeBasedRecommendations = async () => {
   const vnHour = (new Date().getUTCHours() + 7) % 24;
-  let title = "";
-  let keywords = [];
+  let title;
+  let keywords;
 
   if (vnHour >= 5 && vnHour < 10) {
     title = "Năng lượng cho buổi sáng ☀️";

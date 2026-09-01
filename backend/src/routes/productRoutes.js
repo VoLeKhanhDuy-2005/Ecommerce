@@ -33,7 +33,13 @@ router.post("/products/:id/reviews", auth, handleAddReview);
 router.delete("/products/:id/reviews", auth, handleDeleteReview);
 
 router.get("/admin/products", auth, isAdmin, getAllProducts);
-router.post("/admin/products", auth, isAdmin, validateProductImages, createProduct);
+router.post(
+  "/admin/products",
+  auth,
+  isAdmin,
+  validateProductImages,
+  createProduct,
+);
 router.put(
   "/admin/products/:id",
   auth,

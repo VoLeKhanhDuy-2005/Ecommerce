@@ -104,7 +104,6 @@ const getOrderDetails = async (req, res, next) => {
   try {
     const { statusCode, ...data } = await orderService.getOrderDetails(
       req.params.id,
-      req.user.email,
     );
     return res.status(statusCode).json(data);
   } catch (error) {

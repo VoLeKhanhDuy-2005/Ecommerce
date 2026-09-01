@@ -53,8 +53,8 @@ const getCartRecommendations = async (cart) => {
     drinkKeywords.some((k) => name.includes(k)),
   );
 
-  let targetKeywords = [];
-  let title = "Có thể bạn sẽ thích 😋";
+  let targetKeywords;
+  let title;
 
   if (hasFood && !hasDrink) {
     targetKeywords = drinkKeywords;

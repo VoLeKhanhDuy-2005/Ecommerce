@@ -13,7 +13,7 @@ const initCronJobs = (app) => {
       const lockAcquired = await redisClient.set(
         "lock:auto-confirm-order",
         "locked",
-        { NX: true, EX: 50 }
+        { NX: true, EX: 50 },
       );
 
       // Nếu không xin được lock (server khác đã xin chạy trước trong phút này), thì return ngay lập tức
@@ -23,17 +23,20 @@ const initCronJobs = (app) => {
 
       // 2. Đã giữ lock, tiến hành logic update DB
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-      
-      const ordersToUpdate = await Order.find({ status: "New", createdAt: { $lte: thirtyMinutesAgo } });
+
+      const ordersToUpdate = await Order.find({
+        status: "New",
+        createdAt: { $lte: thirtyMinutesAgo },
+      });
 
       if (ordersToUpdate.length > 0) {
         const result = await Order.updateMany(
           { status: "New", createdAt: { $lte: thirtyMinutesAgo } },
-          { $set: { status: "Confirmed" } }
+          { $set: { status: "Confirmed" } },
         );
 
         logger.info(
-          `[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`
+          `[Auto-Confirm Background Job] Đã tự động xác nhận ${result.modifiedCount} đơn hàng.`,
         );
 
         const io = app.get("io");
@@ -51,10 +54,7 @@ const initCronJobs = (app) => {
         }
       }
     } catch (err) {
-      logger.error(
-        "Lỗi trong tiến trình quét tự động xác nhận đơn hàng:",
-        err
-      );
+      logger.error("Lỗi trong tiến trình quét tự động xác nhận đơn hàng:", err);
     }
   });
 

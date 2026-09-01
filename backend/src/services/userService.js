@@ -57,7 +57,7 @@ const sendRegisterOTPService = async (email) => {
     });
 
     return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Lỗi hệ thống khi gửi OTP" };
   }
 };
@@ -76,7 +76,7 @@ const sendForgotPasswordOTPService = async (email) => {
     });
 
     return { success: true, message: "Mã OTP đang được gửi đến email của bạn" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Lỗi hệ thống khi gửi OTP" };
   }
 };
@@ -261,7 +261,7 @@ const updateProfile = async (email, body, file) => {
     if (user.avatarName) user.avatarURL = await getImagePresignedUrl(user);
 
     return { success: true, message: "Cập nhật hồ sơ thành công", data: user };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: "Lỗi cập nhật hồ sơ",
