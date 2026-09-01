@@ -1,37 +1,37 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "./App.jsx";
-import "./index.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './App.jsx';
+import './index.css';
 
-import AdminLayout from "./components/admin/layout/adminLayout.jsx";
-import AdminDashboardPage from "./pages/admin/dashboard.jsx";
-import AdminOrdersPage from "./pages/admin/orders.jsx";
-import AdminCategoriesPage from "./pages/admin/categories.jsx";
-import AdminProductsPage from "./pages/admin/products.jsx";
-import AdminSettingsPage from "./pages/admin/settings.jsx";
-import AdminVouchersPage from "./pages/admin/vouchers.jsx";
-import UserPage from "./pages/admin/users.jsx";
+import AdminLayout from './components/admin/layout/adminLayout.jsx';
+import AdminDashboardPage from './pages/admin/dashboard.jsx';
+import AdminOrdersPage from './pages/admin/orders.jsx';
+import AdminCategoriesPage from './pages/admin/categories.jsx';
+import AdminProductsPage from './pages/admin/products.jsx';
+import AdminSettingsPage from './pages/admin/settings.jsx';
+import AdminVouchersPage from './pages/admin/vouchers.jsx';
+import UserPage from './pages/admin/users.jsx';
 
-import RegisterPage from "./pages/common/register.jsx";
-import HomePage from "./pages/common/home.jsx";
-import LoginPage from "./pages/common/login.jsx";
-import SearchFilterPage from "./pages/common/search.jsx";
-import ForgotPasswordPage from "./pages/common/forgotPassword.jsx";
-import LivestreamPage from "./pages/common/livestreamPage.jsx";
+import RegisterPage from './pages/common/register.jsx';
+import HomePage from './pages/common/home.jsx';
+import LoginPage from './pages/common/login.jsx';
+import SearchFilterPage from './pages/common/search.jsx';
+import ForgotPasswordPage from './pages/common/forgotPassword.jsx';
+import LivestreamPage from './pages/common/livestreamPage.jsx';
 
-import { AuthWrapper } from "./components/common/context/auth.context.jsx";
+import { AuthWrapper } from './components/common/context/auth.context.jsx';
 
-import ProductDetailPage from "./pages/user/productDetail.jsx";
-import CartPage from "./pages/user/cart.jsx";
-import OrdersPage from "./pages/user/orders.jsx";
-import EditProfilePage from "./pages/user/profile/profile.jsx";
-import RewardsPage from "./pages/user/rewards.jsx";
-import GamePage from "./pages/user/game.jsx";
+import ProductDetailPage from './pages/user/productDetail.jsx';
+import CartPage from './pages/user/cart.jsx';
+import OrdersPage from './pages/user/orders.jsx';
+import EditProfilePage from './pages/user/profile/profile.jsx';
+import RewardsPage from './pages/user/rewards.jsx';
+import GamePage from './pages/user/game.jsx';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />,
     children: [
       {
@@ -39,37 +39,37 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "product/:id",
+        path: 'product/:id',
         element: <ProductDetailPage />,
       },
       {
-        path: "search",
+        path: 'search',
         element: <SearchFilterPage />,
       },
       {
-        path: "cart",
+        path: 'cart',
         element: <CartPage />,
       },
       {
-        path: "orders",
+        path: 'orders',
         element: <OrdersPage />,
       },
       {
-        path: "profile",
+        path: 'profile',
         element: <EditProfilePage />,
       },
       {
-        path: "rewards",
+        path: 'rewards',
         element: <RewardsPage />,
       },
       {
-        path: "game",
+        path: 'game',
         element: <GamePage />,
       },
     ],
   },
   {
-    path: "/admin",
+    path: '/admin',
     element: <AdminLayout />,
     children: [
       {
@@ -77,53 +77,53 @@ const router = createBrowserRouter([
         element: <AdminDashboardPage />,
       },
       {
-        path: "users",
+        path: 'users',
         element: <UserPage />,
       },
       {
-        path: "orders",
+        path: 'orders',
         element: <AdminOrdersPage />,
       },
       {
-        path: "categories",
+        path: 'categories',
         element: <AdminCategoriesPage />,
       },
       {
-        path: "products",
+        path: 'products',
         element: <AdminProductsPage />,
       },
       {
-        path: "settings",
+        path: 'settings',
         element: <AdminSettingsPage />,
       },
       {
-        path: "vouchers",
+        path: 'vouchers',
         element: <AdminVouchersPage />,
       },
     ],
   },
   {
-    path: "register",
+    path: 'register',
     element: <RegisterPage />,
   },
   {
-    path: "login",
+    path: 'login',
     element: <LoginPage />,
   },
   {
-    path: "forgot-password",
+    path: 'forgot-password',
     element: <ForgotPasswordPage />,
   },
   {
-    path: "/livestream/:roomID?",
+    path: '/livestream/:roomID?',
     element: <LivestreamPage />,
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthWrapper>
       <RouterProvider router={router} />
     </AuthWrapper>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

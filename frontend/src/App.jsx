@@ -1,13 +1,13 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 
-import { Spin } from "antd";
+import { Spin } from 'antd';
 
-import Header from "./components/user/header/header";
+import Header from './components/user/header/header';
 
-import { getCurrentUserApi, getCartApi } from "./apis";
+import { getCurrentUserApi, getCartApi } from './apis';
 
-import { AuthContext } from "./components/common/context/auth.context";
+import { AuthContext } from './components/common/context/auth.context';
 
 function App() {
   const { setAuth, setCartCount } = useContext(AuthContext);
@@ -34,8 +34,8 @@ function App() {
             },
           });
 
-          if (res.user.role === "admin") {
-            navigate("/admin/orders");
+          if (res.user.role === 'admin') {
+            navigate('/admin/orders');
             setIsLoading(false);
             return;
           }
@@ -44,18 +44,15 @@ function App() {
           try {
             const cartRes = await getCartApi();
             if (cartRes && cartRes.success && cartRes.data) {
-              const count = cartRes.data.items.reduce(
-                (acc, item) => acc + item.quantity,
-                0,
-              );
+              const count = cartRes.data.items.reduce((acc, item) => acc + item.quantity, 0);
               setCartCount(count);
             }
           } catch (error) {
-            console.error("Lỗi khi lấy giỏ hàng ban đầu:", error);
+            console.error('Lỗi khi lấy giỏ hàng ban đầu:', error);
           }
         }
       } catch (error) {
-        console.error("Fetch account error:", error);
+        console.error('Fetch account error:', error);
       } finally {
         setIsLoading(false);
       }
@@ -68,10 +65,10 @@ function App() {
       {isLoading === true ? (
         <div
           style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
           }}
         >
           <Spin />

@@ -1,17 +1,7 @@
-import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Space,
-  Button,
-  Upload,
-  notification,
-} from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { createProductApi, updateProductApi } from "../../../apis";
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Space, Button, Upload, notification } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { createProductApi, updateProductApi } from '../../../apis';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -44,7 +34,7 @@ const ProductModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Dùng Form.useWatch để theo dõi sự thay đổi của trường imageUrls trực tiếp
-  const imageUrlsWatcher = Form.useWatch("imageUrls", form) || [];
+  const imageUrlsWatcher = Form.useWatch('imageUrls', form) || [];
   /*
     || []: fallback khi:
     - Form chưa có giá trị imageUrls
@@ -52,19 +42,19 @@ const ProductModal = ({
     - Form mới render lần đầu
   */
   const previewUrls = imageUrlsWatcher.filter(
-    (url) => url && typeof url === "string" && url.trim(),
+    (url) => url && typeof url === 'string' && url.trim()
   );
 
   useEffect(() => {
     if (isVisible) {
       if (isEditMode && editingProduct) {
-        let imageUrls = [""];
+        let imageUrls = [''];
         if (editingProduct.images && editingProduct.images.length > 0) {
           const urls = editingProduct.images.filter(
-            (img) => img.startsWith("http") && !img.includes("amazonaws.com"),
+            (img) => img.startsWith('http') && !img.includes('amazonaws.com')
           );
           const s3Urls = editingProduct.images.filter(
-            (img) => !img.startsWith("http") || img.includes("amazonaws.com"),
+            (img) => !img.startsWith('http') || img.includes('amazonaws.com')
           );
 
           if (urls.length > 0) {
@@ -75,7 +65,7 @@ const ProductModal = ({
             const initialFileList = s3Urls.map((img, index) => ({
               uid: `-${index}`,
               name: `image-${index}`,
-              status: "done",
+              status: 'done',
               url: img,
             }));
             setFileList(initialFileList);
@@ -100,7 +90,7 @@ const ProductModal = ({
         });
       } else {
         form.resetFields();
-        form.setFieldsValue({ discountPercent: 0, stock: 0, imageUrls: [""] });
+        form.setFieldsValue({ discountPercent: 0, stock: 0, imageUrls: [''] });
         setFileList([]);
       }
     }
@@ -110,24 +100,22 @@ const ProductModal = ({
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("description", values.description);
-      formData.append("price", values.price);
-      formData.append("discountPercent", values.discountPercent);
-      formData.append("category", values.category);
-      formData.append("stock", values.stock);
+      formData.append('name', values.name);
+      formData.append('description', values.description);
+      formData.append('price', values.price);
+      formData.append('discountPercent', values.discountPercent);
+      formData.append('category', values.category);
+      formData.append('stock', values.stock);
 
       const currentFileList = fileList.filter(
-        (f) => f.status !== "removed" && f.status !== "error",
+        (f) => f.status !== 'removed' && f.status !== 'error'
       );
-      const currentUrls = values.imageUrls
-        ? values.imageUrls.filter((u) => u && u.trim())
-        : [];
+      const currentUrls = values.imageUrls ? values.imageUrls.filter((u) => u && u.trim()) : [];
 
       if (currentFileList.length === 0 && currentUrls.length === 0) {
         notification.error({
-          message: "Lỗi",
-          description: "Vui lòng cung cấp ít nhất 1 hình ảnh cho sản phẩm!",
+          message: 'Lỗi',
+          description: 'Vui lòng cung cấp ít nhất 1 hình ảnh cho sản phẩm!',
         });
         setIsSubmitting(false);
         return;
@@ -145,14 +133,14 @@ const ProductModal = ({
       });
 
       if (finalImageUrls.length > 0) {
-        formData.append("imageUrls", finalImageUrls.join(","));
+        formData.append('imageUrls', finalImageUrls.join(','));
       }
 
       // Thêm file mới vào FormData (chỉ những file mới được chọn, chưa upload)
       currentFileList.forEach((file) => {
         if (file.originFileObj) {
           // file.originFileObj là file vật lý từ máy người dùng
-          formData.append("images", file.originFileObj);
+          formData.append('images', file.originFileObj);
           // Các file cũ thì đã có trong imageUrls rồi, không cần append lại
         }
       });
@@ -166,26 +154,21 @@ const ProductModal = ({
 
       if (res && res.success) {
         notification.success({
-          message: "Thành công",
-          description: isEditMode
-            ? "Cập nhật sản phẩm thành công"
-            : "Tạo sản phẩm thành công",
+          message: 'Thành công',
+          description: isEditMode ? 'Cập nhật sản phẩm thành công' : 'Tạo sản phẩm thành công',
         });
         onSuccess();
       } else {
         notification.error({
-          message: "Lỗi",
-          description: res?.EM || "Có lỗi xảy ra",
+          message: 'Lỗi',
+          description: res?.EM || 'Có lỗi xảy ra',
         });
       }
     } catch (error) {
-      console.error("Submit error:", error);
+      console.error('Submit error:', error);
       notification.error({
-        message: "Lỗi",
-        description:
-          error.response?.data?.EM ||
-          error.message ||
-          "Có lỗi xảy ra khi submit",
+        message: 'Lỗi',
+        description: error.response?.data?.EM || error.message || 'Có lỗi xảy ra khi submit',
       });
     }
     setIsSubmitting(false);
@@ -193,30 +176,30 @@ const ProductModal = ({
 
   return (
     <Modal
-      title={isEditMode ? "Sửa Sản Phẩm" : "Thêm Sản Phẩm Mới"}
+      title={isEditMode ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới'}
       open={isVisible}
       onCancel={onCancel}
       footer={null}
       width={700}
       destroyOnClose
     >
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4">
+      <Form form={form} layout='vertical' onFinish={handleSubmit}>
+        <div className='grid grid-cols-2 gap-4'>
           <Form.Item
-            name="name"
-            label="Tên Sản Phẩm"
-            rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
-            className="col-span-2"
+            name='name'
+            label='Tên Sản Phẩm'
+            rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
+            className='col-span-2'
           >
-            <Input placeholder="Ví dụ: Cơm gà Hải Nam" />
+            <Input placeholder='Ví dụ: Cơm gà Hải Nam' />
           </Form.Item>
 
           <Form.Item
-            name="category"
-            label="Danh Mục"
-            rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+            name='category'
+            label='Danh Mục'
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
           >
-            <Select placeholder="Chọn danh mục">
+            <Select placeholder='Chọn danh mục'>
               {categories.map((cat) => (
                 <Option key={cat.categoryId} value={cat.categoryId}>
                   {cat.name}
@@ -226,74 +209,66 @@ const ProductModal = ({
           </Form.Item>
 
           <Form.Item
-            name="price"
-            label="Giá Bán (VNĐ)"
-            rules={[{ required: true, message: "Vui lòng nhập giá bán!" }]}
+            name='price'
+            label='Giá Bán (VNĐ)'
+            rules={[{ required: true, message: 'Vui lòng nhập giá bán!' }]}
           >
-            <InputNumber
-              style={{ width: "100%" }}
-              min={0}
-              placeholder="Ví dụ: 50000"
-            />
+            <InputNumber style={{ width: '100%' }} min={0} placeholder='Ví dụ: 50000' />
           </Form.Item>
 
           <Form.Item
-            name="discountPercent"
-            label="Giảm Giá (%)"
+            name='discountPercent'
+            label='Giảm Giá (%)'
             rules={[
               {
                 required: true,
-                message: "Vui lòng nhập phần trăm giảm giá!",
+                message: 'Vui lòng nhập phần trăm giảm giá!',
               },
             ]}
           >
-            <InputNumber style={{ width: "100%" }} min={0} max={100} />
+            <InputNumber style={{ width: '100%' }} min={0} max={100} />
           </Form.Item>
 
           <Form.Item
-            name="stock"
-            label="Số Lượng Tồn Kho"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
+            name='stock'
+            label='Số Lượng Tồn Kho'
+            rules={[{ required: true, message: 'Vui lòng nhập số lượng!' }]}
           >
-            <InputNumber style={{ width: "100%" }} min={0} />
+            <InputNumber style={{ width: '100%' }} min={0} />
           </Form.Item>
         </div>
 
         <Form.Item
-          name="description"
-          label="Mô Tả Sản Phẩm"
-          rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+          name='description'
+          label='Mô Tả Sản Phẩm'
+          rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
         >
-          <TextArea rows={4} placeholder="Nhập mô tả sản phẩm..." />
+          <TextArea rows={4} placeholder='Nhập mô tả sản phẩm...' />
         </Form.Item>
 
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
-          <div className="mb-4">
-            <span className="font-semibold block mb-1">
+        <div className='bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6'>
+          <div className='mb-4'>
+            <span className='font-semibold block mb-1'>
               Quản lý hình ảnh (Tối đa 5 ảnh tổng cộng)
             </span>
-            <span className="text-gray-500 text-sm">
+            <span className='text-gray-500 text-sm'>
               Hiện có: {previewUrls.length + fileList.length}/5 ảnh
             </span>
           </div>
 
-          <Form.List name="imageUrls" initialValue={[""]}>
+          <Form.List name='imageUrls' initialValue={['']}>
             {(fields, { add, remove }) => (
               <>
-                <div className="mb-2 font-medium">URLs Hình ảnh</div>
+                <div className='mb-2 font-medium'>URLs Hình ảnh</div>
                 {fields.map((field) => (
-                  <Form.Item required={false} key={field.key} className="mb-3">
-                    <div className="flex items-center gap-2">
-                      <Form.Item
-                        {...field}
-                        validateTrigger={["onChange", "onBlur"]}
-                        noStyle
-                      >
-                        <Input placeholder="https://example.com/image.jpg" />
+                  <Form.Item required={false} key={field.key} className='mb-3'>
+                    <div className='flex items-center gap-2'>
+                      <Form.Item {...field} validateTrigger={['onChange', 'onBlur']} noStyle>
+                        <Input placeholder='https://example.com/image.jpg' />
                       </Form.Item>
                       {fields.length > 1 ? (
                         <Button
-                          type="text"
+                          type='text'
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() => remove(field.name)}
@@ -304,12 +279,7 @@ const ProductModal = ({
                 ))}
                 {fields.length + fileList.length < 5 && (
                   <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                    >
+                    <Button type='dashed' onClick={() => add()} block icon={<PlusOutlined />}>
                       Thêm URL Hình ảnh
                     </Button>
                   </Form.Item>
@@ -319,15 +289,15 @@ const ProductModal = ({
           </Form.List>
 
           {previewUrls.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className='flex flex-wrap gap-2 mb-4'>
               {previewUrls.map((url, index) => (
                 <img
                   key={index}
                   src={url}
                   alt={`preview-${index}`}
-                  className="w-20 h-20 object-cover rounded border border-gray-200"
+                  className='w-20 h-20 object-cover rounded border border-gray-200'
                   onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/80?text=Error";
+                    e.target.src = 'https://via.placeholder.com/80?text=Error';
                   }}
                 />
               ))}
@@ -335,16 +305,16 @@ const ProductModal = ({
           )}
 
           <Form.Item
-            label="Tải ảnh lên từ máy tính"
-            name="uploadFiles"
-            valuePropName="fileList"
+            label='Tải ảnh lên từ máy tính'
+            name='uploadFiles'
+            valuePropName='fileList'
             getValueFromEvent={(e) => {
               if (Array.isArray(e)) return e;
               return e?.fileList;
             }}
           >
             <Upload
-              listType="picture-card"
+              listType='picture-card'
               beforeUpload={() => false}
               multiple
               maxCount={5}
@@ -353,7 +323,7 @@ const ProductModal = ({
                 const limit = 5 - previewUrls.length;
                 setFileList(fileList.slice(0, limit));
               }}
-              accept="image/*"
+              accept='image/*'
             >
               {fileList.length + previewUrls.length >= 5 ? null : (
                 <div>
@@ -365,19 +335,19 @@ const ProductModal = ({
           </Form.Item>
         </div>
 
-        <Form.Item className="mb-0 flex justify-end">
+        <Form.Item className='mb-0 flex justify-end'>
           <Space>
             <Button onClick={onCancel} disabled={isSubmitting}>
               Hủy
             </Button>
             <Button
-              type="primary"
-              htmlType="submit"
+              type='primary'
+              htmlType='submit'
               loading={isSubmitting}
-              className="bg-orange-500"
+              className='bg-orange-500'
             >
               {/* htmlType="submit" <-> <button type="submit"></button> trong html */}
-              {isEditMode ? "Cập nhật" : "Tạo mới"}
+              {isEditMode ? 'Cập nhật' : 'Tạo mới'}
             </Button>
           </Space>
         </Form.Item>

@@ -1,11 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
-import { describe, it, expect } from "vitest";
-import Header from "./header";
-import { AuthContext } from "../../common/context/auth.context";
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
+import Header from './header';
+import { AuthContext } from '../../common/context/auth.context';
 
-describe("Header Component", () => {
-  it("renders correctly with logo", () => {
+describe('Header Component', () => {
+  it('renders correctly with logo', () => {
     const mockAuthContext = {
       auth: { isAuthenticated: false, user: null },
       setAuth: () => {},
@@ -17,11 +17,11 @@ describe("Header Component", () => {
         <BrowserRouter>
           <Header />
         </BrowserRouter>
-      </AuthContext.Provider>,
+      </AuthContext.Provider>
     );
 
     // Assert the logo text exists
-    expect(screen.getByText("Food")).toBeInTheDocument();
-    expect(screen.getByText("Shop")).toBeInTheDocument();
+    expect(screen.getByText('Food')).toBeInTheDocument();
+    expect(screen.getByText('Shop')).toBeInTheDocument();
   });
 });

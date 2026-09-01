@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Button, Spin, message } from "antd";
-import { getGameQuestionApi, submitGameAnswerApi } from "../../apis";
-import { AuthContext } from "../../components/common/context/auth.context";
+import React, { useState, useEffect, useContext } from 'react';
+import { Button, Spin, message } from 'antd';
+import { getGameQuestionApi, submitGameAnswerApi } from '../../apis';
+import { AuthContext } from '../../components/common/context/auth.context';
 
-import GameHeader from "../../components/user/game/GameHeader";
-import GameCard from "../../components/user/game/GameCard";
+import GameHeader from '../../components/user/game/GameHeader';
+import GameCard from '../../components/user/game/GameCard';
 
 const GamePage = () => {
   const { setAuth } = useContext(AuthContext);
@@ -23,11 +23,11 @@ const GamePage = () => {
       if (res && res.success) {
         setQuestion(res.data);
       } else {
-        message.error(res.message || "Lỗi khi lấy câu hỏi");
+        message.error(res.message || 'Lỗi khi lấy câu hỏi');
       }
     } catch (error) {
       console.error(error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại");
+      message.error('Có lỗi xảy ra, vui lòng thử lại');
     } finally {
       setLoading(false);
     }
@@ -59,28 +59,28 @@ const GamePage = () => {
           message.error(`Rất tiếc, đáp án đúng là ${res.correctName}`);
         }
       } else {
-        message.error(res.message || "Có lỗi khi nộp câu trả lời");
+        message.error(res.message || 'Có lỗi khi nộp câu trả lời');
       }
     } catch (error) {
       console.error(error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại");
+      message.error('Có lỗi xảy ra, vui lòng thử lại');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className='min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 py-12 px-4'>
+      <div className='max-w-2xl mx-auto'>
         <GameHeader />
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Spin size="large" />
+          <div className='flex justify-center items-center h-64'>
+            <Spin size='large' />
           </div>
         ) : !question ? (
-          <div className="text-center">
-            <Button type="primary" onClick={fetchQuestion} size="large">
+          <div className='text-center'>
+            <Button type='primary' onClick={fetchQuestion} size='large'>
               Tải lại trò chơi
             </Button>
           </div>

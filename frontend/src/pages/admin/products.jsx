@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { notification } from "antd";
-import { ShoppingOutlined } from "@ant-design/icons";
-import {
-  getAdminProductsApi,
-  deleteProductApi,
-  getCategoriesApi,
-} from "../../apis";
-import ProductTable from "../../components/admin/products/ProductTable";
-import ProductModal from "../../components/admin/products/ProductModal";
+import React, { useEffect, useState } from 'react';
+import { notification } from 'antd';
+import { ShoppingOutlined } from '@ant-design/icons';
+import { getAdminProductsApi, deleteProductApi, getCategoriesApi } from '../../apis';
+import ProductTable from '../../components/admin/products/ProductTable';
+import ProductModal from '../../components/admin/products/ProductModal';
 
 const AdminProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -26,14 +22,14 @@ const AdminProductsPage = () => {
         setProducts(res.data);
       } else {
         notification.error({
-          message: "Lỗi",
-          description: res?.EM || "Không thể tải danh sách sản phẩm",
+          message: 'Lỗi',
+          description: res?.EM || 'Không thể tải danh sách sản phẩm',
         });
       }
     } catch (error) {
       notification.error({
-        message: "Lỗi",
-        description: "Có lỗi xảy ra khi gọi API",
+        message: 'Lỗi',
+        description: 'Có lỗi xảy ra khi gọi API',
       });
     }
     setLoading(false);
@@ -46,7 +42,7 @@ const AdminProductsPage = () => {
         setCategories(res.data);
       }
     } catch (error) {
-      console.error("Error fetching categories", error);
+      console.error('Error fetching categories', error);
     }
   };
 
@@ -60,17 +56,17 @@ const AdminProductsPage = () => {
       const res = await deleteProductApi(id);
       if (res && res.success) {
         notification.success({
-          message: "Thành công",
-          description: "Đã xóa sản phẩm",
+          message: 'Thành công',
+          description: 'Đã xóa sản phẩm',
         });
         fetchProducts();
       } else {
-        notification.error({ message: "Lỗi", description: res.message });
+        notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (error) {
       notification.error({
-        message: "Lỗi",
-        description: "Có lỗi xảy ra khi gọi API",
+        message: 'Lỗi',
+        description: 'Có lỗi xảy ra khi gọi API',
       });
     }
   };
@@ -88,12 +84,12 @@ const AdminProductsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <ShoppingOutlined className="text-purple-600" />
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+      <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8'>
+        <div className='flex items-center gap-3'>
+          <div className='w-1.5 h-8 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full' />
+          <h1 className='text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2'>
+            <ShoppingOutlined className='text-purple-600' />
             <span>Quản Lý Sản Phẩm</span>
           </h1>
         </div>

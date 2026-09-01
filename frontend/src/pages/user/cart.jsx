@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Spin, notification, Empty, Steps } from "antd";
-import { ArrowRightOutlined } from "@ant-design/icons";
-import { AuthContext } from "../../components/common/context/auth.context";
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Spin, notification, Empty, Steps } from 'antd';
+import { ArrowRightOutlined } from '@ant-design/icons';
+import { AuthContext } from '../../components/common/context/auth.context';
 import {
   getCartApi,
   addToCartApi,
@@ -13,15 +13,15 @@ import {
   resolveMapLinkApi,
   searchNominatim,
   getMyVouchersApi,
-} from "../../apis";
+} from '../../apis';
 
-import CartItemList from "../../components/user/cart/CartItemList";
-import CartRecommendations from "../../components/user/cart/CartRecommendations";
-import DeliveryForm from "../../components/user/cart/DeliveryForm";
-import PaymentMethods from "../../components/user/cart/PaymentMethods";
-import OrderSummary from "../../components/user/cart/OrderSummary";
+import CartItemList from '../../components/user/cart/CartItemList';
+import CartRecommendations from '../../components/user/cart/CartRecommendations';
+import DeliveryForm from '../../components/user/cart/DeliveryForm';
+import PaymentMethods from '../../components/user/cart/PaymentMethods';
+import OrderSummary from '../../components/user/cart/OrderSummary';
 
-import { formatCurrency } from "../../utils/formatter";
+import { formatCurrency } from '../../utils/formatter';
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -34,13 +34,13 @@ export default function CartPage() {
 
   // Form thông tin giao hàng
   const [deliveryInfo, setDeliveryInfo] = useState({
-    customerName: auth?.user?.name || "",
-    phoneNumber: auth?.user?.phone || "",
-    shippingAddress: auth?.user?.address || "",
-    note: "",
+    customerName: auth?.user?.name || '',
+    phoneNumber: auth?.user?.phone || '',
+    shippingAddress: auth?.user?.address || '',
+    note: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' hoặc 'MOMO'
+  const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' hoặc 'MOMO'
 
   // GPS state
   const [shippingFee, setShippingFee] = useState(0);
@@ -60,17 +60,14 @@ export default function CartPage() {
       const res = await getCartApi();
       if (res && res.success) {
         setCart({ ...res.data, recommendations: res.recommendations });
-        const totalItems = res.data.items.reduce(
-          (sum, item) => sum + item.quantity,
-          0,
-        );
+        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
         setCartCount(totalItems);
       }
     } catch (error) {
       console.error(error);
       notification.error({
-        message: "Lỗi tải giỏ hàng",
-        description: "Không thể lấy thông tin giỏ hàng từ server.",
+        message: 'Lỗi tải giỏ hàng',
+        description: 'Không thể lấy thông tin giỏ hàng từ server.',
       });
     } finally {
       setIsLoading(false);
@@ -85,10 +82,10 @@ export default function CartPage() {
           setMyVouchers(res.data);
         }
       } catch (error) {
-        console.error("Lỗi tải voucher:", error);
+        console.error('Lỗi tải voucher:', error);
         notification.error({
-          message: "Lỗi tải voucher",
-          description: "Không thể lấy thông tin voucher từ server.",
+          message: 'Lỗi tải voucher',
+          description: 'Không thể lấy thông tin voucher từ server.',
         });
       }
     };
@@ -115,10 +112,10 @@ export default function CartPage() {
             setDistance(res.data.distance);
           }
         } catch (e) {
-          console.error("Lỗi tự động tính phí:", e);
+          console.error('Lỗi tự động tính phí:', e);
           notification.error({
-            message: "Lỗi tự động tính phí",
-            description: "Không thể tự động tính phí.",
+            message: 'Lỗi tự động tính phí',
+            description: 'Không thể tự động tính phí.',
           });
         } finally {
           setIsGettingLocation(false);
@@ -139,22 +136,19 @@ export default function CartPage() {
         }));
         //Chờ lấy gợi ý mới từ Backend. Nếu Backend không trả về gợi ý mới thì tiếp tục hiển thị gợi ý cũ thay vì làm trắng màn hình
 
-        const totalItems = res.data.items.reduce(
-          (sum, item) => sum + item.quantity,
-          0,
-        );
+        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
         setCartCount(totalItems);
       } else {
         notification.error({
-          message: "Lỗi cập nhật",
-          description: res.message || "Không thể cập nhật số lượng.",
+          message: 'Lỗi cập nhật',
+          description: res.message || 'Không thể cập nhật số lượng.',
         });
       }
     } catch (error) {
       console.error(error);
       notification.error({
-        message: "Lỗi hệ thống",
-        description: "Có lỗi xảy ra khi cập nhật số lượng.",
+        message: 'Lỗi hệ thống',
+        description: 'Có lỗi xảy ra khi cập nhật số lượng.',
       });
     }
   };
@@ -168,21 +162,18 @@ export default function CartPage() {
           ...res.data,
           recommendations: res.recommendations || prev?.recommendations,
         }));
-        const totalItems = res.data.items.reduce(
-          (sum, item) => sum + item.quantity,
-          0,
-        );
+        const totalItems = res.data.items.reduce((sum, item) => sum + item.quantity, 0);
         setCartCount(totalItems);
         notification.success({
-          message: "Đã xóa sản phẩm",
-          description: "Món ăn đã được xóa khỏi giỏ hàng.",
+          message: 'Đã xóa sản phẩm',
+          description: 'Món ăn đã được xóa khỏi giỏ hàng.',
         });
       }
     } catch (error) {
       console.error(error);
       notification.error({
-        message: "Lỗi hệ thống",
-        description: "Không thể xóa sản phẩm khỏi giỏ hàng.",
+        message: 'Lỗi hệ thống',
+        description: 'Không thể xóa sản phẩm khỏi giỏ hàng.',
       });
     }
   };
@@ -191,16 +182,16 @@ export default function CartPage() {
     try {
       const res = await addToCartApi(productId, 1);
       if (res && res.success) {
-        notification.success({ message: "Đã thêm món vào giỏ hàng!" });
+        notification.success({ message: 'Đã thêm món vào giỏ hàng!' });
         fetchCart();
       } else {
         notification.error({
-          message: res.message || "Không thể thêm vào giỏ hàng.",
+          message: res.message || 'Không thể thêm vào giỏ hàng.',
         });
       }
     } catch (error) {
       console.error(error);
-      notification.error({ message: "Lỗi hệ thống" });
+      notification.error({ message: 'Lỗi hệ thống' });
     }
   };
 
@@ -218,23 +209,19 @@ export default function CartPage() {
 
   const calculateDiscount = () => {
     if (!selectedVoucherId) return 0;
-    const uv = myVouchers.find(
-      (v) => v.voucher && v.voucher._id === selectedVoucherId,
-    );
+    const uv = myVouchers.find((v) => v.voucher && v.voucher._id === selectedVoucherId);
     if (!uv || !uv.voucher) return 0;
     const v = uv.voucher;
     const total = calculateTotal();
 
     if (total < v.minOrderValue) return 0;
 
-    if (v.type === "DISCOUNT_AMOUNT") {
+    if (v.type === 'DISCOUNT_AMOUNT') {
       return v.value;
-    } else if (v.type === "DISCOUNT_PERCENT") {
+    } else if (v.type === 'DISCOUNT_PERCENT') {
       const calcDiscount = (total * v.value) / 100;
-      return v.maxDiscountAmount
-        ? Math.min(calcDiscount, v.maxDiscountAmount)
-        : calcDiscount;
-    } else if (v.type === "FREE_SHIP") {
+      return v.maxDiscountAmount ? Math.min(calcDiscount, v.maxDiscountAmount) : calcDiscount;
+    } else if (v.type === 'FREE_SHIP') {
       return Math.min(shippingFee, v.value);
     }
     return 0; // FREE_ITEM logic
@@ -255,7 +242,7 @@ export default function CartPage() {
   };
 
   const handleGetLocation = () => {
-    if ("geolocation" in navigator) {
+    if ('geolocation' in navigator) {
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -268,17 +255,17 @@ export default function CartPage() {
               setShippingFee(res.data.fee);
               setDistance(res.data.distance);
               notification.success({
-                message: "Định vị thành công",
+                message: 'Định vị thành công',
                 description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatCurrency(
-                  res.data.fee,
+                  res.data.fee
                 )}`,
               });
             } else {
-              notification.error({ message: "Lỗi tính phí giao hàng" });
+              notification.error({ message: 'Lỗi tính phí giao hàng' });
             }
           } catch (e) {
             notification.error({
-              message: "Lỗi kết nối khi tính phí giao hàng",
+              message: 'Lỗi kết nối khi tính phí giao hàng',
             });
           } finally {
             setIsGettingLocation(false);
@@ -286,15 +273,14 @@ export default function CartPage() {
         },
         (error) => {
           notification.error({
-            message: "Không thể lấy vị trí",
-            description:
-              "Vui lòng cho phép quyền truy cập vị trí trên trình duyệt của bạn.",
+            message: 'Không thể lấy vị trí',
+            description: 'Vui lòng cho phép quyền truy cập vị trí trên trình duyệt của bạn.',
           });
           setIsGettingLocation(false);
-        },
+        }
       );
     } else {
-      notification.error({ message: "Trình duyệt không hỗ trợ định vị" });
+      notification.error({ message: 'Trình duyệt không hỗ trợ định vị' });
     }
   };
 
@@ -302,7 +288,7 @@ export default function CartPage() {
     const address = deliveryInfo.shippingAddress;
     if (!address.trim()) {
       notification.warning({
-        message: "Vui lòng nhập địa chỉ hoặc dán link Google Maps",
+        message: 'Vui lòng nhập địa chỉ hoặc dán link Google Maps',
       });
       return;
     }
@@ -310,7 +296,7 @@ export default function CartPage() {
     setIsSearchingAddress(true);
     try {
       let lat, lng;
-      const isUrl = address.includes("http://") || address.includes("https://");
+      const isUrl = address.includes('http://') || address.includes('https://');
 
       if (isUrl) {
         // Xử lý link Google Maps (dài hoặc ngắn)
@@ -326,7 +312,7 @@ export default function CartPage() {
             lng = parseFloat(nomData[0].lon);
           } else {
             notification.warning({
-              message: "Không tìm thấy tọa độ",
+              message: 'Không tìm thấy tọa độ',
               description: `Không thể định vị được địa điểm: ${response.placeName}.`,
             });
             setIsSearchingAddress(false);
@@ -334,9 +320,8 @@ export default function CartPage() {
           }
         } else {
           notification.warning({
-            message: "Không tìm thấy tọa độ",
-            description:
-              response?.message || "Vui lòng kiểm tra lại link Google Maps.",
+            message: 'Không tìm thấy tọa độ',
+            description: response?.message || 'Vui lòng kiểm tra lại link Google Maps.',
           });
           setIsSearchingAddress(false);
           return;
@@ -344,7 +329,7 @@ export default function CartPage() {
       } else {
         // Xử lý địa chỉ chữ (Geocoding)
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
         );
         const data = await response.json();
 
@@ -353,9 +338,9 @@ export default function CartPage() {
           lng = parseFloat(data[0].lon);
         } else {
           notification.warning({
-            message: "Không tìm thấy địa chỉ",
+            message: 'Không tìm thấy địa chỉ',
             description:
-              "Vui lòng ghi rõ tên đường, phường/xã, quận/huyện hoặc nhập link Google Maps.",
+              'Vui lòng ghi rõ tên đường, phường/xã, quận/huyện hoặc nhập link Google Maps.',
           });
           setIsSearchingAddress(false);
           return;
@@ -365,9 +350,8 @@ export default function CartPage() {
       if (lat && lng) {
         setCoordinates({ lat, lng });
         notification.success({
-          message: "Tìm thấy vị trí",
-          description:
-            "Đã cập nhật vị trí trên bản đồ, đang tính lại phí giao hàng...",
+          message: 'Tìm thấy vị trí',
+          description: 'Đã cập nhật vị trí trên bản đồ, đang tính lại phí giao hàng...',
         });
 
         const resShipping = await calculateShippingApi(lat, lng);
@@ -375,12 +359,12 @@ export default function CartPage() {
           setShippingFee(resShipping.data.fee);
           setDistance(resShipping.data.distance);
         } else {
-          notification.error({ message: "Lỗi tính phí giao hàng" });
+          notification.error({ message: 'Lỗi tính phí giao hàng' });
         }
       }
     } catch (error) {
       console.error(error);
-      notification.error({ message: "Lỗi kết nối khi tìm kiếm vị trí" });
+      notification.error({ message: 'Lỗi kết nối khi tìm kiếm vị trí' });
     } finally {
       setIsSearchingAddress(false);
     }
@@ -395,14 +379,14 @@ export default function CartPage() {
         setShippingFee(res.data.fee);
         setDistance(res.data.distance);
         notification.success({
-          message: "Đã cập nhật phí giao hàng",
+          message: 'Đã cập nhật phí giao hàng',
           description: `Khoảng cách ước tính: ${res.data.distance} km. Phí giao hàng: ${formatCurrency(res.data.fee)}`,
         });
       } else {
-        notification.error({ message: "Lỗi tính phí giao hàng" });
+        notification.error({ message: 'Lỗi tính phí giao hàng' });
       }
     } catch (e) {
-      notification.error({ message: "Lỗi kết nối khi tính phí giao hàng" });
+      notification.error({ message: 'Lỗi kết nối khi tính phí giao hàng' });
     } finally {
       setIsGettingLocation(false);
     }
@@ -411,15 +395,10 @@ export default function CartPage() {
   // Tiến hành thanh toán / đặt đơn hàng
   const handlePlaceOrder = async () => {
     const { customerName, phoneNumber, shippingAddress, note } = deliveryInfo;
-    if (
-      !customerName.trim() ||
-      !phoneNumber.trim() ||
-      !shippingAddress.trim()
-    ) {
+    if (!customerName.trim() || !phoneNumber.trim() || !shippingAddress.trim()) {
       notification.warning({
-        message: "Thông tin giao hàng thiếu",
-        description:
-          "Vui lòng nhập đầy đủ Tên, Số điện thoại và Địa chỉ nhận hàng.",
+        message: 'Thông tin giao hàng thiếu',
+        description: 'Vui lòng nhập đầy đủ Tên, Số điện thoại và Địa chỉ nhận hàng.',
       });
       return;
     }
@@ -453,33 +432,32 @@ export default function CartPage() {
 
       if (res && res.success) {
         setCartCount(0);
-        if (paymentMethod === "MOMO" && res.payUrl) {
+        if (paymentMethod === 'MOMO' && res.payUrl) {
           notification.success({
-            message: "Đặt đơn thành công",
-            description:
-              "Đang chuyển hướng sang cổng thanh toán ví MoMo Sandbox...",
+            message: 'Đặt đơn thành công',
+            description: 'Đang chuyển hướng sang cổng thanh toán ví MoMo Sandbox...',
           });
 
           // Mở tab thanh toán MoMo
           window.location.href = res.payUrl;
         } else {
           notification.success({
-            message: "🎉 Đặt hàng thành công!",
-            description: "Đơn hàng COD của bạn đã được tiếp nhận.",
+            message: '🎉 Đặt hàng thành công!',
+            description: 'Đơn hàng COD của bạn đã được tiếp nhận.',
           });
-          navigate("/orders");
+          navigate('/orders');
         }
       } else {
         notification.error({
-          message: "Đặt hàng thất bại",
-          description: res.message || "Không thể tạo đơn hàng.",
+          message: 'Đặt hàng thất bại',
+          description: res.message || 'Không thể tạo đơn hàng.',
         });
       }
     } catch (error) {
       console.error(error);
       notification.error({
-        message: "Lỗi đặt hàng",
-        description: "Hệ thống gặp sự cố khi xử lý đơn hàng của bạn.",
+        message: 'Lỗi đặt hàng',
+        description: 'Hệ thống gặp sự cố khi xử lý đơn hàng của bạn.',
       });
     } finally {
       setIsSubmitting(false);
@@ -488,18 +466,16 @@ export default function CartPage() {
 
   if (!auth.isAuthenticated) {
     return (
-      <div className="min-h-[85vh] flex flex-col items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-sm p-12 text-center max-w-sm w-full border border-gray-100">
-          <p className="text-6xl mb-4">🔒</p>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
-            Chưa đăng nhập
-          </h2>
-          <p className="text-gray-500 text-sm mb-6">
+      <div className='min-h-[85vh] flex flex-col items-center justify-center p-4'>
+        <div className='bg-white rounded-3xl shadow-sm p-12 text-center max-w-sm w-full border border-gray-100'>
+          <p className='text-6xl mb-4'>🔒</p>
+          <h2 className='text-xl font-bold text-gray-800 mb-2'>Chưa đăng nhập</h2>
+          <p className='text-gray-500 text-sm mb-6'>
             Vui lòng đăng nhập tài khoản để xem và quản lý giỏ hàng của bạn.
           </p>
           <Link
-            to="/login"
-            className="inline-flex items-center justify-center w-full px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+            to='/login'
+            className='inline-flex items-center justify-center w-full px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors'
           >
             Đăng nhập ngay
           </Link>
@@ -510,9 +486,9 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[85vh] flex flex-col items-center justify-center">
-        <Spin size="large" />
-        <p className="mt-4 text-gray-500">Đang tải giỏ hàng...</p>
+      <div className='min-h-[85vh] flex flex-col items-center justify-center'>
+        <Spin size='large' />
+        <p className='mt-4 text-gray-500'>Đang tải giỏ hàng...</p>
       </div>
     );
   }
@@ -520,36 +496,34 @@ export default function CartPage() {
   const isCartEmpty = !cart || !cart.items || cart.items.length === 0;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 pb-20">
-      <div className="mb-8">
+    <div className='max-w-4xl mx-auto px-4 py-8 pb-20'>
+      <div className='mb-8'>
         <Steps
           current={currentStep}
-          items={[{ title: "Giỏ hàng" }, { title: "Giao hàng & Thanh toán" }]}
-          className="max-w-md mx-auto"
+          items={[{ title: 'Giỏ hàng' }, { title: 'Giao hàng & Thanh toán' }]}
+          className='max-w-md mx-auto'
         />
       </div>
 
       {currentStep === 0 ? (
         // BƯỚC 1: XEM GIỎ HÀNG
         isCartEmpty ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-sm">
+          <div className='bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-sm'>
             <Empty
               description={
-                <span className="text-gray-500 text-sm">
-                  Giỏ hàng của bạn đang trống rỗng.
-                </span>
+                <span className='text-gray-500 text-sm'>Giỏ hàng của bạn đang trống rỗng.</span>
               }
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
             <Link
-              to="/"
-              className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-all shadow-sm"
+              to='/'
+              className='mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-all shadow-sm'
             >
               Xem thực đơn chọn món
             </Link>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <CartItemList
               cartItems={cart.items}
               handleQuantityChange={handleQuantityChange}
@@ -563,17 +537,17 @@ export default function CartPage() {
               formatCurrency={formatCurrency}
             />
 
-            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className='bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4'>
               <div>
-                <p className="text-xs text-gray-400">Tổng thanh toán</p>
-                <p className="text-2xl font-black text-orange-600">
+                <p className='text-xs text-gray-400'>Tổng thanh toán</p>
+                <p className='text-2xl font-black text-orange-600'>
                   {formatCurrency(calculateTotal())}
                 </p>
               </div>
 
               <button
                 onClick={() => setCurrentStep(1)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl hover:shadow-lg transition-all shadow-md hover:-translate-y-0.5"
+                className='w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl hover:shadow-lg transition-all shadow-md hover:-translate-y-0.5'
               >
                 Tiến hành thanh toán <ArrowRightOutlined />
               </button>
@@ -582,9 +556,9 @@ export default function CartPage() {
         )
       ) : (
         // BƯỚC 2: NHẬP THÔNG TIN VÀ CHỌN PHƯƠNG THỨC THANH TOÁN
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           {/* Thông tin giao hàng (2/3 width) */}
-          <div className="md:col-span-2 space-y-6">
+          <div className='md:col-span-2 space-y-6'>
             <DeliveryForm
               deliveryInfo={deliveryInfo}
               handleInputChange={handleInputChange}
@@ -597,14 +571,11 @@ export default function CartPage() {
               distance={distance}
             />
 
-            <PaymentMethods
-              paymentMethod={paymentMethod}
-              setPaymentMethod={setPaymentMethod}
-            />
+            <PaymentMethods paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
           </div>
 
           {/* Tóm tắt đơn hàng (1/3 width) */}
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <OrderSummary
               cartItems={cart.items}
               formatCurrency={formatCurrency}

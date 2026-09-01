@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import ProductReviews from "./ProductReviews";
-import { AuthContext } from "../../../common/context/auth.context";
-import { vi } from "vitest";
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import ProductReviews from './ProductReviews';
+import { AuthContext } from '../../../common/context/auth.context';
+import { vi } from 'vitest';
 
 // Mock the API calls
-vi.mock("../../../../apis", () => ({
+vi.mock('../../../../apis', () => ({
   getProductReviewsApi: vi.fn(),
   submitReviewApi: vi.fn(),
   deleteReviewApi: vi.fn(),
@@ -17,28 +17,26 @@ import {
   submitReviewApi,
   deleteReviewApi,
   checkReviewEligibilityApi,
-} from "../../../../apis";
+} from '../../../../apis';
 
-describe("ProductReviews Component", () => {
+describe('ProductReviews Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders loading state initially", () => {
+  it('renders loading state initially', () => {
     getProductReviewsApi.mockResolvedValue(new Promise(() => {})); // Never resolves to keep loading state
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: false } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
-    expect(
-      screen.getByRole("heading", { name: /Đánh Giá Sản Phẩm/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Đánh Giá Sản Phẩm/i })).toBeInTheDocument();
   });
 
-  it("renders empty state when no reviews", async () => {
+  it('renders empty state when no reviews', async () => {
     getProductReviewsApi.mockResolvedValue({
       success: true,
       data: { reviews: [], total: 0 },
@@ -46,25 +44,23 @@ describe("ProductReviews Component", () => {
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: false } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Chưa có đánh giá nào cho sản phẩm này."),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Chưa có đánh giá nào cho sản phẩm này.')).toBeInTheDocument();
     });
   });
 
-  it("renders reviews correctly", async () => {
+  it('renders reviews correctly', async () => {
     const mockReviews = [
       {
-        _id: "1",
-        user: { name: "John Doe" },
+        _id: '1',
+        user: { name: 'John Doe' },
         rating: 5,
-        comment: "Tuyệt vời",
-        createdAt: "2023-01-01T00:00:00.000Z",
+        comment: 'Tuyệt vời',
+        createdAt: '2023-01-01T00:00:00.000Z',
       },
     ];
     getProductReviewsApi.mockResolvedValue({
@@ -74,17 +70,17 @@ describe("ProductReviews Component", () => {
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: false } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-      expect(screen.getByText("Tuyệt vời")).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('Tuyệt vời')).toBeInTheDocument();
     });
   });
 
-  it("shows login prompt if not authenticated", async () => {
+  it('shows login prompt if not authenticated', async () => {
     getProductReviewsApi.mockResolvedValue({
       success: true,
       data: { reviews: [], total: 0 },
@@ -92,18 +88,16 @@ describe("ProductReviews Component", () => {
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: false } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Vui lòng đăng nhập để đánh giá sản phẩm."),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Vui lòng đăng nhập để đánh giá sản phẩm.')).toBeInTheDocument();
     });
   });
 
-  it("shows review form if authenticated and eligible", async () => {
+  it('shows review form if authenticated and eligible', async () => {
     getProductReviewsApi.mockResolvedValue({
       success: true,
       data: { reviews: [], total: 0 },
@@ -115,21 +109,19 @@ describe("ProductReviews Component", () => {
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: true } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Chất lượng sản phẩm:")).toBeInTheDocument();
+      expect(screen.getByText('Chất lượng sản phẩm:')).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText(
-          "Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé...",
-        ),
+        screen.getByPlaceholderText('Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé...')
       ).toBeInTheDocument();
     });
   });
 
-  it("shows eligibility error if authenticated but not eligible", async () => {
+  it('shows eligibility error if authenticated but not eligible', async () => {
     getProductReviewsApi.mockResolvedValue({
       success: true,
       data: { reviews: [], total: 0 },
@@ -141,15 +133,13 @@ describe("ProductReviews Component", () => {
 
     render(
       <AuthContext.Provider value={{ auth: { isAuthenticated: true } }}>
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
-        ),
+        screen.getByText('Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.')
       ).toBeInTheDocument();
     });
   });
@@ -157,18 +147,18 @@ describe("ProductReviews Component", () => {
   it("shows delete button for user's own review and allows deletion", async () => {
     const mockReviews = [
       {
-        _id: "1",
-        user: { name: "Test User", email: "test@example.com" },
+        _id: '1',
+        user: { name: 'Test User', email: 'test@example.com' },
         rating: 5,
-        comment: "Tuyệt vời",
-        createdAt: "2023-01-01T00:00:00.000Z",
+        comment: 'Tuyệt vời',
+        createdAt: '2023-01-01T00:00:00.000Z',
       },
       {
-        _id: "2",
-        user: { name: "Other User", email: "other@example.com" },
+        _id: '2',
+        user: { name: 'Other User', email: 'other@example.com' },
         rating: 4,
-        comment: "Khá tốt",
-        createdAt: "2023-01-01T00:00:00.000Z",
+        comment: 'Khá tốt',
+        createdAt: '2023-01-01T00:00:00.000Z',
       },
     ];
     getProductReviewsApi.mockResolvedValue({
@@ -182,36 +172,32 @@ describe("ProductReviews Component", () => {
     });
 
     // Mock window.confirm
-    const confirmSpy = vi
-      .spyOn(window, "confirm")
-      .mockImplementation(() => true);
+    const confirmSpy = vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
     render(
       <AuthContext.Provider
         value={{
-          auth: { isAuthenticated: true, user: { email: "test@example.com" } },
+          auth: { isAuthenticated: true, user: { email: 'test@example.com' } },
         }}
       >
-        <ProductReviews productId="123" />
-      </AuthContext.Provider>,
+        <ProductReviews productId='123' />
+      </AuthContext.Provider>
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Test User")).toBeInTheDocument();
+      expect(screen.getByText('Test User')).toBeInTheDocument();
     });
 
     // Chỉ có 1 nút Xóa do chỉ có 1 review của test@example.com
-    const deleteButtons = screen.getAllByRole("button", { name: "Xóa" });
+    const deleteButtons = screen.getAllByRole('button', { name: 'Xóa' });
     expect(deleteButtons).toHaveLength(1);
 
     // Click xóa
     const user = userEvent.setup();
     await user.click(deleteButtons[0]);
 
-    expect(confirmSpy).toHaveBeenCalledWith(
-      "Bạn có chắc chắn muốn xóa đánh giá này?",
-    );
-    expect(deleteReviewApi).toHaveBeenCalledWith("123");
+    expect(confirmSpy).toHaveBeenCalledWith('Bạn có chắc chắn muốn xóa đánh giá này?');
+    expect(deleteReviewApi).toHaveBeenCalledWith('123');
 
     confirmSpy.mockRestore();
   });

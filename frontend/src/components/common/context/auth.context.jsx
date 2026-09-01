@@ -1,16 +1,16 @@
-import { createContext, useState } from "react";
+import { createContext, useState } from 'react';
 
 export const AuthContext = createContext({
   // default value cho createContext
   auth: {
     isAuthenticated: false,
     user: {
-      email: "",
-      name: "",
-      role: "user",
-      avatar: "",
-      phone: "",
-      address: "",
+      email: '',
+      name: '',
+      role: 'user',
+      avatar: '',
+      phone: '',
+      address: '',
     },
   },
   cartCount: 0,
@@ -23,12 +23,12 @@ export const AuthWrapper = (props) => {
   const [auth, setAuth] = useState({
     isAuthenticated: false,
     user: {
-      email: "",
-      name: "",
-      role: "user",
-      avatar: "",
-      phone: "",
-      address: "",
+      email: '',
+      name: '',
+      role: 'user',
+      avatar: '',
+      phone: '',
+      address: '',
     },
   });
   const [cartCount, setCartCount] = useState(0);

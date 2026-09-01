@@ -1,7 +1,7 @@
-import axios from "./axios.customize";
+import axios from './axios.customize';
 
 const registerApi = (name, email, password, otp) => {
-  const URL_API = "/v1/api/register";
+  const URL_API = '/v1/api/register';
   const data = {
     name,
     email,
@@ -13,22 +13,22 @@ const registerApi = (name, email, password, otp) => {
 };
 
 const sendRegisterOtpApi = (email) => {
-  const URL_API = "/v1/api/register/send-otp";
+  const URL_API = '/v1/api/register/send-otp';
   return axios.post(URL_API, { email });
 };
 
 const sendForgotPasswordOtpApi = (email) => {
-  const URL_API = "/v1/api/forgot-password/send-otp";
+  const URL_API = '/v1/api/forgot-password/send-otp';
   return axios.post(URL_API, { email });
 };
 
 const resetPasswordApi = (email, otp, newPassword) => {
-  const URL_API = "/v1/api/forgot-password";
+  const URL_API = '/v1/api/forgot-password';
   return axios.post(URL_API, { email, otp, newPassword });
 };
 
 const loginApi = (email, password) => {
-  const URL_API = "/v1/api/login";
+  const URL_API = '/v1/api/login';
   const data = {
     email,
     password,
@@ -38,42 +38,42 @@ const loginApi = (email, password) => {
 };
 
 const getUserApi = () => {
-  const URL_API = "/v1/api/user";
+  const URL_API = '/v1/api/user';
   return axios.get(URL_API);
 };
 
 const logoutApi = () => {
-  return axios.post("/v1/api/logout");
+  return axios.post('/v1/api/logout');
 };
 
 const getCurrentUserApi = () => {
-  const URL_API = "/v1/api/user/me";
+  const URL_API = '/v1/api/user/me';
   return axios.get(URL_API);
 };
 
 const getCategoriesApi = () => {
-  return axios.get("/v1/api/categories");
+  return axios.get('/v1/api/categories');
 };
 
 const getProductsApi = () => {
-  const URL_API = "/v1/api/products";
+  const URL_API = '/v1/api/products';
   return axios.get(URL_API);
 };
 
 const getActivePromotionsApi = () => {
-  return axios.get("/v1/api/promotions/active");
+  return axios.get('/v1/api/promotions/active');
 };
 
 const getCartApi = () => {
-  return axios.get("/v1/api/cart");
+  return axios.get('/v1/api/cart');
 };
 
 const addToCartApi = (productId, quantity) => {
-  return axios.post("/v1/api/cart", { productId, quantity });
+  return axios.post('/v1/api/cart', { productId, quantity });
 };
 
 const updateCartItemApi = (productId, quantity) => {
-  return axios.put("/v1/api/cart", { productId, quantity });
+  return axios.put('/v1/api/cart', { productId, quantity });
 };
 
 const deleteCartItemApi = (productId) => {
@@ -81,19 +81,19 @@ const deleteCartItemApi = (productId) => {
 };
 
 const clearCartApi = () => {
-  return axios.delete("/v1/api/cart");
+  return axios.delete('/v1/api/cart');
 };
 
 const createOrderApi = (orderData) => {
-  return axios.post("/v1/api/orders", orderData);
+  return axios.post('/v1/api/orders', orderData);
 };
 
 const calculateShippingApi = (lat, lng) => {
-  return axios.post("/v1/api/orders/calculate-shipping", { lat, lng });
+  return axios.post('/v1/api/orders/calculate-shipping', { lat, lng });
 };
 
 const getMyOrdersApi = () => {
-  return axios.get("/v1/api/orders");
+  return axios.get('/v1/api/orders');
 };
 
 const getOrderDetailsApi = (orderId) => {
@@ -112,9 +112,9 @@ const verifyMomoPaymentApi = (orderId) => {
   return axios.post(`/v1/api/orders/${orderId}/verify-momo`);
 };
 
-const getShopOrdersApi = (page = 1, limit = 10, status = "All") => {
+const getShopOrdersApi = (page = 1, limit = 10, status = 'All') => {
   let url = `/v1/api/admin/orders?page=${page}&limit=${limit}`;
-  if (status && status !== "All") {
+  if (status && status !== 'All') {
     url += `&status=${status}`;
   }
   return axios.get(url);
@@ -131,11 +131,11 @@ const handleShopCancelRequestApi = (orderId, action) => {
 };
 
 const updateProfileApi = (formData) => {
-  return axios.put("/v1/api/user/profile", formData);
+  return axios.put('/v1/api/user/profile', formData);
 };
 
 const createCategoryApi = (data) => {
-  return axios.post("/v1/api/admin/categories", data);
+  return axios.post('/v1/api/admin/categories', data);
 };
 
 const updateCategoryApi = (id, data) => {
@@ -147,11 +147,11 @@ const deleteCategoryApi = (id) => {
 };
 
 const getAdminProductsApi = () => {
-  return axios.get("/v1/api/admin/products");
+  return axios.get('/v1/api/admin/products');
 };
 
 const createProductApi = (data) => {
-  return axios.post("/v1/api/admin/products", data);
+  return axios.post('/v1/api/admin/products', data);
 };
 
 const updateProductApi = (id, data) => {
@@ -163,9 +163,7 @@ const deleteProductApi = (id) => {
 };
 
 const getProductReviewsApi = (productId, page = 1, limit = 5) => {
-  return axios.get(
-    `/v1/api/products/${productId}/reviews?page=${page}&limit=${limit}`,
-  );
+  return axios.get(`/v1/api/products/${productId}/reviews?page=${page}&limit=${limit}`);
 };
 
 const submitReviewApi = (productId, data) => {
@@ -184,46 +182,40 @@ const checkReviewEligibilityApi = (productId) => {
 };
 
 const getSettingsApi = () => {
-  return axios.get("/v1/api/settings");
+  return axios.get('/v1/api/settings');
 };
 
 const updateSettingApi = (key, value) => {
-  return axios.put("/v1/api/admin/settings", { key, value });
+  return axios.put('/v1/api/admin/settings', { key, value });
 };
 
 const resolveMapLinkApi = (url) => {
-  return axios.post("/v1/api/utils/resolve-map-link", { url });
+  return axios.post('/v1/api/utils/resolve-map-link', { url });
 };
 
 const searchNominatim = async (address) => {
   let nomRes = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-      address,
-    )}`,
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
   );
   let nomData = await nomRes.json();
 
   if (nomData && nomData.length > 0) return nomData;
 
   // Fallback 1: Cắt bỏ phần trước dấu "-" (thường là tên riêng doanh nghiệp)
-  if (address.includes("-")) {
-    const shortName = address.substring(address.indexOf("-") + 1).trim();
+  if (address.includes('-')) {
+    const shortName = address.substring(address.indexOf('-') + 1).trim();
     nomRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        shortName,
-      )}`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(shortName)}`
     );
     nomData = await nomRes.json();
     if (nomData && nomData.length > 0) return nomData;
   }
 
   // Fallback 2: Cắt bỏ phần trước dấu "," (lấy cấp địa lý rộng hơn)
-  if (address.includes(",")) {
-    const shorterName = address.substring(address.indexOf(",") + 1).trim();
+  if (address.includes(',')) {
+    const shorterName = address.substring(address.indexOf(',') + 1).trim();
     nomRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        shorterName,
-      )}`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(shorterName)}`
     );
     nomData = await nomRes.json();
     if (nomData && nomData.length > 0) return nomData;
@@ -233,23 +225,23 @@ const searchNominatim = async (address) => {
 };
 
 const getActiveVouchersApi = () => {
-  return axios.get("/v1/api/vouchers/active");
+  return axios.get('/v1/api/vouchers/active');
 };
 
 const redeemVoucherApi = (voucherId) => {
-  return axios.post("/v1/api/vouchers/redeem", { voucherId });
+  return axios.post('/v1/api/vouchers/redeem', { voucherId });
 };
 
 const getMyVouchersApi = () => {
-  return axios.get("/v1/api/vouchers/my");
+  return axios.get('/v1/api/vouchers/my');
 };
 
 const createVoucherApi = (data) => {
-  return axios.post("/v1/api/admin/vouchers", data);
+  return axios.post('/v1/api/admin/vouchers', data);
 };
 
 const getAllAdminVouchersApi = () => {
-  return axios.get("/v1/api/admin/vouchers");
+  return axios.get('/v1/api/admin/vouchers');
 };
 
 const updateVoucherApi = (id, data) => {
@@ -261,11 +253,11 @@ const deleteVoucherApi = (id) => {
 };
 
 const getGameQuestionApi = () => {
-  return axios.get("/v1/api/game/question");
+  return axios.get('/v1/api/game/question');
 };
 
 const submitGameAnswerApi = (token, answer) => {
-  return axios.post("/v1/api/game/submit", { token, answer });
+  return axios.post('/v1/api/game/submit', { token, answer });
 };
 
 const getDashboardStatsApi = (year = new Date().getFullYear()) => {
@@ -273,20 +265,20 @@ const getDashboardStatsApi = (year = new Date().getFullYear()) => {
 };
 
 const exportDashboardStatsApi = (years) => {
-  return axios.get(`/v1/api/admin/dashboard/export?years=${years.join(",")}`, {
-    responseType: "blob", // Quan trọng để tải file nhị phân
+  return axios.get(`/v1/api/admin/dashboard/export?years=${years.join(',')}`, {
+    responseType: 'blob', // Quan trọng để tải file nhị phân
   });
 };
 
 const exportInvoiceApi = (orderId) => {
   return axios.get(`/v1/api/orders/${orderId}/invoice`, {
-    responseType: "blob",
+    responseType: 'blob',
   });
 };
 
 const requestReturnApi = (orderId, formData) => {
   return axios.post(`/v1/api/orders/${orderId}/return`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 

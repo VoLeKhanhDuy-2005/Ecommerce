@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 // Set config defaults when creating the instance
 const instance = axios.create({
@@ -11,7 +11,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   function (config) {
     // Do something before request is sent
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
@@ -22,7 +22,7 @@ instance.interceptors.request.use(
   function (error) {
     // Do something with request error
     return Promise.reject(error);
-  },
+  }
 );
 
 // Add a response interceptor
@@ -42,11 +42,11 @@ instance.interceptors.response.use(
         const res = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/v1/api/refresh-token`,
           {},
-          { withCredentials: true }, // Cho phép client gửi kèm cookie
+          { withCredentials: true } // Cho phép client gửi kèm cookie
         );
 
         if (res.data && res.data.access_token) {
-          localStorage.setItem("access_token", res.data.access_token);
+          localStorage.setItem('access_token', res.data.access_token);
           // Gắn token mới vào header của request bị lỗi
           originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`;
           // Thực hiện lại request bị lỗi
@@ -54,13 +54,12 @@ instance.interceptors.response.use(
         }
       } catch (refreshError) {
         // Nếu refresh token cũng hết hạn, buộc đăng xuất
-        localStorage.removeItem("access_token");
+        localStorage.removeItem('access_token');
 
         // Không redirect nếu đang check user ban đầu để tránh kẹt ở trang login
-        const isCheckUserReq =
-          originalRequest.url && originalRequest.url.includes("/user/me");
+        const isCheckUserReq = originalRequest.url && originalRequest.url.includes('/user/me');
         if (!isCheckUserReq) {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }
 
         return Promise.reject(refreshError);
@@ -70,7 +69,7 @@ instance.interceptors.response.use(
     // Do something with response error
     if (error?.response?.data) return error?.response?.data;
     return Promise.reject(error);
-  },
+  }
 );
 
 export default instance;

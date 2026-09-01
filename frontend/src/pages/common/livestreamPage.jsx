@@ -1,12 +1,7 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../components/common/context/auth.context";
-import {
-  PhoneOutlined,
-  EyeOutlined,
-  MessageOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
+import React, { useContext, useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../components/common/context/auth.context';
+import { PhoneOutlined, EyeOutlined, MessageOutlined, CloseOutlined } from '@ant-design/icons';
 import {
   LiveKitRoom,
   VideoTrack,
@@ -17,10 +12,10 @@ import {
   useConnectionState,
   useParticipants,
   useLocalParticipant,
-} from "@livekit/components-react";
-import "@livekit/components-styles";
-import { Track, ConnectionState } from "livekit-client";
-import axios from "axios";
+} from '@livekit/components-react';
+import '@livekit/components-styles';
+import { Track, ConnectionState } from 'livekit-client';
+import axios from 'axios';
 
 const serverUrl = import.meta.env.VITE_LIVEKIT_URL;
 const backendApiUrl = import.meta.env.VITE_BACKEND_URL;
@@ -178,7 +173,7 @@ const LivestreamPage = () => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
 
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState('');
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
   useEffect(() => {
@@ -188,17 +183,17 @@ const LivestreamPage = () => {
           `${backendApiUrl}/v1/api/livestream/token?room=${roomID}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
             },
-          },
+          }
         );
 
         if (response.data && response.data.success) {
           setToken(response.data.data.token);
         }
       } catch (error) {
-        console.error("Failed to fetch token", error);
-        alert("Không thể lấy token để kết nối Livestream!");
+        console.error('Failed to fetch token', error);
+        alert('Không thể lấy token để kết nối Livestream!');
       }
     };
 
@@ -207,23 +202,23 @@ const LivestreamPage = () => {
     }
   }, [auth.isAuthenticated, roomID]);
 
-  const isAdmin = auth?.user?.role === "admin";
+  const isAdmin = auth?.user?.role === 'admin';
 
   if (!token) {
     return (
       <div
-        className="bc-root w-screen h-[100dvh] flex items-center justify-center"
-        style={{ background: "var(--bc-void)" }}
+        className='bc-root w-screen h-[100dvh] flex items-center justify-center'
+        style={{ background: 'var(--bc-void)' }}
       >
         <style>{FONT_IMPORTS}</style>
-        <div className="flex flex-col items-center gap-4">
+        <div className='flex flex-col items-center gap-4'>
           <div
-            className="w-3 h-3 rounded-full bc-live-dot"
-            style={{ background: "var(--bc-live)" }}
+            className='w-3 h-3 rounded-full bc-live-dot'
+            style={{ background: 'var(--bc-live)' }}
           />
           <p
-            className="bc-mono text-sm tracking-widest uppercase"
-            style={{ color: "var(--bc-muted)" }}
+            className='bc-mono text-sm tracking-widest uppercase'
+            style={{ color: 'var(--bc-muted)' }}
           >
             Đang chuẩn bị kết nối Livestream...
           </p>
@@ -234,62 +229,60 @@ const LivestreamPage = () => {
 
   return (
     <div
-      className="bc-root w-screen h-[100dvh] flex flex-col"
-      style={{ background: "var(--bc-void)" }}
+      className='bc-root w-screen h-[100dvh] flex flex-col'
+      style={{ background: 'var(--bc-void)' }}
     >
       <style>{FONT_IMPORTS}</style>
 
       {/* Chassis header */}
       <div
-        className="px-3 md:px-5 py-2 md:py-3 flex items-center justify-between shadow-md z-10"
+        className='px-3 md:px-5 py-2 md:py-3 flex items-center justify-between shadow-md z-10'
         style={{
-          background: "var(--bc-panel)",
-          borderBottom: "1px solid var(--bc-line)",
+          background: 'var(--bc-panel)',
+          borderBottom: '1px solid var(--bc-line)',
         }}
       >
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className='flex items-center gap-2 md:gap-3'>
           <div
-            className="w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center font-bold bc-display text-sm"
+            className='w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center font-bold bc-display text-sm'
             style={{
-              background: "var(--bc-panel-raised)",
-              color: "var(--bc-text)",
-              border: "1px solid var(--bc-line)",
+              background: 'var(--bc-panel-raised)',
+              color: 'var(--bc-text)',
+              border: '1px solid var(--bc-line)',
             }}
           >
-            {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : "V"}
+            {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : 'V'}
           </div>
           <div>
             <h2
-              className="bc-display text-sm md:text-base font-semibold leading-tight"
-              style={{ color: "var(--bc-text)" }}
+              className='bc-display text-sm md:text-base font-semibold leading-tight'
+              style={{ color: 'var(--bc-text)' }}
             >
               Phòng Livestream
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className='flex items-center gap-2 md:gap-3'>
           <span
-            className="bc-mono text-[9px] md:text-[11px] px-2 py-1 rounded uppercase tracking-wider hidden sm:inline-block"
+            className='bc-mono text-[9px] md:text-[11px] px-2 py-1 rounded uppercase tracking-wider hidden sm:inline-block'
             style={{
-              color: isAdmin ? "var(--bc-signal)" : "var(--bc-viewer)",
-              border: `1px solid ${isAdmin ? "var(--bc-signal)" : "var(--bc-viewer)"}`,
-              background: "rgba(255,255,255,0.02)",
+              color: isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)',
+              border: `1px solid ${isAdmin ? 'var(--bc-signal)' : 'var(--bc-viewer)'}`,
+              background: 'rgba(255,255,255,0.02)',
             }}
           >
-            {isAdmin ? "Admin" : "Viewer"}
+            {isAdmin ? 'Admin' : 'Viewer'}
           </span>
           <button
-            onClick={() => navigate("/")}
-            className="px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium transition-colors flex items-center gap-1 md:gap-2 bc-display text-xs md:text-sm"
-            style={{ background: "var(--bc-live)", color: "#fff" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#e32e24")}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "var(--bc-live)")
-            }
+            onClick={() => navigate('/')}
+            className='px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium transition-colors flex items-center gap-1 md:gap-2 bc-display text-xs md:text-sm'
+            style={{ background: 'var(--bc-live)', color: '#fff' }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#e32e24')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--bc-live)')}
           >
-            <PhoneOutlined className="rotate-[135deg]" />{" "}
-            <span className="hidden sm:inline">Rời livestream</span>
+            <PhoneOutlined className='rotate-[135deg]' />{' '}
+            <span className='hidden sm:inline'>Rời livestream</span>
           </button>
         </div>
       </div>
@@ -301,43 +294,43 @@ const LivestreamPage = () => {
         token={token}
         serverUrl={serverUrl}
         connect={true}
-        className="flex-1 flex flex-col md:flex-row overflow-hidden"
+        className='flex-1 flex flex-col md:flex-row overflow-hidden'
       >
         {/* Video / console area */}
-        <div className="flex-1 p-0 md:p-4 flex flex-col relative min-w-0 w-full bg-black md:bg-transparent">
-          <div className="flex-1 md:rounded-2xl overflow-hidden md:shadow-lg relative border-0 md:border md:border-[#262b31] bg-black">
+        <div className='flex-1 p-0 md:p-4 flex flex-col relative min-w-0 w-full bg-black md:bg-transparent'>
+          <div className='flex-1 md:rounded-2xl overflow-hidden md:shadow-lg relative border-0 md:border md:border-[#262b31] bg-black'>
             {/* viewfinder corner brackets — the signature detail */}
-            <div className="hidden md:block">
+            <div className='hidden md:block'>
               <Corner
                 style={{
                   top: 12,
                   left: 12,
-                  borderRight: "none",
-                  borderBottom: "none",
+                  borderRight: 'none',
+                  borderBottom: 'none',
                 }}
               />
               <Corner
                 style={{
                   top: 12,
                   right: 12,
-                  borderLeft: "none",
-                  borderBottom: "none",
+                  borderLeft: 'none',
+                  borderBottom: 'none',
                 }}
               />
               <Corner
                 style={{
                   bottom: 12,
                   left: 12,
-                  borderRight: "none",
-                  borderTop: "none",
+                  borderRight: 'none',
+                  borderTop: 'none',
                 }}
               />
               <Corner
                 style={{
                   bottom: 12,
                   right: 12,
-                  borderLeft: "none",
-                  borderTop: "none",
+                  borderLeft: 'none',
+                  borderTop: 'none',
                 }}
               />
             </div>
@@ -348,21 +341,21 @@ const LivestreamPage = () => {
             <button
               className={`
                 md:hidden absolute bottom-6 right-4 z-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300
-                ${isMobileChatOpen ? "opacity-0 pointer-events-none scale-75" : "opacity-100 scale-100"}
+                ${isMobileChatOpen ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}
               `}
               style={{
-                background: "var(--bc-live)",
-                color: "white",
-                boxShadow: "0 4px 12px rgba(255,59,48,0.4)",
+                background: 'var(--bc-live)',
+                color: 'white',
+                boxShadow: '0 4px 12px rgba(255,59,48,0.4)',
               }}
               onClick={() => setIsMobileChatOpen(true)}
             >
-              <MessageOutlined className="text-xl" />
+              <MessageOutlined className='text-xl' />
             </button>
           </div>
 
           {isAdmin && (
-            <div className="mt-4 pb-6 md:pb-0 flex justify-center bc-controlbar shrink-0">
+            <div className='mt-4 pb-6 md:pb-0 flex justify-center bc-controlbar shrink-0'>
               <ControlBar />
             </div>
           )}
@@ -373,52 +366,52 @@ const LivestreamPage = () => {
           className={`
             fixed inset-x-0 bottom-0 top-[35vh] z-50 flex flex-col transition-transform duration-300 ease-out
             rounded-t-3xl md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none
-            ${isMobileChatOpen ? "translate-y-0" : "translate-y-full"}
+            ${isMobileChatOpen ? 'translate-y-0' : 'translate-y-full'}
             md:static md:translate-y-0 md:w-80 lg:w-96 md:flex-1 md:min-h-0
           `}
           style={{
-            background: "var(--bc-panel)",
-            borderLeft: "1px solid var(--bc-line)",
+            background: 'var(--bc-panel)',
+            borderLeft: '1px solid var(--bc-line)',
           }}
         >
           <div
-            className="px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none relative"
+            className='px-4 py-3 flex flex-col bc-display font-semibold text-sm rounded-t-3xl md:rounded-none relative'
             style={{
-              background: "var(--bc-void)",
-              borderBottom: "1px solid var(--bc-line)",
-              color: "var(--bc-text)",
+              background: 'var(--bc-void)',
+              borderBottom: '1px solid var(--bc-line)',
+              color: 'var(--bc-text)',
             }}
           >
             {/* Drag handle for mobile */}
-            <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-3 md:hidden opacity-70" />
+            <div className='w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-3 md:hidden opacity-70' />
 
-            <div className="flex items-center justify-between w-full min-w-0 pr-10">
-              <div className="flex items-center gap-2 truncate">
-                <span className="truncate">Live Feed</span>
+            <div className='flex items-center justify-between w-full min-w-0 pr-10'>
+              <div className='flex items-center gap-2 truncate'>
+                <span className='truncate'>Live Feed</span>
                 <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0 bc-live-dot"
-                  style={{ background: "var(--bc-live)" }}
+                  className='w-1.5 h-1.5 rounded-full shrink-0 bc-live-dot'
+                  style={{ background: 'var(--bc-live)' }}
                 />
               </div>
-              <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+              <div className='flex items-center gap-1.5 md:gap-3 shrink-0'>
                 <ViewerCountBadge />
               </div>
             </div>
 
             {/* Absolute Close Button to guarantee visibility */}
             <button
-              className="md:hidden absolute top-3 right-3 shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors z-10"
+              className='md:hidden absolute top-3 right-3 shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors z-10'
               style={{
-                background: "rgba(255,255,255,0.15)",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: 'rgba(255,255,255,0.15)',
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.1)',
               }}
               onClick={() => setIsMobileChatOpen(false)}
             >
-              <CloseOutlined style={{ fontSize: "14px" }} />
+              <CloseOutlined style={{ fontSize: '14px' }} />
             </button>
           </div>
-          <div className="flex-1 overflow-hidden bc-chat-theme">
+          <div className='flex-1 overflow-hidden bc-chat-theme'>
             <CustomLivestreamChat />
           </div>
         </div>
@@ -432,8 +425,8 @@ const LivestreamPage = () => {
 /* Small decorative corner bracket used on the video monitor */
 const Corner = ({ style }) => (
   <div
-    className="absolute w-6 h-6 pointer-events-none z-10"
-    style={{ border: "2px solid rgba(255,255,255,0.35)", ...style }}
+    className='absolute w-6 h-6 pointer-events-none z-10'
+    style={{ border: '2px solid rgba(255,255,255,0.35)', ...style }}
   />
 );
 
@@ -446,7 +439,7 @@ const LivestreamVideo = () => {
       { source: Track.Source.ScreenShare, withPlaceholder: false },
       { source: Track.Source.Camera, withPlaceholder: false },
     ],
-    { onlySubscribed: false },
+    { onlySubscribed: false }
   );
 
   const connectionState = useConnectionState();
@@ -454,8 +447,8 @@ const LivestreamVideo = () => {
   if (connectionState !== ConnectionState.Connected) {
     return (
       <div
-        className="flex items-center justify-center h-full w-full bc-mono text-sm"
-        style={{ color: "var(--bc-muted)" }}
+        className='flex items-center justify-center h-full w-full bc-mono text-sm'
+        style={{ color: 'var(--bc-muted)' }}
       >
         Đang kết nối đến máy chủ Livestream...
       </div>
@@ -471,15 +464,15 @@ const LivestreamVideo = () => {
 
   if (!activeTrack) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full">
+      <div className='flex flex-col items-center justify-center h-full w-full'>
         <div
-          className="w-16 h-16 rounded-full mb-4"
+          className='w-16 h-16 rounded-full mb-4'
           style={{
-            background: "var(--bc-panel-raised)",
-            border: "1px solid var(--bc-line)",
+            background: 'var(--bc-panel-raised)',
+            border: '1px solid var(--bc-line)',
           }}
         />
-        <p className="bc-mono text-sm" style={{ color: "var(--bc-muted)" }}>
+        <p className='bc-mono text-sm' style={{ color: 'var(--bc-muted)' }}>
           Chưa có phiên livestream...
         </p>
       </div>
@@ -487,41 +480,33 @@ const LivestreamVideo = () => {
   }
 
   return (
-    <div className="relative h-full w-full bg-black">
-      <VideoTrack
-        trackRef={activeTrack}
-        className="h-full w-full object-contain md:object-cover"
-      />
+    <div className='relative h-full w-full bg-black'>
+      <VideoTrack trackRef={activeTrack} className='h-full w-full object-contain md:object-cover' />
       <div
-        className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md z-30"
+        className='absolute bottom-4 left-4 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-md z-30'
         style={{
-          background: "rgba(10,11,13,0.7)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(4px)",
+          background: 'rgba(10,11,13,0.7)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(4px)',
         }}
       >
+        <span className='w-1.5 h-1.5 rounded-full' style={{ background: 'var(--bc-live)' }} />
         <span
-          className="w-1.5 h-1.5 rounded-full"
-          style={{ background: "var(--bc-live)" }}
-        />
-        <span
-          className="bc-mono text-[11px] uppercase tracking-wide"
-          style={{ color: "var(--bc-text)" }}
+          className='bc-mono text-[11px] uppercase tracking-wide'
+          style={{ color: 'var(--bc-text)' }}
         >
-          {activeTrack.participant?.name ||
-            activeTrack.participant?.identity ||
-            "Broadcaster"}
+          {activeTrack.participant?.name || activeTrack.participant?.identity || 'Broadcaster'}
         </span>
       </div>
 
       {/* Mobile Viewer Count Overlay */}
-      <div className="absolute top-4 right-4 md:hidden z-30">
+      <div className='absolute top-4 right-4 md:hidden z-30'>
         <ViewerCountBadge
-          className="px-3 py-1.5 rounded-lg shadow-md"
+          className='px-3 py-1.5 rounded-lg shadow-md'
           style={{
-            background: "rgba(10,11,13,0.7)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            backdropFilter: "blur(4px)",
+            background: 'rgba(10,11,13,0.7)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(4px)',
           }}
         />
       </div>
@@ -533,24 +518,22 @@ const ViewerCountBadge = ({ className, style }) => {
   const participants = useParticipants();
 
   // Đếm những người KHÔNG có quyền publish (tức là những người xem bình thường)
-  const viewerCount = participants.filter(
-    (p) => p.permissions && !p.permissions.canPublish,
-  ).length;
+  const viewerCount = participants.filter((p) => p.permissions && !p.permissions.canPublish).length;
 
   return (
     <div
-      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${className || ""}`}
+      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${className || ''}`}
       style={
         style || {
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid var(--bc-line)",
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid var(--bc-line)',
         }
       }
     >
-      <span style={{ fontSize: "11px", color: "var(--bc-viewer)" }}>
-        <EyeOutlined style={{ color: "white" }} />
+      <span style={{ fontSize: '11px', color: 'var(--bc-viewer)' }}>
+        <EyeOutlined style={{ color: 'white' }} />
       </span>
-      <span className="bc-mono text-[11px]" style={{ color: "var(--bc-text)" }}>
+      <span className='bc-mono text-[11px]' style={{ color: 'var(--bc-text)' }}>
         {viewerCount}
       </span>
     </div>
@@ -560,12 +543,12 @@ const ViewerCountBadge = ({ className, style }) => {
 const CustomLivestreamChat = () => {
   const { chatMessages, send, isSending } = useChat();
   const { localParticipant } = useLocalParticipant();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages]);
 
@@ -573,49 +556,47 @@ const CustomLivestreamChat = () => {
     e.preventDefault();
     if (message.trim()) {
       await send(message);
-      setMessage("");
+      setMessage('');
     }
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <ul className="lk-list">
+    <div className='flex flex-col h-full w-full'>
+      <ul className='lk-list'>
         {chatMessages.map((msg, idx) => {
           const isLocal = msg.from?.identity === localParticipant?.identity;
           return (
             <li
               key={idx}
-              className="lk-chat-entry"
-              data-lk-message-origin={isLocal ? "local" : "remote"}
+              className='lk-chat-entry'
+              data-lk-message-origin={isLocal ? 'local' : 'remote'}
             >
-              <div className="lk-meta-data">
-                <span className="lk-participant-name">
-                  {msg.from?.name || msg.from?.identity}
-                </span>
-                <span className="lk-timestamp">
+              <div className='lk-meta-data'>
+                <span className='lk-participant-name'>{msg.from?.name || msg.from?.identity}</span>
+                <span className='lk-timestamp'>
                   {new Date(msg.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </span>
               </div>
-              <div className="lk-message-body">{msg.message}</div>
+              <div className='lk-message-body'>{msg.message}</div>
             </li>
           );
         })}
         <div ref={messagesEndRef} />
       </ul>
-      <form onSubmit={handleSend} className="lk-chat-form">
+      <form onSubmit={handleSend} className='lk-chat-form'>
         <input
-          className="lk-form-control lk-chat-form-input"
+          className='lk-form-control lk-chat-form-input'
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Nhập tin nhắn..."
+          placeholder='Nhập tin nhắn...'
           disabled={isSending}
         />
         <button
-          type="submit"
-          className="lk-button lk-chat-form-button"
+          type='submit'
+          className='lk-button lk-chat-form-button'
           disabled={!message.trim() || isSending}
         >
           Gửi

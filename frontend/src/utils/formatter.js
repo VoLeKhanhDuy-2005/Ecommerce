@@ -5,8 +5,8 @@ export const formatCurrency = (value) => {
      Nó giúp định dạng số, tiền tệ, ngày tháng và so sánh chuỗi theo
      ngôn ngữ và khu vực cụ thể mà không cần thư viện ngoài.
   */
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
   }).format(value);
 };

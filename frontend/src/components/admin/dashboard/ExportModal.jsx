@@ -1,5 +1,5 @@
-import React from "react";
-import { Modal, Select } from "antd";
+import React from 'react';
+import { Modal, Select } from 'antd';
 
 const ExportModal = ({
   isVisible,
@@ -11,31 +11,25 @@ const ExportModal = ({
 }) => {
   return (
     <Modal
-      title={
-        <span className="text-xl font-bold text-gray-800">
-          Xuất Báo Cáo Excel
-        </span>
-      }
+      title={<span className='text-xl font-bold text-gray-800'>Xuất Báo Cáo Excel</span>}
       open={isVisible}
       onOk={onExport}
       onCancel={onCancel}
       confirmLoading={isExporting}
-      okText="Tải xuống"
-      cancelText="Hủy"
+      okText='Tải xuống'
+      cancelText='Hủy'
       okButtonProps={{
-        className: "bg-green-600 hover:bg-green-700 border-none",
+        className: 'bg-green-600 hover:bg-green-700 border-none',
       }}
       centered
     >
-      <div className="py-4">
-        <p className="mb-2 text-gray-600 font-medium">
-          Chọn các năm cần xuất dữ liệu:
-        </p>
+      <div className='py-4'>
+        <p className='mb-2 text-gray-600 font-medium'>Chọn các năm cần xuất dữ liệu:</p>
         <Select
-          mode="multiple"
+          mode='multiple'
           allowClear
-          style={{ width: "100%" }}
-          placeholder="Chọn năm"
+          style={{ width: '100%' }}
+          placeholder='Chọn năm'
           value={selectedExportYears}
           onChange={(values) => setSelectedExportYears(values)}
           options={Array.from(
@@ -46,7 +40,7 @@ const ExportModal = ({
                 value: year,
                 label: `Năm ${year}`,
               };
-            },
+            }
           )}
         />
       </div>

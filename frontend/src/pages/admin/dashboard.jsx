@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Button, Typography, Spin, message, Row, Col } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import React, { useEffect, useState, useCallback } from 'react';
+import { Button, Typography, Spin, message, Row, Col } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 import {
   getDashboardStatsApi,
   getProductsApi,
   getCategoriesApi,
   exportDashboardStatsApi,
-} from "../../apis";
-import SummaryCards from "../../components/admin/dashboard/SummaryCards";
-import RevenueChart from "../../components/admin/dashboard/RevenueChart";
-import OrderStatusChart from "../../components/admin/dashboard/OrderStatusChart";
-import RecentOrdersTable from "../../components/admin/dashboard/RecentOrdersTable";
-import ExportModal from "../../components/admin/dashboard/ExportModal";
-import DashboardProductStats from "../../components/admin/dashboard/DashboardProductStats";
+} from '../../apis';
+import SummaryCards from '../../components/admin/dashboard/SummaryCards';
+import RevenueChart from '../../components/admin/dashboard/RevenueChart';
+import OrderStatusChart from '../../components/admin/dashboard/OrderStatusChart';
+import RecentOrdersTable from '../../components/admin/dashboard/RecentOrdersTable';
+import ExportModal from '../../components/admin/dashboard/ExportModal';
+import DashboardProductStats from '../../components/admin/dashboard/DashboardProductStats';
 
 const { Title } = Typography;
 
@@ -31,9 +31,7 @@ const AdminDashboardPage = () => {
     mostViewed: [],
   });
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
-  const [selectedExportYears, setSelectedExportYears] = useState([
-    new Date().getFullYear(),
-  ]);
+  const [selectedExportYears, setSelectedExportYears] = useState([new Date().getFullYear()]);
   const [isExporting, setIsExporting] = useState(false);
 
   const fetchStats = useCallback(async () => {
@@ -44,7 +42,7 @@ const AdminDashboardPage = () => {
         setStats(res.data);
       }
     } catch (error) {
-      console.error("Failed to fetch dashboard stats", error);
+      console.error('Failed to fetch dashboard stats', error);
     }
     setLoading(false);
   }, [year]);
@@ -57,10 +55,7 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const [catRes, prodRes] = await Promise.all([
-          getCategoriesApi(),
-          getProductsApi(),
-        ]);
+        const [catRes, prodRes] = await Promise.all([getCategoriesApi(), getProductsApi()]);
 
         let fetchedCategories = [];
         if (catRes && catRes.success) {
@@ -72,8 +67,7 @@ const AdminDashboardPage = () => {
             productsList.map((p) => ({
               ...p,
               categoryName:
-                fetchedCategories.find((c) => c.categoryId === p.category)
-                  ?.name || p.category,
+                fetchedCategories.find((c) => c.categoryId === p.category)?.name || p.category,
             }));
 
           setProducts({
@@ -83,7 +77,7 @@ const AdminDashboardPage = () => {
           });
         }
       } catch (err) {
-        console.error("Lỗi khi tải sản phẩm:", err);
+        console.error('Lỗi khi tải sản phẩm:', err);
       }
     };
 
@@ -92,7 +86,7 @@ const AdminDashboardPage = () => {
 
   const handleExport = async () => {
     if (selectedExportYears.length === 0) {
-      message.warning("Vui lòng chọn ít nhất 1 năm để xuất báo cáo");
+      message.warning('Vui lòng chọn ít nhất 1 năm để xuất báo cáo');
       return;
     }
 
@@ -102,18 +96,18 @@ const AdminDashboardPage = () => {
 
       // Axios interceptor returns response.data directly, so res is already the Blob
       const url = window.URL.createObjectURL(res); // tạo một URL tạm thời trỏ tới Blob (file Excel) trong bộ nhớ trình duyệt.
-      const link = document.createElement("a"); // Tạo thẻ a ẩn
+      const link = document.createElement('a'); // Tạo thẻ a ẩn
       link.href = url;
-      link.setAttribute("download", "Bao_Cao_Thong_Ke.xlsx");
+      link.setAttribute('download', 'Bao_Cao_Thong_Ke.xlsx');
       document.body.appendChild(link);
       link.click(); // Kích hoạt click để tải file
       document.body.removeChild(link);
 
-      message.success("Xuất báo cáo Excel thành công!");
+      message.success('Xuất báo cáo Excel thành công!');
       setIsExportModalVisible(false);
     } catch (error) {
-      console.error("Lỗi xuất Excel:", error);
-      message.error("Có lỗi xảy ra khi xuất báo cáo");
+      console.error('Lỗi xuất Excel:', error);
+      message.error('Có lỗi xảy ra khi xuất báo cáo');
     } finally {
       setIsExporting(false);
     }
@@ -121,26 +115,26 @@ const AdminDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[80vh]">
-        <Spin size="large" />
+      <div className='flex justify-center items-center h-[80vh]'>
+        <Spin size='large' />
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8 flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4">
+    <div className='p-6 max-w-7xl mx-auto'>
+      <div className='mb-8 flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4'>
         <div>
-          <Title level={2} className="!mb-1 !text-gray-800">
+          <Title level={2} className='!mb-1 !text-gray-800'>
             Tổng quan
           </Title>
-          <p className="text-gray-500">Các chỉ số quan trọng của FoodShop</p>
+          <p className='text-gray-500'>Các chỉ số quan trọng của FoodShop</p>
         </div>
         <Button
-          type="primary"
+          type='primary'
           icon={<DownloadOutlined />}
-          size="large"
-          className="bg-green-600 hover:bg-green-700 border-none"
+          size='large'
+          className='bg-green-600 hover:bg-green-700 border-none'
           onClick={() => setIsExportModalVisible(true)}
         >
           Xuất Excel
@@ -153,13 +147,9 @@ const AdminDashboardPage = () => {
         totalRevenue={stats.summary.totalRevenue}
       />
 
-      <Row gutter={[24, 24]} className="mb-8">
+      <Row gutter={[24, 24]} className='mb-8'>
         <Col xs={24} lg={16}>
-          <RevenueChart
-            year={year}
-            setYear={setYear}
-            data={stats.monthlyRevenue}
-          />
+          <RevenueChart year={year} setYear={setYear} data={stats.monthlyRevenue} />
         </Col>
         <Col xs={24} lg={8}>
           <OrderStatusChart data={stats.orderStatusData} />
