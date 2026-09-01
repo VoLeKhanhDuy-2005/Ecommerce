@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Spin, notification, Modal } from "antd";
 import { AuthContext } from "../../components/common/context/auth.context";
@@ -21,16 +21,7 @@ export default function RewardsPage() {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [userCoins, setUserCoins] = useState(auth.user?.coins || 0);
 
-  useEffect(() => {
-    if (auth.isAuthenticated) {
-      fetchVouchers();
-    } else {
-      setIsLoading(false);
-    }
-  }, [auth.isAuthenticated]);
-
-  const fetchVouchers = async () => {
-    setIsLoading(true);
+  const fetchVouchers = useCallback(async () => {
     try {
       const res = await getActiveVouchersApi();
       if (res && res.success) {
@@ -51,11 +42,23 @@ export default function RewardsPage() {
         setUserCoins(auth?.user?.coins || 0);
       }
     } catch (error) {
+      console.error(error);
       notification.error({ message: "Lỗi tải voucher" });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [auth, setAuth]);
+
+  useEffect(() => {
+    const initData = async () => {
+      if (auth.isAuthenticated) {
+        await fetchVouchers();
+      } else {
+        setIsLoading(false);
+      }
+    };
+    initData();
+  }, [auth.isAuthenticated, fetchVouchers]);
 
   const handleRedeem = async (voucherId, cost) => {
     if (userCoins < cost) {
@@ -91,6 +94,7 @@ export default function RewardsPage() {
             });
           }
         } catch (error) {
+          console.error(error);
           notification.error({
             message: "Lỗi hệ thống",
             description: "Vui lòng thử lại sau.",

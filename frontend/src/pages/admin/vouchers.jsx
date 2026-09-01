@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button, Form, notification } from "antd";
 import { PlusOutlined, TagsOutlined } from "@ant-design/icons";
 import {
@@ -14,15 +14,14 @@ import VoucherModal from "../../components/admin/vouchers/VoucherModal";
 
 const AdminVouchersPage = () => {
   const [vouchers, setVouchers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [products, setProducts] = useState([]);
   const [form] = Form.useForm();
 
-  const fetchVouchers = async () => {
-    setLoading(true);
+  const fetchVouchers = useCallback(async () => {
     try {
       const res = await getAllAdminVouchersApi();
       if (res && res.success) {
@@ -34,15 +33,17 @@ const AdminVouchersPage = () => {
         });
       }
     } catch (error) {
+      console.error(error)
       notification.error({
         message: "Lỗi",
         description: "Lỗi kết nối khi tải voucher",
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const res = await getAdminProductsApi();
       if (res && res.success) {
@@ -51,12 +52,14 @@ const AdminVouchersPage = () => {
     } catch (error) {
       console.error("Lỗi lấy danh sách sản phẩm", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchVouchers();
-    fetchProducts();
-  }, []);
+    const initData = async () => {
+      await Promise.all([fetchVouchers(), fetchProducts()]);
+    };
+    initData();
+  }, [fetchVouchers, fetchProducts]);
 
   const handleOpenCreateModal = () => {
     setIsEditMode(false);
@@ -88,6 +91,7 @@ const AdminVouchersPage = () => {
           message: "Thành công",
           description: "Xóa voucher thành công",
         });
+        setLoading(true);
         fetchVouchers();
       } else {
         notification.error({
@@ -96,6 +100,7 @@ const AdminVouchersPage = () => {
         });
       }
     } catch (error) {
+      console.error(error)
       notification.error({
         message: "Lỗi",
         description: "Lỗi kết nối khi xóa voucher",
@@ -130,6 +135,7 @@ const AdminVouchersPage = () => {
           description: res.message,
         });
         setIsModalVisible(false);
+        setLoading(true);
         fetchVouchers();
       } else {
         notification.error({
@@ -138,6 +144,7 @@ const AdminVouchersPage = () => {
         });
       }
     } catch (error) {
+      console.error(error)
       notification.error({
         message: "Lỗi",
         description: "Lỗi kết nối khi lưu voucher",

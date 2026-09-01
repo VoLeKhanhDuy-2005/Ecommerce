@@ -1,10 +1,13 @@
 import "@testing-library/jest-dom";
 
-// Mock window.matchMedia for Ant Design
+// Prepare environment before running React test
+// Mock because jsom don't support some api for Ant Design
+
+// Mock window.matchMedia for Ant Design (background running)
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query) => ({
-    matches: false,
+    matches: false,// mock .matches is false
     media: query,
     onchange: null,
     addListener: () => {}, // Deprecated
@@ -13,10 +16,10 @@ Object.defineProperty(window, "matchMedia", {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }),
-});
+});//=> stimulate real responsive
 
 // Mock ResizeObserver for Ant Design
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
