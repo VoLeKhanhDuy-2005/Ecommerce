@@ -21,12 +21,12 @@ export default function EditProfilePage() {
   const navigate = useNavigate();
   const { auth, setAuth } = useContext(AuthContext);
   const user = auth.user;
+  const userId = user?.id;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess] = useState('');
-  const [mounted, setMounted] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -41,10 +41,6 @@ export default function EditProfilePage() {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Giải phóng bộ nhớ preview URL tránh memory leak
   useEffect(() => {
     return () => {
@@ -55,8 +51,7 @@ export default function EditProfilePage() {
   }, [preview]);
 
   useEffect(() => {
-    if (!mounted) return;
-    if (!user) return;
+    if (!userId) return;
 
     const fetchProfile = async () => {
       try {
@@ -85,7 +80,7 @@ export default function EditProfilePage() {
     };
 
     fetchProfile();
-  }, [mounted, user?.id]); // user?.id tránh fetch khi user undefined khi load lại trang
+  }, [userId]); // user?.id tránh fetch khi user undefined khi load lại trang
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -145,6 +140,7 @@ export default function EditProfilePage() {
         (err) => {
           setIsGettingLocation(false);
           setError('Không thể lấy vị trí. Vui lòng cấp quyền GPS.');
+          console.error(err);
         }
       );
     } else {

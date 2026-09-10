@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import {
@@ -75,23 +75,24 @@ export default function OrdersPage() {
   const hasCalledVerify = React.useRef(false); // useRef cờ hiệu tránh Strict Mode gọi 2 lần liên tục
 
   // Lấy lịch sử mua hàng
-  const fetchOrders = async (selectOrderId = null) => {
+  const fetchOrders = useCallback(async (selectOrderId = null) => {
     try {
       const res = await getMyOrdersApi();
       if (res && res.success) {
         setOrders(res.data);
         if (res.data.length > 0) {
-          // Chọn đơn hàng được chỉ định hoặc mặc định chọn đơn hàng đầu tiên
-          if (selectOrderId) {
-            const found = res.data.find((o) => o._id === selectOrderId);
-            setSelectedOrder(found || res.data[0]);
-          } else if (!selectedOrder) {
-            setSelectedOrder(res.data[0]);
-          } else {
-            // Cập nhật lại thông tin đơn hàng đang chọn
-            const found = res.data.find((o) => o._id === selectedOrder._id);
-            setSelectedOrder(found || res.data[0]);
-          }
+          setSelectedOrder((currentSelectedOrder) => {// functional updater
+            // Chọn đơn hàng được chỉ định hoặc mặc định chọn đơn hàng đầu tiên
+            if (selectOrderId) {
+              return res.data.find((o) => o._id === selectOrderId) || res.data[0];
+            }
+            
+            if (!currentSelectedOrder) {
+              return res.data[0];
+            }
+            
+            return res.data.find((o) => o._id === currentSelectedOrder._id) || res.data[0];
+          });
         }
       }
     } catch (error) {
@@ -103,9 +104,9 @@ export default function OrdersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const refreshCartCount = async () => {
+  const refreshCartCount = useCallback(async () => {
     try {
       const cartRes = await getCartApi();
       if (cartRes && cartRes.success && cartRes.data) {
@@ -115,7 +116,7 @@ export default function OrdersPage() {
     } catch (error) {
       console.error('Lỗi khi cập nhật badge giỏ hàng:', error);
     }
-  };
+  }, [setCartCount]);
 
   // Xác minh giao dịch MoMo từ URL chuyển hướng về
   useEffect(() => {
@@ -169,13 +170,13 @@ export default function OrdersPage() {
     };
 
     verifyMomo();
-  }, [auth.isAuthenticated, searchParams]);
+  }, [auth.isAuthenticated, searchParams, fetchOrders, setSearchParams, refreshCartCount]);
 
   // Lắng nghe cập nhật trạng thái đơn hàng theo thời gian thực (Socket.io)
   useEffect(() => {
     if (!auth.isAuthenticated || !auth.user?.email) return;
 
-    const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:8686', {
+    const socket = io(import.meta.env.VITE_BACKEND_URL, {
       withCredentials: true,
     });
 
@@ -192,13 +193,13 @@ export default function OrdersPage() {
           data?.message || `Đơn hàng #${data?.orderId} của bạn đã được cập nhật trạng thái mới!`,
         placement: 'bottomLeft',
       });
-      fetchOrders(data?.orderId || (selectedOrder ? selectedOrder._id : null));
+      fetchOrders(data?.orderId);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [auth.isAuthenticated, auth.user?.email, selectedOrder?._id]);
+  }, [auth.isAuthenticated, auth.user?.email, fetchOrders]);
 
   // Bộ đếm ngược thời gian hủy đơn (30 phút)
   useEffect(() => {
