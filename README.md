@@ -135,7 +135,7 @@ npm run dev
 
 - Redis server: Upstash
 
-- link: https://ecommerce-rho-opal-64.vercel.app/
+- link: https://ecommerce-rho-opal-64.vercel.app/ (Initial page load may be slow due to Render's free tier plan)
 
 - email: admin@ecommerce.com - pass: 123456
 
