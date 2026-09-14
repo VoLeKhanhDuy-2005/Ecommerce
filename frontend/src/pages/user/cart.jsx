@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Spin, notification, Empty, Steps } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
@@ -54,7 +54,7 @@ export default function CartPage() {
   const [selectedVoucherId, setSelectedVoucherId] = useState(null);
 
   // Lấy dữ liệu giỏ hàng từ API
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await getCartApi();
@@ -72,7 +72,7 @@ export default function CartPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setCartCount]);
 
   useEffect(() => {
     const fetchVouchers = async () => {
@@ -90,13 +90,16 @@ export default function CartPage() {
       }
     };
 
-    if (auth.isAuthenticated) {
-      fetchCart();
-      fetchVouchers();
-    } else {
-      setIsLoading(false);
-    }
-  }, [auth.isAuthenticated]);
+    const loadCartAndVouchers = async () => {
+      if (auth.isAuthenticated) {
+        await fetchCart();
+        await fetchVouchers();
+      } else {
+        setIsLoading(false);
+      }
+    };
+    loadCartAndVouchers();
+  }, [auth.isAuthenticated, fetchCart]);
 
   // Tự động tính phí nếu user đã lưu vị trí trong profile
   useEffect(() => {
@@ -123,7 +126,7 @@ export default function CartPage() {
       }
     };
     autoCalcShipping();
-  }, [auth?.user?.location]);
+  }, [auth?.user?.location, coordinates]);
 
   // Thay đổi số lượng sản phẩm
   const handleQuantityChange = async (productId, quantity) => {
@@ -264,6 +267,7 @@ export default function CartPage() {
               notification.error({ message: 'Lỗi tính phí giao hàng' });
             }
           } catch (e) {
+            console.error(e);
             notification.error({
               message: 'Lỗi kết nối khi tính phí giao hàng',
             });
@@ -272,6 +276,7 @@ export default function CartPage() {
           }
         },
         (error) => {
+          console.error(error);
           notification.error({
             message: 'Không thể lấy vị trí',
             description: 'Vui lòng cho phép quyền truy cập vị trí trên trình duyệt của bạn.',
@@ -386,6 +391,7 @@ export default function CartPage() {
         notification.error({ message: 'Lỗi tính phí giao hàng' });
       }
     } catch (e) {
+      console.error(e);
       notification.error({ message: 'Lỗi kết nối khi tính phí giao hàng' });
     } finally {
       setIsGettingLocation(false);

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Spin } from 'antd';
-import { ArrowRightOutlined, FireOutlined, StarOutlined } from '@ant-design/icons';
-import { AuthContext } from '../../components/common/context/auth.context';
+import { ArrowRightOutlined, FireOutlined } from '@ant-design/icons';
 
 import ProductCard from '../../components/common/products/ProductCard';
 import ProductSection from '../../components/common/products/ProductSection';
@@ -20,7 +19,6 @@ import 'swiper/css/pagination';
 import { formatCurrency } from '../../utils/formatter';
 
 export default function Home() {
-  const { auth } = useContext(AuthContext);
   const [products, setProducts] = useState({
     newest: [],
     bestSelling: [],

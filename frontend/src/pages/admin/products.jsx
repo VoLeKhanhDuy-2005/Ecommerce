@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { notification } from 'antd';
 import { ShoppingOutlined } from '@ant-design/icons';
 import { getAdminProductsApi, deleteProductApi, getCategoriesApi } from '../../apis';
@@ -27,6 +27,7 @@ const AdminProductsPage = () => {
         });
       }
     } catch (error) {
+      console.error(error)
       notification.error({
         message: 'Lỗi',
         description: 'Có lỗi xảy ra khi gọi API',
@@ -47,8 +48,11 @@ const AdminProductsPage = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    const fetchProductsAndCategories = async () => {
+      await fetchProducts();
+      await fetchCategories();
+    }
+    fetchProductsAndCategories();
   }, []);
 
   const handleDeleteProduct = async (id) => {
@@ -64,6 +68,7 @@ const AdminProductsPage = () => {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (error) {
+      console.error(error)
       notification.error({
         message: 'Lỗi',
         description: 'Có lỗi xảy ra khi gọi API',

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Button, Col, Divider, Form, Input, notification, Row, Typography } from 'antd';
 import { loginApi } from '../../apis';
 import { Link, useNavigate } from 'react-router-dom';

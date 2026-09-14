@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { Input, Spin, Empty, Radio, Divider, Pagination } from 'antd';
@@ -10,8 +10,6 @@ import axios from '../../apis/axios.customize';
 import { getCategoriesApi } from '../../apis';
 
 import { formatCurrency } from '../../utils/formatter';
-
-const { Search } = Input;
 
 export default function SearchFilterPage() {
   const [totalItems, setTotalItems] = useState(0);
@@ -97,7 +95,7 @@ export default function SearchFilterPage() {
       }
     };
     fetchResults();
-  }, [query, category, priceRange, currentPage]);
+  }, [query, category, priceRange, currentPage, categories]);
 
   // Cập nhật query + URL khi gõ tìm kiếm
   const handleSearch = (value) => {

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Col, Divider, Form, Input, notification, Row, Typography } from 'antd';
 import { sendForgotPasswordOtpApi, resetPasswordApi } from '../../apis';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeftOutlined,
   LockOutlined,
   MailOutlined,
   SafetyCertificateOutlined,

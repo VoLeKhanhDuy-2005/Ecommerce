@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { notification, Spin } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import { getSettingsApi } from '../../apis';
@@ -13,31 +13,31 @@ export default function AdminSettingsPage() {
   const [shippingFeeConfig, setShippingFeeConfig] = useState(null);
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      setIsLoading(true);
+      try {
+        const res = await getSettingsApi();
+        if (res && res.success) {
+          if (res.data.store_location) {
+            setStoreLocation(res.data.store_location);
+          }
+          if (res.data.default_shipping_fee) {
+            setShippingFeeConfig(res.data.default_shipping_fee);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        notification.error({
+          message: 'Lỗi tải cấu hình',
+          description: 'Không thể lấy thông tin cấu hình từ máy chủ.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchSettings();
   }, []);
   // Khi component được render lần đầu (mount), gọi hàm fetchSettings() đúng một lần mảng dependencies [] rỗng.
-
-  const fetchSettings = async () => {
-    setIsLoading(true);
-    try {
-      const res = await getSettingsApi();
-      if (res && res.success) {
-        if (res.data.store_location) {
-          setStoreLocation(res.data.store_location);
-        }
-        if (res.data.default_shipping_fee) {
-          setShippingFeeConfig(res.data.default_shipping_fee);
-        }
-      }
-    } catch (error) {
-      notification.error({
-        message: 'Lỗi tải cấu hình',
-        description: 'Không thể lấy thông tin cấu hình từ máy chủ.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!auth.isAuthenticated) {
     return null;

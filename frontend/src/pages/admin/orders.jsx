@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { notification, Empty, Spin, Card, Pagination, Select, message } from 'antd';
 import { HistoryOutlined } from '@ant-design/icons';
@@ -42,9 +42,9 @@ export default function AdminOrdersPage() {
   const fetchShopOrders = useCallback(
     async (
       isAutoRefresh = false,
-      page = pagination.current,
-      limit = pagination.pageSize,
-      status = statusFilter
+      page,
+      limit,
+      status
     ) => {
       if (!isAutoRefresh) setIsLoading(true);
       try {
@@ -75,19 +75,22 @@ export default function AdminOrdersPage() {
       } finally {
         setIsLoading(false);
       }
-    },
-    [pagination.current, pagination.pageSize, statusFilter]
+    }, []
   );
 
   useEffect(() => {
     // Dùng khi đổi bộ lọc/phân trang
-    fetchShopOrders(false, 1, pagination.pageSize, statusFilter);
+    (async () => {
+      await fetchShopOrders(false, 1, pagination.pageSize, statusFilter);
+    })();
   }, [statusFilter, fetchShopOrders, pagination.pageSize]);
 
   useEffect(() => {
     // Dùng khi hành động làm mới thủ công từ bên ngoài thông qua biến triggerRefresh
     if (triggerRefresh > 0) {
-      fetchShopOrders(true, 1, pagination.pageSize, statusFilter);
+      (async () => {
+        await fetchShopOrders(true, 1, pagination.pageSize, statusFilter);
+      })();
     }
   }, [triggerRefresh, fetchShopOrders, pagination.pageSize, statusFilter]);
 
@@ -188,6 +191,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
+      console.log(err)
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -224,6 +228,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
+      console.log(err)
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -247,6 +252,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
+      console.log(err)
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -273,6 +279,7 @@ export default function AdminOrdersPage() {
       link.remove();
       notification.success({ message: 'Xuất hóa đơn thành công' });
     } catch (error) {
+      console.log(error)
       notification.error({
         message: 'Lỗi xuất hóa đơn',
         description: 'Không thể tải hóa đơn. Vui lòng thử lại sau.',

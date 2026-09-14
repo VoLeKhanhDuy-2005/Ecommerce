@@ -81,16 +81,17 @@ export default function OrdersPage() {
       if (res && res.success) {
         setOrders(res.data);
         if (res.data.length > 0) {
-          setSelectedOrder((currentSelectedOrder) => {// functional updater
+          setSelectedOrder((currentSelectedOrder) => {
+            // functional updater
             // Chọn đơn hàng được chỉ định hoặc mặc định chọn đơn hàng đầu tiên
             if (selectOrderId) {
               return res.data.find((o) => o._id === selectOrderId) || res.data[0];
             }
-            
+
             if (!currentSelectedOrder) {
               return res.data[0];
             }
-            
+
             return res.data.find((o) => o._id === currentSelectedOrder._id) || res.data[0];
           });
         }

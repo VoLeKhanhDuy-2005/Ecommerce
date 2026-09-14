@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { Button, Spin, message } from 'antd';
 import { getGameQuestionApi, submitGameAnswerApi } from '../../apis';
 import { AuthContext } from '../../components/common/context/auth.context';
@@ -14,7 +14,7 @@ const GamePage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [result, setResult] = useState(null);
 
-  const fetchQuestion = async () => {
+  const fetchQuestion = useCallback(async () => {
     setLoading(true);
     setResult(null);
     setSelectedOption(null);
@@ -23,7 +23,7 @@ const GamePage = () => {
       if (res && res.success) {
         setQuestion(res.data);
       } else {
-        message.error(res.message || 'Lỗi khi lấy câu hỏi');
+        message.error(res.message);
       }
     } catch (error) {
       console.error(error);
@@ -31,11 +31,14 @@ const GamePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchQuestion();
-  }, []);
+    const load = async () => {
+      await fetchQuestion();
+    };
+    load();
+  }, [fetchQuestion]);
 
   const handleSelectOption = async (option) => {
     if (result || submitting) return;
