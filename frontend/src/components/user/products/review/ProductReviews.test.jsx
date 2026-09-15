@@ -12,12 +12,7 @@ vi.mock('../../../../apis', () => ({
   checkReviewEligibilityApi: vi.fn(),
 }));
 
-import {
-  getProductReviewsApi,
-  submitReviewApi,
-  deleteReviewApi,
-  checkReviewEligibilityApi,
-} from '../../../../apis';
+import { getProductReviewsApi, deleteReviewApi, checkReviewEligibilityApi } from '../../../../apis';
 
 describe('ProductReviews Component', () => {
   beforeEach(() => {

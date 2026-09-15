@@ -39,6 +39,7 @@ import {
   submitReviewApi,
   exportInvoiceApi,
   requestReturnApi,
+  getProductReviewsApi,
 } from '../../apis';
 
 import { formatCurrency } from '../../utils/formatter';
@@ -61,6 +62,7 @@ export default function OrdersPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewedProducts, setReviewedProducts] = useState(new Set());
 
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [returnItemsState, setReturnItemsState] = useState({});
@@ -230,6 +232,31 @@ export default function OrdersPage() {
 
     return () => clearInterval(timer);
   }, [selectedOrder]);
+
+  // Kiểm tra sản phẩm đã được đánh giá khi chọn đơn hàng đã giao
+  useEffect(() => {
+    const checkReviewedProducts = async () => {
+      if (!selectedOrder || selectedOrder.status !== 'Delivered' || !auth?.user?.email) return;
+
+      const reviewed = new Set();
+      for (const item of selectedOrder.items) {
+        try {
+          const res = await getProductReviewsApi(item.product, 1, 100);
+          if (res && res.success && res.data?.reviews) {
+            const hasReviewed = res.data.reviews.some((r) => r.user?.email === auth.user.email);
+            if (hasReviewed) {
+              reviewed.add(item.product);
+            }
+          }
+        } catch (error) {
+          console.error('Lỗi kiểm tra đánh giá:', error);
+        }
+      }
+      setReviewedProducts(reviewed);
+    };
+
+    checkReviewedProducts();
+  }, [selectedOrder?._id, selectedOrder?.status, auth?.user?.email, selectedOrder]);
 
   // Mở modal xác nhận hủy đơn
   const openCancelModal = () => {
@@ -436,6 +463,7 @@ export default function OrdersPage() {
       });
       if (res && res.success) {
         notification.success({ message: 'Đánh giá thành công!' });
+        setReviewedProducts((prev) => new Set(prev).add(reviewProduct.product));
         setIsReviewModalOpen(false);
       } else {
         notification.error({
@@ -887,14 +915,19 @@ export default function OrdersPage() {
                           <span className='font-bold text-gray-800'>
                             {formatCurrency(item.price)}
                           </span>
-                          {selectedOrder.status === 'Delivered' && (
-                            <button
-                              onClick={() => openReviewModal(item)}
-                              className='text-orange-500 hover:text-orange-600 font-semibold underline text-[10px]'
-                            >
-                              Đánh giá
-                            </button>
-                          )}
+                          {selectedOrder.status === 'Delivered' &&
+                            (reviewedProducts.has(item.product) ? (
+                              <span className='text-gray-400 font-semibold text-[10px]'>
+                                Đã đánh giá
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => openReviewModal(item)}
+                                className='text-orange-500 hover:text-orange-600 font-semibold underline text-[10px]'
+                              >
+                                Đánh giá
+                              </button>
+                            ))}
                         </div>
                       </div>
                     ))}

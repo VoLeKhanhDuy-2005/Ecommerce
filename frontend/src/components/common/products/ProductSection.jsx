@@ -93,11 +93,8 @@ export default function ProductSection({ smallHeader, bigHeader, productData, ba
             1024: { slidesPerView: 4, slidesPerGroup: 4 },
             1280: { slidesPerView: 5, slidesPerGroup: 5 },
           }}
-          /* Tắt navigation built-in để dùng nút tuỳ chỉnh */
-          navigation={{
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-          }}
+          /* Navigation được gắn thủ công trong onSwiper */
+          navigation={true}
           className='product-section-swiper'
         >
           {productData.map((item) => (

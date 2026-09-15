@@ -48,8 +48,10 @@ const AdminDashboardPage = () => {
   }, [year]);
 
   useEffect(() => {
-    //sửa triệt để cảnh báo useEffect missing dependencies bằng hook useCallback
-    fetchStats();
+    const loadStats = async () => {
+      await fetchStats();
+    };
+    loadStats();
   }, [fetchStats]);
 
   useEffect(() => {

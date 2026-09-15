@@ -25,6 +25,7 @@ const AdminCategoriesPage = () => {
         });
       }
     } catch (error) {
+      console.error(error);
       notification.error({
         message: 'Lỗi',
         description: 'Lỗi server khi tải danh mục',
@@ -34,7 +35,10 @@ const AdminCategoriesPage = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
+    const loadCategories = async () => {
+      await fetchCategories();
+    };
+    loadCategories();
   }, []);
 
   const handleOpenCreateModal = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { Rate, Button, Input, Pagination, Avatar, notification, Spin } from 'antd';
 import { UserOutlined, SendOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../../common/context/auth.context';
@@ -23,22 +23,25 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
   const [submitting, setSubmitting] = useState(false);
   const [canReview, setCanReview] = useState(false);
 
-  const fetchReviews = async (currentPage) => {
-    setLoading(true);
-    try {
-      const res = await getProductReviewsApi(productId, currentPage, 5);
-      if (res && res.success) {
-        setReviews(res.data.reviews);
-        setTotal(res.data.total);
+  const fetchReviews = useCallback(
+    async (currentPage) => {
+      setLoading(true);
+      try {
+        const res = await getProductReviewsApi(productId, currentPage, 5);
+        if (res && res.success) {
+          setReviews(res.data.reviews);
+          setTotal(res.data.total);
+        }
+      } catch (error) {
+        console.error('Lỗi lấy đánh giá:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Lỗi lấy đánh giá:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [productId]
+  );
 
-  const checkEligibility = async () => {
+  const checkEligibility = useCallback(async () => {
     try {
       const res = await checkReviewEligibilityApi(productId);
       if (res && res.success && res.data) {
@@ -47,19 +50,25 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
     } catch (error) {
       console.error('Lỗi kiểm tra quyền đánh giá:', error);
     }
-  };
+  }, [productId]);
 
   useEffect(() => {
+    const loadReviews = async () => {
+      await fetchReviews(page);
+    };
     if (productId) {
-      fetchReviews(page);
+      loadReviews();
     }
-  }, [productId, page]);
+  }, [productId, page, fetchReviews]);
 
   useEffect(() => {
+    const loadEligibility = async () => {
+      await checkEligibility();
+    };
     if (productId && auth?.isAuthenticated) {
-      checkEligibility();
+      loadEligibility();
     }
-  }, [productId, auth?.isAuthenticated]);
+  }, [productId, auth?.isAuthenticated, checkEligibility]);
 
   const handleSubmit = async () => {
     if (!rating) {
@@ -118,6 +127,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
           });
         }
       } catch (error) {
+        console.error(error);
         notification.error({
           message: 'Lỗi kết nối',
           description: 'Không thể xóa đánh giá lúc này.',
@@ -125,6 +135,8 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
       }
     }
   };
+
+  const alreadyReviewed = reviews.some((r) => r.user?.email === auth?.user?.email);
 
   return (
     <div className='bg-white rounded-3xl shadow-sm border border-gray-100 p-6 lg:p-10 mb-14'>
@@ -134,7 +146,7 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
 
       {/* Form đánh giá */}
       {auth.isAuthenticated ? (
-        canReview ? (
+        canReview && !alreadyReviewed ? (
           <div className='bg-orange-50 rounded-2xl p-5 mb-8 border border-orange-100'>
             <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4'>
               <span className='font-semibold text-gray-700'>Chất lượng sản phẩm:</span>
@@ -161,7 +173,9 @@ const ProductReviews = ({ productId, onReviewAdded }) => {
           </div>
         ) : (
           <div className='bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-200 text-center text-gray-500'>
-            Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.
+            {alreadyReviewed
+              ? 'Bạn đã đánh giá sản phẩm này rồi.'
+              : 'Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.'}
           </div>
         )
       ) : (

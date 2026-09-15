@@ -8,11 +8,11 @@ export default [
   { ignores: ["dist"] },
   {
     files: ["**/*.{js,jsx}"],
+    ignores: ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: "latest",
       globals: globals.browser,
       parserOptions: {
-        ecmaVersion: "latest",
         ecmaFeatures: { jsx: true },
         sourceType: "module",
       },
@@ -28,7 +28,46 @@ export default [
         "warn",
         { allowConstantExport: true },
       ],
-      "no-unused-vars": "warn",
+      // Unused vars: ignore vars prefixed with _ and React (JSX transform)
+      "no-unused-vars": [
+        "warn",
+        {
+          varsIgnorePattern: "^(_|React$)",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  // TEST FILE
+  {
+    files: ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}"],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: {
+        ...globals.browser,
+        // Vitest globals
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        vi: "readonly",
+      },
+      parserOptions: {
+        ecmaVersion: "latest",
+        ecmaFeatures: { jsx: true },
+        sourceType: "module",
+      },
+    },
+    plugins: {
+      "react-hooks": reactHooks,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
     },
   },
   eslintConfigPrettier,
