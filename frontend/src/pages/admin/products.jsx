@@ -27,7 +27,7 @@ const AdminProductsPage = () => {
         });
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
       notification.error({
         message: 'Lỗi',
         description: 'Có lỗi xảy ra khi gọi API',
@@ -51,7 +51,7 @@ const AdminProductsPage = () => {
     const fetchProductsAndCategories = async () => {
       await fetchProducts();
       await fetchCategories();
-    }
+    };
     fetchProductsAndCategories();
   }, []);
 
@@ -68,7 +68,7 @@ const AdminProductsPage = () => {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
       notification.error({
         message: 'Lỗi',
         description: 'Có lỗi xảy ra khi gọi API',

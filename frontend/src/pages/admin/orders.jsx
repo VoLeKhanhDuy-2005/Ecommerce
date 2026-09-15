@@ -39,44 +39,37 @@ export default function AdminOrdersPage() {
   */
   const [returnLoading, setReturnLoading] = useState(false);
 
-  const fetchShopOrders = useCallback(
-    async (
-      isAutoRefresh = false,
-      page,
-      limit,
-      status
-    ) => {
-      if (!isAutoRefresh) setIsLoading(true);
-      try {
-        const res = await getShopOrdersApi(page, limit, status);
-        if (res && res.success) {
-          setOrders(res.data);
-          if (res.meta) {
-            setPagination({
-              current: res.meta.page,
-              pageSize: res.meta.limit,
-              total: res.meta.total,
-            });
-          }
-        } else {
-          notification.error({
-            message: 'Lỗi tải đơn hàng',
-            description: res?.message || 'Không thể tải danh sách đơn hàng.',
-            placement: 'bottomLeft',
+  const fetchShopOrders = useCallback(async (isAutoRefresh = false, page, limit, status) => {
+    if (!isAutoRefresh) setIsLoading(true);
+    try {
+      const res = await getShopOrdersApi(page, limit, status);
+      if (res && res.success) {
+        setOrders(res.data);
+        if (res.meta) {
+          setPagination({
+            current: res.meta.page,
+            pageSize: res.meta.limit,
+            total: res.meta.total,
           });
         }
-      } catch (error) {
-        console.error('Lỗi lấy danh sách đơn hàng admin:', error);
+      } else {
         notification.error({
-          message: 'Lỗi kết nối',
-          description: error.message || 'Đã xảy ra lỗi kết nối.',
+          message: 'Lỗi tải đơn hàng',
+          description: res?.message || 'Không thể tải danh sách đơn hàng.',
           placement: 'bottomLeft',
         });
-      } finally {
-        setIsLoading(false);
       }
-    }, []
-  );
+    } catch (error) {
+      console.error('Lỗi lấy danh sách đơn hàng admin:', error);
+      notification.error({
+        message: 'Lỗi kết nối',
+        description: error.message || 'Đã xảy ra lỗi kết nối.',
+        placement: 'bottomLeft',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Dùng khi đổi bộ lọc/phân trang
@@ -191,7 +184,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -228,7 +221,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -252,7 +245,7 @@ export default function AdminOrdersPage() {
         notification.error({ message: 'Lỗi', description: res.message });
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       notification.error({ message: 'Lỗi', description: 'Đã xảy ra sự cố.' });
     } finally {
       setReturnLoading(false);
@@ -279,7 +272,7 @@ export default function AdminOrdersPage() {
       link.remove();
       notification.success({ message: 'Xuất hóa đơn thành công' });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       notification.error({
         message: 'Lỗi xuất hóa đơn',
         description: 'Không thể tải hóa đơn. Vui lòng thử lại sau.',
