@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Form, Input, Space, Button, Upload, notification } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { createCategoryApi, updateCategoryApi } from '../../../apis';
@@ -8,61 +8,50 @@ const extractS3KeyFromUrl = (url) => {
     const urlObj = new URL(url);
     return decodeURIComponent(urlObj.pathname.substring(1));
   } catch (e) {
+    console.error(e);
     return url;
   }
 };
 
-const CategoryModal = ({ isVisible, isEditMode, editingCategory, onCancel, onSuccess }) => {
+const getCategoryInitialData = (editingCategory) => {
+  let imageUrl = '';
+  let initialFileList = [];
+
+  if (editingCategory?.image) {
+    // Kiểm tra xem có phải link HTTP hay ảnh từ S3
+    const isS3 =
+      !editingCategory.image.startsWith('http') ||
+      editingCategory.image.includes('amazonaws.com');
+
+    if (!isS3) {
+      imageUrl = editingCategory.image;
+    } else {
+      initialFileList = [
+        {
+          uid: '-1',// quy ước file cũ đã có sẵn trên hệ thống
+          name: 'image.png',
+          status: 'done',
+          url: editingCategory.image,
+        },
+      ];
+    }
+  }
+
+  return { imageUrl, initialFileList };
+};
+
+// Component Form bên trong: chỉ nhận initialValues và quản lý tương tác người dùng
+const CategoryForm = ({ isEditMode, editingCategory, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState([]);
+  const initialData = getCategoryInitialData(isEditMode ? editingCategory : null);
+  const [fileList, setFileList] = useState(initialData.initialFileList);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Theo dõi giá trị URL nhập vào
-  const imageUrlWatcher = Form.useWatch('imageUrl', form);
+  const imageUrlWatcher = Form.useWatch('imageUrl', form);// luôn chứa giá trị mới nhất mà người dùng vừa gõ vào ô URL
   const previewUrl =
-    imageUrlWatcher && typeof imageUrlWatcher === 'string' && imageUrlWatcher.trim()
+    imageUrlWatcher && typeof imageUrlWatcher === 'string' && imageUrlWatcher.trim()// cắt bỏ các khoảng trắng thừa ở hai đầu, chuỗi đó vẫn không được rỗng
       ? imageUrlWatcher
       : null;
-
-  useEffect(() => {
-    if (isVisible) {
-      if (isEditMode && editingCategory) {
-        let imageUrl = '';
-
-        if (editingCategory.image) {
-          // Kiểm tra xem có phải link HTTP hay ảnh từ S3
-          const isS3 =
-            !editingCategory.image.startsWith('http') ||
-            editingCategory.image.includes('amazonaws.com');
-
-          if (!isS3) {
-            imageUrl = editingCategory.image;
-            setFileList([]);
-          } else {
-            setFileList([
-              {
-                uid: '-1',
-                name: 'image.png',
-                status: 'done',
-                url: editingCategory.image,
-              },
-            ]);
-          }
-        } else {
-          setFileList([]);
-        }
-
-        form.setFieldsValue({
-          categoryId: editingCategory.categoryId,
-          name: editingCategory.name,
-          imageUrl: imageUrl,
-        });
-      } else {
-        form.resetFields();
-        setFileList([]);
-      }
-    }
-  }, [isVisible, isEditMode, editingCategory, form]);
 
   const handleSubmit = async (values) => {
     setIsSubmitting(true);
@@ -129,107 +118,130 @@ const CategoryModal = ({ isVisible, isEditMode, editingCategory, onCancel, onSuc
   };
 
   return (
+    <Form
+      form={form}
+      layout='vertical'
+      onFinish={handleSubmit}
+      initialValues={{
+        categoryId: isEditMode && editingCategory ? editingCategory.categoryId : '',
+        name: isEditMode && editingCategory ? editingCategory.name : '',
+        imageUrl: initialData.imageUrl,
+        uploadFiles: initialData.initialFileList,
+      }}
+    >
+      <Form.Item
+        name='categoryId'
+        label='Mã Danh mục'
+        rules={[
+          { required: true, message: 'Vui lòng nhập mã danh mục!' },
+          {
+            pattern: /^[a-zA-Z0-9-_]+$/,
+            message: 'Mã danh mục chỉ chứa chữ cái, số, dấu gạch ngang hoặc gạch dưới!',
+          },
+        ]}
+      >
+        <Input placeholder='Ví dụ: do-uong' />
+      </Form.Item>
+
+      <Form.Item
+        name='name'
+        label='Tên Danh mục'
+        rules={[{ required: true, message: 'Vui lòng nhập tên danh mục!' }]}
+      >
+        <Input placeholder='Ví dụ: Đồ uống' />
+      </Form.Item>
+
+      <div className='bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6'>
+        <div className='mb-4'>
+          <span className='font-semibold block mb-1'>Quản lý hình ảnh (Tối đa 1 ảnh)</span>
+        </div>
+
+        <Form.Item name='imageUrl' label='URL Hình ảnh'>
+          <Input placeholder='https://example.com/image.jpg' disabled={fileList.length > 0} />
+        </Form.Item>
+
+        {previewUrl && fileList.length === 0 && (
+          <div className='flex flex-wrap gap-2 mb-4'>
+            <img
+              src={previewUrl}
+              alt={`preview`}
+              className='w-20 h-20 object-cover rounded border border-gray-200'
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/80?text=Error';
+              }}
+            />
+          </div>
+        )}
+
+        <Form.Item
+          label='Tải ảnh lên từ máy tính'
+          name='uploadFiles'
+          valuePropName='fileList'
+          getValueFromEvent={(e) => {
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
+        >
+          <Upload
+            listType='picture-card'
+            beforeUpload={() => false}
+            maxCount={1}
+            fileList={fileList}
+            onChange={({ fileList: newFileList }) => {
+              setFileList(newFileList);
+              // Xóa URL nhập tay nếu người dùng chọn upload file
+              if (newFileList.length > 0) {
+                form.setFieldsValue({ imageUrl: '' });
+              }
+            }}
+            accept='image/*'
+          >
+            {fileList.length > 0 || previewUrl ? null : (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+              </div>
+            )}
+          </Upload>
+        </Form.Item>
+      </div>
+
+      <Form.Item className='mb-0 flex justify-end'>
+        <Space>
+          <Button onClick={onCancel} disabled={isSubmitting}>
+            Hủy
+          </Button>
+          <Button
+            type='primary'
+            htmlType='submit'
+            loading={isSubmitting}
+            className='bg-orange-500 hover:bg-orange-600 border-none'
+          >
+            Lưu
+          </Button>
+        </Space>
+      </Form.Item>
+    </Form>
+  );
+};
+
+// Component Modal bọc ngoài: quản lý hiển thị và gán key để remount Form khi props thay đổi
+const CategoryModal = ({ isVisible, isEditMode, editingCategory, onCancel, onSuccess }) => {
+  return (
     <Modal
       title={isEditMode ? 'Cập nhật Danh mục' : 'Thêm mới Danh mục'}
       open={isVisible}
       onCancel={onCancel}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
-      <Form form={form} layout='vertical' onFinish={handleSubmit}>
-        <Form.Item
-          name='categoryId'
-          label='Mã Danh mục'
-          rules={[
-            { required: true, message: 'Vui lòng nhập mã danh mục!' },
-            {
-              pattern: /^[a-zA-Z0-9-_]+$/,
-              message: 'Mã danh mục chỉ chứa chữ cái, số, dấu gạch ngang hoặc gạch dưới!',
-            },
-          ]}
-        >
-          <Input placeholder='Ví dụ: do-uong' />
-        </Form.Item>
-
-        <Form.Item
-          name='name'
-          label='Tên Danh mục'
-          rules={[{ required: true, message: 'Vui lòng nhập tên danh mục!' }]}
-        >
-          <Input placeholder='Ví dụ: Đồ uống' />
-        </Form.Item>
-
-        <div className='bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6'>
-          <div className='mb-4'>
-            <span className='font-semibold block mb-1'>Quản lý hình ảnh (Tối đa 1 ảnh)</span>
-          </div>
-
-          <Form.Item name='imageUrl' label='URL Hình ảnh'>
-            <Input placeholder='https://example.com/image.jpg' disabled={fileList.length > 0} />
-          </Form.Item>
-
-          {previewUrl && fileList.length === 0 && (
-            <div className='flex flex-wrap gap-2 mb-4'>
-              <img
-                src={previewUrl}
-                alt={`preview`}
-                className='w-20 h-20 object-cover rounded border border-gray-200'
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/80?text=Error';
-                }}
-              />
-            </div>
-          )}
-
-          <Form.Item
-            label='Tải ảnh lên từ máy tính'
-            name='uploadFiles'
-            valuePropName='fileList'
-            getValueFromEvent={(e) => {
-              if (Array.isArray(e)) return e;
-              return e?.fileList;
-            }}
-          >
-            <Upload
-              listType='picture-card'
-              beforeUpload={() => false}
-              maxCount={1}
-              fileList={fileList}
-              onChange={({ fileList }) => {
-                setFileList(fileList);
-                // Xóa URL nhập tay nếu người dùng chọn upload file
-                if (fileList.length > 0) {
-                  form.setFieldsValue({ imageUrl: '' });
-                }
-              }}
-              accept='image/*'
-            >
-              {fileList.length > 0 || previewUrl ? null : (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
-                </div>
-              )}
-            </Upload>
-          </Form.Item>
-        </div>
-
-        <Form.Item className='mb-0 flex justify-end'>
-          <Space>
-            <Button onClick={onCancel} disabled={isSubmitting}>
-              Hủy
-            </Button>
-            <Button
-              type='primary'
-              htmlType='submit'
-              loading={isSubmitting}
-              className='bg-orange-500 hover:bg-orange-600 border-none'
-            >
-              Lưu
-            </Button>
-          </Space>
-        </Form.Item>
-      </Form>
+      <CategoryForm
+        key={isVisible ? (isEditMode && editingCategory ? editingCategory._id : 'create') : 'closed'}
+        isEditMode={isEditMode}
+        editingCategory={editingCategory}
+        onCancel={onCancel}
+        onSuccess={onSuccess}
+      />
     </Modal>
   );
 };

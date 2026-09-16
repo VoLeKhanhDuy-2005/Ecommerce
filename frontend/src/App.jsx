@@ -58,7 +58,7 @@ function App() {
       }
     };
     fetchAccount();
-  }, []);
+  }, [navigate, setAuth, setCartCount]);
 
   return (
     <div>
