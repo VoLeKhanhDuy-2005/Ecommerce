@@ -16,3 +16,9 @@ export const ORDER_FILTER_OPTIONS = [
     label: ORDER_STATUS_MAP[key].label,
   })),
 ];
+
+export const DEFAULT_SHIPPING_CONFIG = {
+  BASE_FEE: 15000,
+  BASE_DISTANCE: 3,
+  EXTRA_FEE_PER_KM: 5000,
+};

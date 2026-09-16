@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal, Button, Image } from 'antd';
 import { EyeOutlined, PrinterOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../../../../src/utils/formatter';
@@ -30,7 +29,7 @@ const OrderDetailModal = ({
           <Button
             key='export'
             icon={<PrinterOutlined />}
-            className='text-green-600 hover:text-green-700 text-xs font-semibold flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md transition-colors ml-1 inline-flex'
+            className='text-green-600 hover:text-green-700 text-xs font-semibold inline-flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md transition-colors ml-1'
             onClick={() => handleExportInvoice(selectedOrder._id)}
           >
             Xuất hóa đơn

@@ -149,6 +149,7 @@ const loginService = async (email1, password) => {
           access_token,
           refresh_token,
           user: {
+            _id: user._id,
             email: user.email,
             name: user.name,
             role: user.role,

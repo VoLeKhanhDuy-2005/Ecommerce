@@ -12,7 +12,6 @@ import { StarFilled, EyeOutlined } from '@ant-design/icons';
  *   categoryName - Tên danh mục
  *   badge        - Chuỗi label nổi bật (VD: "Hot", "New", "Sale")
  *   rating       - Điểm đánh giá (số từ 0–5)
- *   sold         - Số lượng đã bán
  *   views        - Số lượt xem
  */
 export default function ProductCard({
@@ -23,7 +22,6 @@ export default function ProductCard({
   categoryName,
   badge,
   rating,
-  sold,
   views,
 }) {
   // Xác định màu badge (Hot = đỏ-cam, còn lại = xanh lá)

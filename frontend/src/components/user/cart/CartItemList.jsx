@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { InputNumber } from 'antd';
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';

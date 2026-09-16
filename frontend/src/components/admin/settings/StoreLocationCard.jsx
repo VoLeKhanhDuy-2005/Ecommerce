@@ -1,23 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Input, notification, Card } from 'antd';
 import { EnvironmentOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
 import { updateSettingApi, resolveMapLinkApi, searchNominatim } from '../../../apis';
 import MapSelector from '../../common/settings/MapSelector';
 
 const StoreLocationCard = ({ initialLat, initialLng }) => {
-  const [lat, setLat] = useState('');
-  const [lng, setLng] = useState('');
+  const [lat, setLat] = useState(initialLat || '');
+  const [lng, setLng] = useState(initialLng || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [searchAddress, setSearchAddress] = useState('');
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [prevInitialLat, setPrevInitialLat] = useState(initialLat);
+  const [prevInitialLng, setPrevInitialLng] = useState(initialLng);
 
-  useEffect(() => {
+  if (initialLat !== prevInitialLat || initialLng !== prevInitialLng) {
+    setPrevInitialLat(initialLat);
+    setPrevInitialLng(initialLng);
     if (initialLat && initialLng) {
       setLat(initialLat);
       setLng(initialLng);
     }
-  }, [initialLat, initialLng]);
+  }
 
   const handleSave = async () => {
     if (!lat || !lng) {
@@ -36,6 +40,7 @@ const StoreLocationCard = ({ initialLat, initialLng }) => {
         notification.error({ message: 'Lỗi khi lưu cấu hình' });
       }
     } catch (error) {
+      console.error(error);
       notification.error({
         message: 'Lỗi kết nối',
         description: 'Không thể lưu cấu hình.',
@@ -56,6 +61,7 @@ const StoreLocationCard = ({ initialLat, initialLng }) => {
           notification.success({ message: 'Lấy vị trí thành công!' });
         },
         (error) => {
+          console.error(error);
           setIsGettingLocation(false);
           notification.error({
             message: 'Lỗi lấy vị trí',

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, Table, Tag, Typography } from 'antd';
 import moment from 'moment';
 import { formatCurrency } from '../../../utils/formatter';

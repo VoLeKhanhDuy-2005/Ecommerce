@@ -1,4 +1,3 @@
-import React from 'react';
 import { Empty, Button } from 'antd';
 import { AppstoreAddOutlined, DollarCircleFilled } from '@ant-design/icons';
 import { formatCurrency } from '../../../utils/formatter';

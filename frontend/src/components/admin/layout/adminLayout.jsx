@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Layout, Menu, Avatar, Dropdown } from 'antd';
 import {
   UsergroupAddOutlined,
@@ -51,7 +51,7 @@ const AdminLayout = () => {
       setIsLoading(false);
     };
     fetchAccount();
-  }, []);
+  }, [navigate, setAuth]);
 
   const handleLogout = async () => {
     try {

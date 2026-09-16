@@ -1,4 +1,3 @@
-import React from 'react';
 import { DollarOutlined, TagOutlined, CarFilled, GiftOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../../../utils/formatter';
 

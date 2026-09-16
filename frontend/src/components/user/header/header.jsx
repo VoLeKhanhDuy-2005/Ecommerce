@@ -1,18 +1,15 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   HomeOutlined,
   SearchOutlined,
   UserOutlined,
   LogoutOutlined,
   LoginOutlined,
-  UsergroupAddOutlined,
   MenuOutlined,
   CloseOutlined,
   ShoppingCartOutlined,
   HistoryOutlined,
   SettingOutlined,
-  AppstoreOutlined,
-  TagOutlined,
   GiftOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons';

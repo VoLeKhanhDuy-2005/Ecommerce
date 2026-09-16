@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Space, Button, Upload, notification } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { createProductApi, updateProductApi } from '../../../apis';
@@ -16,6 +16,7 @@ const extractS3KeyFromUrl = (url) => {
     // Bỏ dấu '/' ở đầu và giải mã các ký tự đặc biệt (vd: %20 -> dấu cách)
     return decodeURIComponent(urlObj.pathname.substring(1));
   } catch (e) {
+    console.error(e);
     // Trả về url gốc nếu có lỗi parse để không làm mất data
     return url;
   }
@@ -45,7 +46,14 @@ const ProductModal = ({
     (url) => url && typeof url === 'string' && url.trim()
   );
 
-  useEffect(() => {
+  const [prevDeps, setPrevDeps] = useState({ isVisible, editingProduct, isEditMode });
+
+  if (
+    isVisible !== prevDeps.isVisible ||
+    editingProduct !== prevDeps.editingProduct ||
+    isEditMode !== prevDeps.isEditMode
+  ) {
+    setPrevDeps({ isVisible, editingProduct, isEditMode });
     if (isVisible) {
       if (isEditMode && editingProduct) {
         let imageUrls = [''];
@@ -94,7 +102,7 @@ const ProductModal = ({
         setFileList([]);
       }
     }
-  }, [isVisible, isEditMode, editingProduct, form]);
+  }
 
   const handleSubmit = async (values) => {
     setIsSubmitting(true);

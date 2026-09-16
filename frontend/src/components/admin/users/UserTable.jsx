@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Table, Tag } from 'antd';
 
 const UserTable = ({ dataSource, loading }) => {

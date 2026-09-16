@@ -1,6 +1,5 @@
-import React from 'react';
 import { InputNumber } from 'antd';
-import { ShoppingCartOutlined, FireOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../../../../utils/formatter';
 
 const ProductAction = ({ product, inStock, quantity, setQuantity, handleAddToCart }) => {

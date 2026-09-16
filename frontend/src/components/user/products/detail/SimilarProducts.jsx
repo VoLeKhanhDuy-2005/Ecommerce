@@ -1,4 +1,3 @@
-import React from 'react';
 import ProductCard from '../../../common/products/ProductCard';
 import { formatCurrency } from '../../../../utils/formatter';
 

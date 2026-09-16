@@ -20,15 +20,14 @@ const getCategoryInitialData = (editingCategory) => {
   if (editingCategory?.image) {
     // Kiểm tra xem có phải link HTTP hay ảnh từ S3
     const isS3 =
-      !editingCategory.image.startsWith('http') ||
-      editingCategory.image.includes('amazonaws.com');
+      !editingCategory.image.startsWith('http') || editingCategory.image.includes('amazonaws.com');
 
     if (!isS3) {
       imageUrl = editingCategory.image;
     } else {
       initialFileList = [
         {
-          uid: '-1',// quy ước file cũ đã có sẵn trên hệ thống
+          uid: '-1', // quy ước file cũ đã có sẵn trên hệ thống
           name: 'image.png',
           status: 'done',
           url: editingCategory.image,
@@ -47,9 +46,9 @@ const CategoryForm = ({ isEditMode, editingCategory, onCancel, onSuccess }) => {
   const [fileList, setFileList] = useState(initialData.initialFileList);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const imageUrlWatcher = Form.useWatch('imageUrl', form);// luôn chứa giá trị mới nhất mà người dùng vừa gõ vào ô URL
+  const imageUrlWatcher = Form.useWatch('imageUrl', form); // luôn chứa giá trị mới nhất mà người dùng vừa gõ vào ô URL
   const previewUrl =
-    imageUrlWatcher && typeof imageUrlWatcher === 'string' && imageUrlWatcher.trim()// cắt bỏ các khoảng trắng thừa ở hai đầu, chuỗi đó vẫn không được rỗng
+    imageUrlWatcher && typeof imageUrlWatcher === 'string' && imageUrlWatcher.trim() // cắt bỏ các khoảng trắng thừa ở hai đầu, chuỗi đó vẫn không được rỗng
       ? imageUrlWatcher
       : null;
 
@@ -236,7 +235,9 @@ const CategoryModal = ({ isVisible, isEditMode, editingCategory, onCancel, onSuc
       destroyOnHidden
     >
       <CategoryForm
-        key={isVisible ? (isEditMode && editingCategory ? editingCategory._id : 'create') : 'closed'}
+        key={
+          isVisible ? (isEditMode && editingCategory ? editingCategory._id : 'create') : 'closed'
+        }
         isEditMode={isEditMode}
         editingCategory={editingCategory}
         onCancel={onCancel}

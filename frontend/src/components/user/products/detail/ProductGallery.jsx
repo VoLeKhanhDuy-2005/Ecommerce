@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade, Thumbs } from 'swiper/modules';
-import { FireOutlined } from '@ant-design/icons';
 
 import 'swiper/css';
 import 'swiper/css/navigation';

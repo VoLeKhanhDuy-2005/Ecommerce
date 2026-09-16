@@ -1,19 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Input, notification, Card } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { updateSettingApi } from '../../../apis';
+import { DEFAULT_SHIPPING_CONFIG } from '../../../utils/constants';
 
 const ShippingFeeCard = ({ initialBaseFee, initialBaseDistance, initialExtraFeePerKm }) => {
-  const [baseFee, setBaseFee] = useState(15000);
-  const [baseDistance, setBaseDistance] = useState(3);
-  const [extraFeePerKm, setExtraFeePerKm] = useState(5000);
+  /*
+    Ở lần render đầu tiên (Mount): React sẽ lấy giá trị truyền vào useState (ví dụ: initialBaseFee)
+
+    Ở các lần render tiếp theo (Re-render): React sẽ hoàn toàn bỏ qua tham số truyền vào trong useState.
+    Thay vào đó, nó sẽ lấy giá trị state hiện tại đang được lưu trong bộ nhớ của React
+  */
+  const [baseFee, setBaseFee] = useState(
+    initialBaseFee !== undefined ? initialBaseFee : DEFAULT_SHIPPING_CONFIG.BASE_FEE
+  );
+  const [baseDistance, setBaseDistance] = useState(
+    initialBaseDistance !== undefined ? initialBaseDistance : DEFAULT_SHIPPING_CONFIG.BASE_DISTANCE
+  );
+  const [extraFeePerKm, setExtraFeePerKm] = useState(
+    initialExtraFeePerKm !== undefined
+      ? initialExtraFeePerKm
+      : DEFAULT_SHIPPING_CONFIG.EXTRA_FEE_PER_KM
+  );
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (initialBaseFee !== undefined) setBaseFee(initialBaseFee);
+  const [prevInitialBaseFee, setPrevInitialBaseFee] = useState(initialBaseFee);
+  const [prevInitialBaseDistance, setPrevInitialBaseDistance] = useState(initialBaseDistance);
+  const [prevInitialExtraFeePerKm, setPrevInitialExtraFeePerKm] = useState(initialExtraFeePerKm);
+
+  if (
+    initialBaseFee !== prevInitialBaseFee ||
+    initialBaseDistance !== prevInitialBaseDistance ||
+    initialExtraFeePerKm !== prevInitialExtraFeePerKm
+  ) {
+    setPrevInitialBaseFee(initialBaseFee); // Mốc props mới nhất bây giờ (lịch sử)
+    setPrevInitialBaseDistance(initialBaseDistance);
+    setPrevInitialExtraFeePerKm(initialExtraFeePerKm);
+
+    if (initialBaseFee !== undefined) setBaseFee(initialBaseFee); // Được gọi để cập nhật số tiền phí mới lên giao diện
     if (initialBaseDistance !== undefined) setBaseDistance(initialBaseDistance);
     if (initialExtraFeePerKm !== undefined) setExtraFeePerKm(initialExtraFeePerKm);
-  }, [initialBaseFee, initialBaseDistance, initialExtraFeePerKm]);
+  }
 
   const handleSave = async () => {
     if (baseFee === '' || baseDistance === '' || extraFeePerKm === '') {
@@ -48,6 +75,7 @@ const ShippingFeeCard = ({ initialBaseFee, initialBaseDistance, initialExtraFeeP
         });
       }
     } catch (error) {
+      console.error(error);
       notification.error({
         message: 'Lỗi kết nối',
         description: 'Không thể lưu thông tin cấu hình.',

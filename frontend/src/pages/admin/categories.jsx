@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { notification } from 'antd';
 import { UnorderedListOutlined } from '@ant-design/icons';
 import { getCategoriesApi, deleteCategoryApi } from '../../apis';

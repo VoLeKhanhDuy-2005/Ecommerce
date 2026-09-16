@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from 'antd';
 import { EnvironmentOutlined, SearchOutlined } from '@ant-design/icons';
 import MapSelector from '../../common/settings/MapSelector';

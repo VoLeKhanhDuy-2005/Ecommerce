@@ -1,4 +1,3 @@
-import React from 'react';
 import { Row, Col, Card, Statistic } from 'antd';
 import { UserOutlined, ShoppingOutlined, DollarOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../../../utils/formatter';

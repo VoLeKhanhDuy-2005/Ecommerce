@@ -32,7 +32,7 @@ export default [
       "no-unused-vars": [
         "warn",
         {
-          varsIgnorePattern: "^(_|React$)",
+          varsIgnorePattern: "^_",
           argsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
         },

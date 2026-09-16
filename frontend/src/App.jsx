@@ -10,7 +10,7 @@ import { getCurrentUserApi, getCartApi } from './apis';
 import { AuthContext } from './components/common/context/auth.context';
 
 function App() {
-  const { setAuth, setCartCount } = useContext(AuthContext);
+  const { setAuth, setCartCount, setIsAuthLoading } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -23,6 +23,7 @@ function App() {
           setAuth({
             isAuthenticated: true,
             user: {
+              id: res.user._id,
               email: res.user.email,
               name: res.user.name,
               role: res.user.role,
@@ -36,7 +37,6 @@ function App() {
 
           if (res.user.role === 'admin') {
             navigate('/admin/orders');
-            setIsLoading(false);
             return;
           }
 
@@ -55,10 +55,11 @@ function App() {
         console.error('Fetch account error:', error);
       } finally {
         setIsLoading(false);
+        setIsAuthLoading(false);
       }
     };
     fetchAccount();
-  }, [navigate, setAuth, setCartCount]);
+  }, [navigate, setAuth, setCartCount, setIsAuthLoading]);
 
   return (
     <div>

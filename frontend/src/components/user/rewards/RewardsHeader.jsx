@@ -1,4 +1,3 @@
-import React from 'react';
 import { GiftOutlined, DollarCircleFilled } from '@ant-design/icons';
 
 const RewardsHeader = ({ userCoins }) => {

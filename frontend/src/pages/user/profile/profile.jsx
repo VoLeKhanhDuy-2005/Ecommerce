@@ -19,7 +19,7 @@ import AvatarUpload from '../../../components/user/profile/AvatarUpload';
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
-  const { auth, setAuth } = useContext(AuthContext);
+  const { auth, setAuth, isAuthLoading } = useContext(AuthContext);
   const user = auth.user;
   const userId = user?.id;
 
@@ -51,7 +51,14 @@ export default function EditProfilePage() {
   }, [preview]);
 
   useEffect(() => {
-    if (!userId) return;
+    // Đợi auth load xong mới kiểm tra - tránh redirect nhầm khi token đang verify
+    if (isAuthLoading) return;
+
+    if (!userId) {
+      // Auth đã load xong nhưng không có user -> chưa đăng nhập
+      navigate('/login');
+      return;
+    }
 
     const fetchProfile = async () => {
       try {
@@ -80,7 +87,7 @@ export default function EditProfilePage() {
     };
 
     fetchProfile();
-  }, [userId]); // user?.id tránh fetch khi user undefined khi load lại trang
+  }, [userId, isAuthLoading, navigate]); // re-run khi auth load xong
 
   const handleChange = (e) => {
     const { name, value } = e.target;

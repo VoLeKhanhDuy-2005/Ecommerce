@@ -19,12 +19,12 @@ const LoginPage = () => {
     if (res && res.success) {
       localStorage.setItem('access_token', res.access_token);
       notification.success({
-        message: 'LOGIN USER',
-        description: 'success',
+        title: 'Đăng nhập thành công'
       });
       setAuth({
         isAuthenticated: true,
         user: {
+          id: res?.user?._id ?? '',
           email: res?.user?.email ?? '',
           name: res?.user?.name ?? '',
           role: res.user.role,
@@ -39,7 +39,7 @@ const LoginPage = () => {
       }
     } else {
       notification.error({
-        message: 'LOGIN USER',
+        title: 'Đăng nhập thất bại',
         description: res?.EM ?? 'error',
       });
     }

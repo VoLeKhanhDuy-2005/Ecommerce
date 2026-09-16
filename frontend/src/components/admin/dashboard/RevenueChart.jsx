@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Select, Typography } from 'antd';
 import {
   AreaChart,

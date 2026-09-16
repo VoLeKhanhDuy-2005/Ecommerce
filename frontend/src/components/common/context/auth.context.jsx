@@ -1,7 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState } from 'react';
 
 export const AuthContext = createContext({
-  // default value cho createContext
+  // Default value for createContext
   auth: {
     isAuthenticated: false,
     user: {
@@ -14,12 +15,10 @@ export const AuthContext = createContext({
     },
   },
   cartCount: 0,
-  setAuth: () => {}, //hàm giả (dummy function) để tránh lỗi khi component dùng context nhưng chưa được bọc bởi AuthWrapper
-  setCartCount: () => {},
 });
 
 export const AuthWrapper = (props) => {
-  //Context Provider
+  // Context Provider component
   const [auth, setAuth] = useState({
     isAuthenticated: false,
     user: {
@@ -32,6 +31,7 @@ export const AuthWrapper = (props) => {
     },
   });
   const [cartCount, setCartCount] = useState(0);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);// true khi đang chờ verify token từ server (tránh redirect sớm)
   return (
     <AuthContext.Provider
       value={{
@@ -39,6 +39,8 @@ export const AuthWrapper = (props) => {
         setAuth,
         cartCount,
         setCartCount,
+        isAuthLoading,
+        setIsAuthLoading,
       }}
     >
       {props.children}

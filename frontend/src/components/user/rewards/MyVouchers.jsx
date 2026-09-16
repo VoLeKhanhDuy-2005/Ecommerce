@@ -1,4 +1,3 @@
-import React from 'react';
 import { Empty } from 'antd';
 import { TagOutlined } from '@ant-design/icons';
 import { getVoucherTypeIcon, getVoucherDescription } from './voucherUtils';
