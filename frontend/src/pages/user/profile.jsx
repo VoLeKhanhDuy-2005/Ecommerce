@@ -1,21 +1,20 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 
-import { putProfileSchema } from './profile.schemas';
-
-import { AuthContext } from '../../../components/common/context/auth.context';
+import { AuthContext } from '../../components/common/context/auth.context';
 
 import {
   getCurrentUserApi,
   updateProfileApi,
   resolveMapLinkApi,
   searchNominatim,
-} from '../../../apis';
+} from '../../apis';
 
-import { Spin, notification } from 'antd';
+import { Form, Button, Spin, notification } from 'antd';
 
-import ProfileForm from '../../../components/user/profile/ProfileForm';
-import AvatarUpload from '../../../components/user/profile/AvatarUpload';
+import ProfileForm from '../../components/user/profile/ProfileForm';
+import AvatarUpload from '../../components/user/profile/AvatarUpload';
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -23,21 +22,12 @@ export default function EditProfilePage() {
   const user = auth.user;
   const userId = user?.id;
 
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [formData, setFormData] = useState({
-    fullname: '',
-    phone: '',
-    gender: '',
-    address: '',
-    birthday: '',
-    lat: null,
-    lng: null,
-  });
+  const [coords, setCoords] = useState({ lat: null, lng: null });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
@@ -67,12 +57,15 @@ export default function EditProfilePage() {
         const res = await getCurrentUserApi();
         if (res && res.user) {
           const profile = res.user;
-          setFormData({
+          form.setFieldsValue({
             fullname: profile.name || '',
             phone: profile.phone || '',
-            gender: profile.gender || '',
+            gender: profile.gender || undefined,
             address: profile.address || '',
-            birthday: profile.birthday || '',
+            birthday: profile.birthday ? dayjs(profile.birthday) : null,
+          });
+
+          setCoords({
             lat: profile.location?.lat || null,
             lng: profile.location?.lng || null,
           });
@@ -80,39 +73,35 @@ export default function EditProfilePage() {
           setPreview(profile.avatarURL);
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'Không thể tải dữ liệu');
+        notification.error({
+          message: 'Lỗi',
+          description: err.response?.data?.message || 'Không thể tải dữ liệu hồ sơ',
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [userId, isAuthLoading, navigate]); // re-run khi auth load xong
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    // Xóa lỗi của field đó khi người dùng bắt đầu sửa
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: null });
-    }
-  };
+  }, [userId, isAuthLoading, navigate, form]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const validTypes = ['image/jpeg', 'image/png'];
       if (!validTypes.includes(file.type)) {
-        setError('Định dạng file không hợp lệ. Chỉ chấp nhận JPG, PNG.');
+        notification.error({
+          message: 'Định dạng không hợp lệ',
+          description: 'Chỉ chấp nhận file định dạng JPG, PNG.',
+        });
         return;
       }
 
       if (file.size > 2 * 1024 * 1024) {
-        setError('Kích thước ảnh quá lớn (tối đa 2MB)');
+        notification.error({
+          message: 'Dung lượng quá lớn',
+          description: 'Kích thước ảnh tối đa 2MB.',
+        });
         return;
       }
       setAvatar(file);
@@ -132,31 +121,39 @@ export default function EditProfilePage() {
       }
     */
     if ('geolocation' in navigator) {
-      //Kiểm tra xem trình duyệt có hỗ trợ Geolocation API hay không
+      // Kiểm tra xem trình duyệt có hỗ trợ Geolocation API hay không
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          //Hàm callback sẽ được gọi khi lấy được vị trí
+          // Hàm callback sẽ được gọi khi lấy được vị trí
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          setFormData((prev) => ({ ...prev, lat, lng }));
+          setCoords({ lat, lng });
           setIsGettingLocation(false);
-          setSuccess('Đã lấy vị trí hiện tại thành công!');
-          setTimeout(() => setSuccess(''), 3000);
+          notification.success({
+            message: 'Thành công',
+            description: 'Đã lấy vị trí hiện tại của bạn!',
+          });
         },
         (err) => {
           setIsGettingLocation(false);
-          setError('Không thể lấy vị trí. Vui lòng cấp quyền GPS.');
+          notification.error({
+            message: 'Lỗi GPS',
+            description: 'Không thể lấy vị trí. Vui lòng cấp quyền truy cập vị trí.',
+          });
           console.error(err);
         }
       );
     } else {
-      setError('Trình duyệt không hỗ trợ GPS.');
+      notification.error({
+        message: 'Lỗi',
+        description: 'Trình duyệt không hỗ trợ GPS.',
+      });
     }
   };
 
   const handleSearchAddress = async () => {
-    const address = formData.address;
+    const address = form.getFieldValue('address');
     if (!address?.trim()) {
       notification.warning({
         message: 'Vui lòng nhập địa chỉ hoặc dán link Google Maps',
@@ -208,7 +205,7 @@ export default function EditProfilePage() {
         } else {
           notification.warning({
             message: 'Không tìm thấy địa chỉ',
-            description: 'Vui lòng ghi rõ tên đường, quận/huyện hoặc tìm thủ công trên bản đồ.',
+            description: 'Vui lòng ghi rõ tên đường, quận/huyện hoặc chọn vị trí trên bản đồ.',
           });
           setIsSearchingAddress(false);
           return;
@@ -216,71 +213,62 @@ export default function EditProfilePage() {
       }
 
       if (lat && lng) {
-        setFormData((prev) => ({ ...prev, lat, lng }));
+        setCoords({ lat, lng });
         notification.success({
           message: 'Tìm thấy vị trí',
-          description: 'Vị trí trên bản đồ đã được cập nhật.',
+          description: 'Vị trí trên bản đồ đã được cập nhật thành công.',
         });
       }
     } catch (err) {
       console.error(err);
-      notification.error({ message: 'Lỗi kết nối khi tìm kiếm vị trí' });
+      notification.error({
+        message: 'Lỗi kết nối',
+        description: 'Lỗi khi tìm kiếm vị trí địa chỉ.',
+      });
     } finally {
       setIsSearchingAddress(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setFieldErrors({});
-    setSuccess('');
-
-    //Validate bằng Zod ở Frontend
-    const validation = putProfileSchema.safeParse({
-      ...formData,
-      userId: String(user?.id), // Ép kiểu vì schema yêu cầu string
-    });
-
-    if (!validation.success) {
-      // Chuyển đổi lỗi Zod thành object { fieldName: message }
-      const errors = {};
-      validation.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
-      });
-      setFieldErrors(errors);
-      return; // Dừng lại không call API
-    }
-
+  const handleSubmit = async (values) => {
     try {
-      const form = new FormData();
+      setIsSubmitting(true);
+      const formData = new FormData();
 
-      form.append('fullname', formData.fullname);
-      form.append('phone', formData.phone);
-      form.append('gender', formData.gender);
-      form.append('address', formData.address);
-      form.append('birthday', formData.birthday);
-      if (formData.lat && formData.lng) {
-        form.append('lat', formData.lat);
-        form.append('lng', formData.lng);
+      formData.append('fullname', values.fullname?.trim() || '');
+      formData.append('phone', values.phone || '');
+      formData.append('gender', values.gender || '');
+      formData.append('address', values.address || '');
+      if (values.birthday) {
+        formData.append(
+          'birthday',
+          dayjs.isDayjs(values.birthday) ? values.birthday.format('YYYY-MM-DD') : values.birthday
+        );
+      }
+      if (coords.lat && coords.lng) {
+        formData.append('lat', coords.lat);
+        formData.append('lng', coords.lng);
       }
 
       if (avatar) {
-        form.append('avatar', avatar);
+        formData.append('avatar', avatar);
       }
 
-      const res = await updateProfileApi(form);
+      const res = await updateProfileApi(formData);
 
       if (res && res.success) {
-        setSuccess('Cập nhật hồ sơ thành công');
+        notification.success({
+          message: 'Thành công',
+          description: 'Cập nhật hồ sơ thành công',
+        });
         setAuth({
           ...auth,
           user: {
             ...auth.user,
-            name: formData.fullname,
-            phone: formData.phone,
-            address: formData.address,
-            location: { lat: formData.lat, lng: formData.lng },
+            name: values.fullname?.trim() || auth.user.name,
+            phone: values.phone || auth.user.phone,
+            address: values.address || auth.user.address,
+            location: { lat: coords.lat, lng: coords.lng },
             avatar: res.data?.avatarURL || auth.user.avatar,
           },
         });
@@ -289,10 +277,18 @@ export default function EditProfilePage() {
           navigate('/');
         }, 1000);
       } else {
-        setError(res?.message || 'Cập nhật thất bại');
+        notification.error({
+          message: 'Cập nhật thất bại',
+          description: res?.message || 'Không thể cập nhật hồ sơ.',
+        });
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Cập nhật thất bại');
+      notification.error({
+        message: 'Cập nhật thất bại',
+        description: err.response?.data?.message || 'Cập nhật hồ sơ thất bại.',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -314,49 +310,45 @@ export default function EditProfilePage() {
           Cập Nhật Hồ Sơ
         </h1>
 
-        {error && (
-          <div className='bg-red-50 text-red-600 p-4 rounded-2xl mb-6 font-medium border border-red-100 flex items-center gap-2'>
-            <span className='text-xl'>⚠️</span> {error}
-          </div>
-        )}
-
-        {success && (
-          <div className='bg-green-50 text-green-600 p-4 rounded-2xl mb-6 font-medium border border-green-100 flex items-center gap-2'>
-            <span className='text-xl'>✅</span> {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className='space-y-6'>
+        <Form
+          form={form}
+          layout='vertical'
+          onFinish={handleSubmit}
+          requiredMark={false}
+          className='space-y-6'
+        >
           <div className='flex flex-col md:flex-row gap-8'>
             <ProfileForm
-              formData={formData}
-              fieldErrors={fieldErrors}
-              handleChange={handleChange}
+              coords={coords}
+              setCoords={setCoords}
               handleGetLocation={handleGetLocation}
               isGettingLocation={isGettingLocation}
               handleSearchAddress={handleSearchAddress}
               isSearchingAddress={isSearchingAddress}
-              setFormData={setFormData}
             />
             <AvatarUpload preview={preview} handleFileChange={handleFileChange} />
           </div>
 
           <div className='flex gap-4 pt-6 border-t border-gray-100'>
-            <button
-              type='submit'
-              className='px-8 py-3.5 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all'
+            <Button
+              type='primary'
+              htmlType='submit'
+              loading={isSubmitting}
+              size='large'
+              className='!px-8 !py-3.5 !h-auto !bg-gradient-to-r !from-orange-500 !to-red-500 !text-white !font-bold !rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all !border-none'
             >
               Lưu thay đổi
-            </button>
-            <button
-              type='button'
-              className='px-8 py-3.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all'
+            </Button>
+            <Button
+              type='default'
+              size='large'
+              className='!px-8 !py-3.5 !h-auto !bg-gray-100 !text-gray-700 !font-bold !rounded-xl hover:!bg-gray-200 transition-all !border-none'
               onClick={() => navigate('/')}
             >
               Quay lại
-            </button>
+            </Button>
           </div>
-        </form>
+        </Form>
       </div>
     </div>
   );

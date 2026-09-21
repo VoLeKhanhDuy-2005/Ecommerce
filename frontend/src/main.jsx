@@ -25,7 +25,7 @@ import { AuthWrapper } from './components/common/context/auth.context.jsx';
 import ProductDetailPage from './pages/user/productDetail.jsx';
 import CartPage from './pages/user/cart.jsx';
 import OrdersPage from './pages/user/orders.jsx';
-import EditProfilePage from './pages/user/profile/profile.jsx';
+import EditProfilePage from './pages/user/profile.jsx';
 import RewardsPage from './pages/user/rewards.jsx';
 import GamePage from './pages/user/game.jsx';
 

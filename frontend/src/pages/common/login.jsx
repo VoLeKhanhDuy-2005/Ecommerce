@@ -19,7 +19,7 @@ const LoginPage = () => {
     if (res && res.success) {
       localStorage.setItem('access_token', res.access_token);
       notification.success({
-        title: 'Đăng nhập thành công'
+        title: 'Đăng nhập thành công',
       });
       setAuth({
         isAuthenticated: true,

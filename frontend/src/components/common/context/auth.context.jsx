@@ -31,7 +31,7 @@ export const AuthWrapper = (props) => {
     },
   });
   const [cartCount, setCartCount] = useState(0);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);// true khi đang chờ verify token từ server (tránh redirect sớm)
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // true khi đang chờ verify token từ server (tránh redirect sớm)
   return (
     <AuthContext.Provider
       value={{
