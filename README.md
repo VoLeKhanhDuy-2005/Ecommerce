@@ -1,4 +1,6 @@
 # Fullstack Web Application
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FVoLeKhanhDuy-2005%2FEcommerce.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FVoLeKhanhDuy-2005%2FEcommerce?ref=badge_shield)
+
 
 A professional, production-ready Fullstack Web Application built with the modern MERN stack (MongoDB, Express, React, Node.js). Designed with performance, scalability, and security in mind.
 
@@ -146,3 +148,7 @@ npm run dev
 ## Author
 
 **Võ Lê Khánh Duy**
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FVoLeKhanhDuy-2005%2FEcommerce.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FVoLeKhanhDuy-2005%2FEcommerce?ref=badge_large)
